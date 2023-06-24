@@ -17,7 +17,7 @@ dependencies:
   - pytest
   - pytest-cov
   - tox
-  - pre_commit
+  # - pre_commit # causes issues with conda! (e.g., pre-commit autoupdate)
   - nbdime
   - nbstripout
   - sphinx
