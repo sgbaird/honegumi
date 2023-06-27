@@ -9,7 +9,7 @@
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Twitter)](https://twitter.com/honegumi)
 -->
 
-# honegumi
+![honegumi-logo](reports/figures/honegumi-logo.png)
 
 > Honegumi (骨組み, pronounced "ho neh goo mee") is a package for creating dynamic API tutorials with a focus on optimization packages such as Meta's Ax Platform.
 
