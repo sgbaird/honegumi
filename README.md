@@ -11,7 +11,7 @@
 
 # honegumi
 
-> Add a short description here!
+> Honegumi (骨組み, pronounced "ho neh goo mee") is a package for creating dynamic API tutorials with a focus on optimization packages such as Meta's Ax Platform.
 
 A longer description of your project goes here...
 
