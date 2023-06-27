@@ -11,7 +11,10 @@
 
 ![honegumi-logo](reports/figures/honegumi-logo.png)
 
-> Honegumi (骨組み, pronounced "ho neh goo mee") is a package under development for creating dynamic API tutorials with a focus on optimization packages such as Meta's Ax Platform. We are looking for contributors, so please let us know if you're interested!
+> Honegumi (骨組み, pronounced "ho neh goo mee") is a work-in-progress package for
+> interactively creating API tutorials with a focus on optimization packages such as Meta's Ax
+> Platform. We are looking for contributors, so please let us know if you're interested!
+> Start by taking a look at our "Gentle Introduction to Jinja2" notebook: <a href="https://colab.research.google.com/github/sgbaird/honegumi/blob/main/1.0-sgb-gentle-introduction-jinja.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
 <!-- > Unlock the power of advanced optimization in materials science with Honegumi (骨組み,
 > pronounced "ho-neh-goo-mee"), our interactive "skeleton code" generator. -->
