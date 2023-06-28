@@ -1,9 +1,10 @@
 [![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
+<a href="https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+[![ReadTheDocs](https://readthedocs.org/projects/honegumi/badge/?version=latest)](https://honegumi.readthedocs.io/en/stable/)
 <!-- These are examples of badges you might also want to add to your README. Update the URLs accordingly.
 [![Built Status](https://api.cirrus-ci.com/github/<USER>/honegumi.svg?branch=main)](https://cirrus-ci.com/github/<USER>/honegumi)
-[![ReadTheDocs](https://readthedocs.org/projects/honegumi/badge/?version=latest)](https://honegumi.readthedocs.io/en/stable/)
-[![Coveralls](https://img.shields.io/coveralls/github/<USER>/honegumi/main.svg)](https://coveralls.io/r/<USER>/honegumi)
 [![PyPI-Server](https://img.shields.io/pypi/v/honegumi.svg)](https://pypi.org/project/honegumi/)
+[![Coveralls](https://img.shields.io/coveralls/github/<USER>/honegumi/main.svg)](https://coveralls.io/r/<USER>/honegumi)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/honegumi.svg)](https://anaconda.org/conda-forge/honegumi)
 [![Monthly Downloads](https://pepy.tech/badge/honegumi/month)](https://pepy.tech/project/honegumi)
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Twitter)](https://twitter.com/honegumi)
@@ -11,10 +12,10 @@
 
 ![honegumi-logo](reports/figures/honegumi-logo.png)
 
-> Honegumi (骨組み, pronounced "ho neh goo mee") is a work-in-progress package for
+> Honegumi (骨組み, pronounced "ho neh goo mee"), which means "skeletal framework" in Japanese, is a work-in-progress package for
 > interactively creating API tutorials with a focus on optimization packages such as Meta's Ax
 > Platform. We are looking for contributors, so please let us know if you're interested!
-> Start by taking a look at our "Gentle Introduction to Jinja2" notebook: <a href="https://colab.research.google.com/github/sgbaird/honegumi/blob/main/1.0-sgb-gentle-introduction-jinja.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+> Start by taking a look at [our Google Colab tutorial: *A Gentle Introduction to Jinja2*](https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb).
 
 <!-- > Unlock the power of advanced optimization in materials science with Honegumi (骨組み,
 > pronounced "ho-neh-goo-mee"), our interactive "skeleton code" generator. -->
