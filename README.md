@@ -110,7 +110,7 @@ Then take a look into the `scripts` and `notebooks` folders.
 ├── setup.py                <- [DEPRECATED] Use `python setup.py develop` to install for
 │                              development or `python setup.py bdist_wheel` to build.
 ├── src
-│   └── sensei              <- Actual Python package where the main functionality goes.
+│   └── core              <- Actual Python package where the main functionality goes.
 ├── tests                   <- Unit tests which can be run with `pytest`.
 ├── .coveragerc             <- Configuration for coverage reports of unit tests.
 ├── .isort.cfg              <- Configuration for git hook that sorts imports.
