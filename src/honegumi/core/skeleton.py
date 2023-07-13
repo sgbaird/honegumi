@@ -26,6 +26,8 @@ import sys
 
 from honegumi.core import __version__
 
+# from jinja2 import Environment, FileSystemLoader
+
 __author__ = "sgbaird"
 __copyright__ = "sgbaird"
 __license__ = "MIT"
@@ -54,6 +56,24 @@ def fib(n):
     for _i in range(n - 1):
         a, b = b, a + b
     return a
+
+
+# # Create an environment with the template directory
+# template_dir = "."
+# env = Environment(loader=FileSystemLoader(template_dir))
+
+# # Load the template file
+# template_name = "randint.py.jinja"
+# template = env.get_template(template_name)
+
+# # Define the data to be rendered
+# data = {
+#     "min_value": 1,
+#     "max_value": 10,
+# }
+
+# # print the rendered template
+# print(template.render(data))
 
 
 # ---- CLI ----
