@@ -47,9 +47,12 @@ for data in all_opts:
     template = env.get_template(template_name)
 
     # save the rendered template
-    rendered_template_stem = "test_" + "__".join(
-        [f"{option_name}-{str(data[option_name])}" for option_name in option_names]
-    )
+    rendered_template_stem = (
+        "__".join(
+            [f"{option_name}-{str(data[option_name])}" for option_name in option_names]
+        )
+        + "_test"
+    )  # add a test suffix for pytest recognition
     gen_template_name = path.join(gen_template_dir, f"{rendered_template_stem}.py")
     with open(gen_template_name, "w") as f:
         rendered_template = template.render(data)
