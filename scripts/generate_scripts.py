@@ -11,6 +11,7 @@ from honegumi.ax.utils.constants import (
     model_opt_name,
     objective_opt_name,
     template_dir,
+    test_template_dir,
     use_custom_gen_opt_name,
 )
 
@@ -40,6 +41,7 @@ all_opts = [
 
 # create the directory if it doesn't exist
 Path(gen_template_dir).mkdir(parents=True, exist_ok=True)
+Path(test_template_dir).mkdir(parents=True, exist_ok=True)
 
 
 for data in all_opts:
@@ -47,20 +49,30 @@ for data in all_opts:
     template = env.get_template(template_name)
 
     # save the rendered template
-    rendered_template_stem = (
-        "__".join(
-            [f"{option_name}-{str(data[option_name])}" for option_name in option_names]
-        )
-        # + "_test"  # add a test suffix for pytest recognition
+    rendered_template_stem = "__".join(
+        [f"{option_name}-{str(data[option_name])}" for option_name in option_names]
     )
-    gen_template_name = path.join(gen_template_dir, f"{rendered_template_stem}.py")
-    with open(gen_template_name, "w") as f:
-        rendered_template = template.render(data)
-        # apply black formatting
-        rendered_template = format_file_contents(
-            rendered_template, fast=False, mode=FileMode()
-        )
+
+    gen_template_name = f"{rendered_template_stem}.py"
+    gen_template_path = path.join(gen_template_dir, gen_template_name)
+    # prepend test_ and save in tests directory
+    test_template_path = path.join(test_template_dir, f"test_{gen_template_name}")
+
+    rendered_template = template.render(data)
+    # apply black formatting
+    rendered_template = format_file_contents(
+        rendered_template, fast=False, mode=FileMode()
+    )
+    with open(gen_template_path, "w") as f:
         f.write(rendered_template)
+
+    # indent each line by 4 spaces and prefix def test_script():
+    rendered_test_template = "def test_script():\n" + "\n".join(
+        ["    " + line for line in rendered_template.split("\n")]
+    )
+
+    with open(test_template_path, "w") as f:
+        f.write(rendered_test_template)
     1 + 1
 
 # # %% Code Graveyard
