@@ -1,0 +1,495 @@
+sgbaird: Change this so that data contains mapping from combinations of options to values. For example, one combination is 'A' and 'D' which could map to "You selected Option 1. A and Option 2. E", and another combination is 'B' and 'D' mapping to "You selected Option 1. B and Option 2. D".
+
+GitHub Copilot: Here's the modified code that maps combinations of options to values:
+
+```python
+import ipywidgets as widgets
+from IPython.display import display
+import numpy as np
+
+# Define the options for the toggle buttons
+data = {
+    ('A', 'D'): 'You selected Option 1. A and Option 2. D',
+    ('A', 'E'): 'You selected Option 1. A and Option 2. E',
+    ('B', 'D'): 'You selected Option 1. B and Option 2. D',
+    ('B', 'E'): 'You selected Option 1. B and Option 2. E',
+    ('C', 'D'): 'You selected Option 1. C and Option 2. D',
+    ('C', 'E'): 'You selected Option 1. C and Option 2. E',
+    ('A', 'F'): 'You selected Option 1. A and Option 3. F',
+    ('A', 'G'): 'You selected Option 1. A and Option 3. G',
+    ('A', 'H'): 'You selected Option 1. A and Option 3. H',
+    ('B', 'F'): 'You selected Option 1. B and Option 3. F',
+    ('B', 'G'): 'You selected Option 1. B and Option 3. G',
+    ('B', 'H'): 'You selected Option 1. B and Option 3. H',
+    ('C', 'F'): 'You selected Option 1. C and Option 3. F',
+    ('C', 'G'): 'You selected Option 1. C and Option 3. G',
+    ('C', 'H'): 'You selected Option 1. C and Option 3. H'
+}
+
+# Create a list of HBox widgets for each option group
+hboxes = []
+for row in data:
+    hbox = widgets.HBox([
+        widgets.Label(f'Options: {row}', layout=widgets.Layout(width="100px")),
+        widgets.Label(data[row], layout=widgets.Layout(width="auto")),
+    ])
+    hboxes.append(hbox)
+
+# Create a vertical box to display the toggle buttons and output widget
+vbox = widgets.VBox(hboxes)
+
+# Display the vertical box
+display(vbox)
+```
+
+
+
+sgbaird: You should still use ToggleButtons, except there are no labels. You need to select the appropriate data entry based on the combination of options that were selected.
+
+GitHub Copilot: Here's the modified code that uses ToggleButtons and selects the appropriate data entry based on the combination of options that were selected:
+
+```python
+import ipywidgets as widgets
+from IPython.display import display
+import numpy as np
+
+# Define the options for the toggle buttons
+options1 = ['A', 'B', 'C']
+options2 = ['D', 'E']
+options3 = ['F', 'G', 'H']
+
+# Define the function to handle the toggle button events
+def on_toggle_button_change(change):
+    # Get the selected options
+    selected_options = [toggle_button.value for toggle_button in toggle_buttons]
+    # Get the corresponding data entry
+    data_entry = data.get(tuple(selected_options), '')
+    # Update the output widget
+    output_widget.value = data_entry
+
+# Create the toggle buttons
+toggle_buttons = [
+    widgets.ToggleButton(description=option, layout=widgets.Layout(width="50px"))
+    for option in options1 + options2 + options3
+]
+
+# Create the output widget
+output_widget = widgets.Output()
+
+# Create a vertical box to display the toggle buttons and output widget
+vbox = widgets.VBox(toggle_buttons + [output_widget])
+
+# Register the event handler for the toggle buttons
+for toggle_button in toggle_buttons:
+    toggle_button.observe(on_toggle_button_change, names='value')
+
+# Display the vertical box
+display(vbox)
+```
+
+
+
+sgbaird: There's no output when I click a button.
+
+GitHub Copilot: It looks like the `output_widget` is not being used to display the output. Instead, the output is being printed to the console using the `print()` function. To fix this, you can replace the `print()` statements with `output_widget.value = ...` statements.
+
+Here's the modified code:
+
+```python
+import ipywidgets as widgets
+from IPython.display import display
+import numpy as np
+
+# Define the options for the toggle buttons
+
+options1 = {"description": "Option 1", "options": ['A', 'B', 'C']}
+options2 = {"description": "Option 2", "options": ['D', 'E']}
+options3 = {"description": "Option 3", "options": ['F', 'G', 'H']}
+
+option_rows = [options1, options2, options3]
+
+data = {
+    ('A', 'D'): 'You selected Option 1. A and Option 2. D',
+    ('A', 'E'): 'You selected Option 1. A and Option 2. E',
+    ('B', 'D'): 'You selected Option 1. B and Option 2. D',
+    ('B', 'E'): 'You selected Option 1. B and Option 2. E',
+    ('C', 'D'): 'You selected Option 1. C and Option 2. D',
+    ('C', 'E'): 'You selected Option 1. C and Option 2. E',
+    ('A', 'F'): 'You selected Option 1. A and Option 3. F',
+    ('A', 'G'): 'You selected Option 1. A and Option 3. G',
+    ('A', 'H'): 'You selected Option 1. A and Option 3. H',
+    ('B', 'F'): 'You selected Option 1. B and Option 3. F',
+    ('B', 'G'): 'You selected Option 1. B and Option 3. G',
+    ('B', 'H'): 'You selected Option 1. B and Option 3. H',
+    ('C', 'F'): 'You selected Option 1. C and Option 3. F',
+    ('C', 'G'): 'You selected Option 1. C and Option 3. G',
+    ('C', 'H'): 'You selected Option 1. C and Option 3. H'
+}
+
+# Create a list of HBox widgets for each option group
+hboxes = []
+for row in option_rows:
+    options = row['options']
+    hbox = widgets.HBox([
+        widgets.Label(row['description'], layout=widgets.Layout(width="100px")),
+        widgets.ToggleButtons(
+            options=options,
+            layout=widgets.Layout(width="auto"),
+            style={"button_width": f"{np.round(300/len(options))}px"},
+        ),
+    ])
+    hboxes.append(hbox)
+
+# Create the output widget
+output_widget = widgets.Output()
+
+# Define the function to handle the toggle button events
+def on_toggle_button_change(change):
+    output_widget.clear_output(wait=True)
+    # Get the selected options
+    with output_widget:
+        selected_options = [hbox.children[1].value for hbox in hboxes]
+        # Get the corresponding data entry
+        data_entry = data.get(tuple(selected_options), '')
+        # Update the output widget
+        output_widget.value = data_entry
+
+# Register the event handler for the toggle buttons
+for toggle_button in hboxes:
+    toggle_button.children[1].observe(on_toggle_button_change, names='value')
+
+# Create a vertical box to display the toggle buttons and output widget
+vbox = widgets.VBox(hboxes + [output_widget])
+
+# Display the vertical box
+display(vbox)
+```
+
+
+
+sgbaird: Update data to consider that there are 3 options
+
+GitHub Copilot: Here's the updated `data` dictionary that considers 3 options:
+
+```python
+data = {
+    ('A', 'D', 'F'): 'You selected Option 1. A, Option 2. D, and Option 3. F',
+    ('A', 'D', 'G'): 'You selected Option 1. A, Option 2. D, and Option 3. G',
+    ('A', 'D', 'H'): 'You selected Option 1. A, Option 2. D, and Option 3. H',
+    ('A', 'E', 'F'): 'You selected Option 1. A, Option 2. E, and Option 3. F',
+    ('A', 'E', 'G'): 'You selected Option 1. A, Option 2. E, and Option 3. G',
+    ('A', 'E', 'H'): 'You selected Option 1. A, Option 2. E, and Option 3. H',
+    ('B', 'D', 'F'): 'You selected Option 1. B, Option 2. D, and Option 3. F',
+    ('B', 'D', 'G'): 'You selected Option 1. B, Option 2. D, and Option 3. G',
+    ('B', 'D', 'H'): 'You selected Option 1. B, Option 2. D, and Option 3. H',
+    ('B', 'E', 'F'): 'You selected Option 1. B, Option 2. E, and Option 3. F',
+    ('B', 'E', 'G'): 'You selected Option 1. B, Option 2. E, and Option 3. G',
+    ('B', 'E', 'H'): 'You selected Option 1. B, Option 2. E, and Option 3. H',
+    ('C', 'D', 'F'): 'You selected Option 1. C, Option 2. D, and Option 3. F',
+    ('C', 'D', 'G'): 'You selected Option 1. C, Option 2. D, and Option 3. G',
+    ('C', 'D', 'H'): 'You selected Option 1. C, Option 2. D, and Option 3. H',
+    ('C', 'E', 'F'): 'You selected Option 1. C, Option 2. E, and Option 3. F',
+    ('C', 'E', 'G'): 'You selected Option 1. C, Option 2. E, and Option 3. G',
+    ('C', 'E', 'H'): 'You selected Option 1. C, Option 2. E, and Option 3. H'
+}
+```
+
+You can use this dictionary with the previous code to display the output based on the selected options.
+
+sgbaird: Convert this to a list of dictionaries
+
+GitHub Copilot: Here's the code that converts the options to a list of dictionaries:
+
+```python
+options = [
+    {"description": "Option 1", "options": ['A', 'B', 'C']},
+    {"description": "Option 2", "options": ['D', 'E']},
+    {"description": "Option 3", "options": ['F', 'G', 'H']}
+]
+```
+
+You can use this list of dictionaries with the previous code to create the toggle buttons.
+
+sgbaird: Create data programmatically
+
+GitHub Copilot: Here's the code that creates the `data` dictionary programmatically based on the options:
+
+```python
+options = [
+    {"description": "Option 1", "options": ['A', 'B', 'C']},
+    {"description": "Option 2", "options": ['D', 'E']},
+    {"description": "Option 3", "options": ['F', 'G', 'H']}
+]
+
+data = {}
+for a in options[0]['options']:
+    for b in options[1]['options']:
+        for c in options[2]['options']:
+            key = (a, b, c)
+            value = f"You selected Option 1. {a}, Option 2. {b}, and Option 3. {c}"
+            data[key] = value
+```
+
+You can use this `data` dictionary with the previous code to display the output based on the selected options.
+
+sgbaird: Use itertools instead
+
+GitHub Copilot: Here's the code that uses `itertools.product` to create the `data` dictionary:
+
+```python
+import itertools
+
+options = [
+    {"description": "Option 1", "options": ['A', 'B', 'C']},
+    {"description": "Option 2", "options": ['D', 'E']},
+    {"description": "Option 3", "options": ['F', 'G', 'H']}
+]
+
+data = {}
+for option_values in itertools.product(*[option['options'] for option in options]):
+    key = tuple(option_values)
+    value = f"You selected Option 1. {key[0]}, Option 2. {key[1]}, and Option 3. {key[2]}"
+    data[key] = value
+```
+
+You can use this `data` dictionary with the previous code to display the output based on the selected options.
+
+sgbaird: Do this for an arbitrary number of option rows.
+
+GitHub Copilot: Here's the updated code that creates the `data` dictionary programmatically for an arbitrary number of option rows:
+
+```python
+import itertools
+
+options = [
+    {"description": "Option 1", "options": ['A', 'B', 'C']},
+    {"description": "Option 2", "options": ['D', 'E']},
+    {"description": "Option 3", "options": ['F', 'G', 'H']}
+]
+
+data = {}
+for option_values in itertools.product(*[option['options'] for option in options]):
+    key = tuple(option_values)
+    value = f"You selected {', '.join([f'Option {i+1}. {v}' for i, v in enumerate(option_values)])}"
+    data[key] = value
+```
+
+In this code, the `options` list contains the option rows, where each row is a dictionary with a `description` key and an `options` key. The `itertools.product` function is used to generate all possible combinations of the option values, and the resulting `key` and `value` are added to the `data` dictionary.
+
+This code works for any number of option rows, as long as the `options` list is updated accordingly.
+
+sgbaird: Cross out the corresponding button labels for option combinations that are considered invalid (for example, `('A', 'D', 'F')` and `('C', 'E', 'H')`)
+
+GitHub Copilot: Here's the modified code that crosses out the corresponding button labels for invalid option combinations:
+
+```python
+import ipywidgets as widgets
+from IPython.display import display
+import numpy as np
+
+options = [
+    {"description": "Option 1", "options": ['A', 'B', 'C']},
+    {"description": "Option 2", "options": ['D', 'E']},
+    {"description": "Option 3", "options": ['F', 'G', 'H']}
+]
+
+invalid_options = [
+    ('A', 'D', 'F'),
+    ('A', 'D', 'G'),
+    ('A', 'D', 'H'),
+    ('A', 'E', 'F'),
+    ('A', 'E', 'G'),
+    ('A', 'E', 'H'),
+    ('B', 'D', 'F'),
+    ('B', 'D', 'G'),
+    ('B', 'D', 'H'),
+    ('B', 'E', 'F'),
+    ('B', 'E', 'G'),
+    ('B', 'E', 'H'),
+    ('C', 'D', 'F'),
+    ('C', 'D', 'G'),
+    ('C', 'D', 'H')
+]
+
+data = {}
+for option_values in itertools.product(*[option['options'] for option in options]):
+    key = tuple(option_values)
+    value = f"You selected {', '.join([f'Option {i+1}. {v}' for i, v in enumerate(option_values)])}"
+    data[key] = value
+
+# Create the toggle buttons
+hboxes = []
+for i, row in enumerate(options):
+    options = row['options']
+    hbox = widgets.HBox([
+        widgets.Label(row['description'], layout=widgets.Layout(width="100px")),
+        widgets.ToggleButtons(
+            options=options,
+            layout=widgets.Layout(width="auto"),
+            style={"button_width": f"{np.round(300/len(options))}px"},
+        ),
+    ])
+    if i == 0:
+        # Cross out invalid options for the first row
+        for button in hbox.children[1].buttons:
+            if (button.description, ) in invalid_options:
+                button.button_style = 'text-decoration: line-through'
+    elif i == 1:
+        # Cross out invalid options for the second row
+        for button in hbox.children[1].buttons:
+            if (hboxes[0].children[1].value, button.description) in invalid_options:
+                button.button_style = 'text-decoration: line-through'
+    elif i == 2:
+        # Cross out invalid options for the third row
+        for button in hbox.children[1].buttons:
+            if (hboxes[0].children[1].value, hboxes[1].children[1].value, button.description) in invalid_options:
+                button.button_style = 'text-decoration: line-through'
+    hboxes.append(hbox)
+
+# Create the output widget
+output_widget = widgets.Output()
+
+# Define the function to handle the toggle button events
+def on_toggle_button_change(change):
+    output_widget.clear_output(wait=True)
+    # Get the selected options
+    with output_widget:
+        selected_options = [hbox.children[1].value for hbox in hboxes]
+        # Get the corresponding data entry
+        data_entry = data.get(tuple(selected_options), '')
+        # Update the output widget
+        output_widget.value = data_entry
+
+        # Cross out invalid options for the first row
+        for button in hboxes[0].children[1].buttons:
+            if (button.description, ) in invalid_options:
+                button.button_style = 'text-decoration: line-through'
+
+        # Cross out invalid options for the second row
+        for button in hboxes[1].children[1].buttons:
+            if (hboxes[0].children[1].value, button.description) in invalid_options:
+                button.button_style = 'text-decoration: line-through'
+
+        # Cross out invalid options for the third row
+        for button in hboxes[2].children[1].buttons:
+            if (hboxes[0].children[1].value, hboxes[1].children[1].value, button.description) in invalid_options:
+                button.button_style = 'text-decoration: line-through'
+
+# Register the event handler for the toggle buttons
+for toggle_button in hboxes:
+    toggle_button.children[1].observe(on_toggle_button_change, names='value')
+
+# Create a vertical box to display the toggle buttons and output widget
+vbox = widgets.VBox(hboxes + [output_widget])
+
+# Display the vertical box
+display(vbox)
+```
+
+In this code, the `invalid_options` list contains the option combinations that are considered invalid. The `button_style` attribute is set to `'text-decoration: line-through'` for the corresponding toggle button if it is invalid. The `on_toggle_button_change` function is updated to cross out the invalid options whenever the toggle buttons are changed.
+
+sgbaird: Modify this to allow for an arbitrary number of rows.
+
+GitHub Copilot: Here's the modified code that allows for an arbitrary number of rows:
+
+```python
+import ipywidgets as widgets
+from IPython.display import display
+import numpy as np
+
+options = [
+    {"description": "Option 1", "options": ['A', 'B', 'C']},
+    {"description": "Option 2", "options": ['D', 'E']},
+    {"description": "Option 3", "options": ['F', 'G', 'H']}
+]
+
+invalid_options = [
+    ('A', 'D', 'F'),
+    ('A', 'D', 'G'),
+    ('A', 'D', 'H'),
+    ('A', 'E', 'F'),
+    ('A', 'E', 'G'),
+    ('A', 'E', 'H'),
+    ('B', 'D', 'F'),
+    ('B', 'D', 'G'),
+    ('B', 'D', 'H'),
+    ('B', 'E', 'F'),
+    ('B', 'E', 'G'),
+    ('B', 'E', 'H'),
+    ('C', 'D', 'F'),
+    ('C', 'D', 'G'),
+    ('C', 'D', 'H')
+]
+
+data = {}
+for option_values in itertools.product(*[option['options'] for option in options]):
+    key = tuple(option_values)
+    value = f"You selected {', '.join([f'Option {i+1}. {v}' for i, v in enumerate(option_values)])}"
+    data[key] = value
+
+# Create the toggle buttons
+hboxes = []
+for i, row in enumerate(options):
+    options = row['options']
+    hbox = widgets.HBox([
+        widgets.Label(row['description'], layout=widgets.Layout(width="100px")),
+        widgets.ToggleButtons(
+            options=options,
+            layout=widgets.Layout(width="auto"),
+            style={"button_width": f"{np.round(300/len(options))}px"},
+        ),
+    ])
+    if i == 0:
+        # Cross out invalid options for the first row
+        for button in hbox.children[1].buttons:
+            if (button.description, ) in invalid_options:
+                button.button_style = 'text-decoration: line-through'
+    else:
+        # Cross out invalid options for the other rows
+        for button in hbox.children[1].buttons:
+            invalid = False
+            for j in range(i):
+                if (hboxes[j].children[1].value[j], button.description) not in data:
+                    invalid = True
+                    break
+            if invalid:
+                button.button_style = 'text-decoration: line-through'
+    hboxes.append(hbox)
+
+# Create the output widget
+output_widget = widgets.Output()
+
+# Define the function to handle the toggle button events
+def on_toggle_button_change(change):
+    output_widget.clear_output(wait=True)
+    # Get the selected options
+    with output_widget:
+        selected_options = [hbox.children[1].value for hbox in hboxes]
+        # Get the corresponding data entry
+        data_entry = data.get(tuple(selected_options), '')
+        # Update the output widget
+        output_widget.value = data_entry
+
+        # Cross out invalid options for the other rows
+        for i in range(1, len(hboxes)):
+            for button in hboxes[i].children[1].buttons:
+                invalid = False
+                for j in range(i):
+                    if (hboxes[j].children[1].value[j], button.description) not in data:
+                        invalid = True
+                        break
+                if invalid:
+                    button.button_style = 'text-decoration: line-through'
+
+# Register the event handler for the toggle buttons
+for toggle_button in hboxes:
+    toggle_button.children[1].observe(on_toggle_button_change, names='value')
+
+# Create a vertical box to display the toggle buttons and output widget
+vbox = widgets.VBox(hboxes + [output_widget])
+
+# Display the vertical box
+display(vbox)
+```
+
+In this code, the `invalid_options` list contains the option combinations that are considered invalid. The `button_style` attribute is set to `'text-decoration: line-through'` for the corresponding toggle button if it is invalid. The `on_toggle_button_change` function is updated to cross out the invalid options whenever the toggle buttons are changed. The difference is that the invalid options for the other rows are now checked by iterating over the previous rows.
