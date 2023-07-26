@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Grid Example</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body onload="updateText()">
+    <table>
+        <tr>
+            <td><input type="radio" name="row1" value="option1" checked onclick="updateText()">Option 1</td>
+            <td><input type="radio" name="row1" value="option2" onclick="updateText()">Option 2</td>
+        </tr>
+        <tr>
+            <td><input type="radio" name="row2" value="option3" checked onclick="updateText()">Option 3</td>
+            <td><input type="radio" name="row2" value="option4" onclick="updateText()">Option 4</td>
+            <td><input type="radio" name="row2" value="option5" onclick="updateText()">Option 5</td>
+        </tr>
+        <tr>
+            <td><input type="radio" name="row3" value="option6" checked onclick="updateText()">Option 6</td>
+            <td><input type="radio" name="row3" value="option7" onclick="updateText()">Option 7</td>
+        </tr>
+    </table>
+    <p id="text"></p>
+    <script>
+        function updateText() {
+            var rows = document.querySelectorAll('input[type="radio"]:checked');
+            var lookup = {
+                "option1,option3,option6": "Entry 1",
+                "option1,option3,option7": "Entry 2",
+                "option1,option4,option6": "Entry 3",
+                "option1,option4,option7": "Entry 4",
+                // "option1,option5,option6": "Entry 5",
+                "option1,option5,option7": "Entry 6",
+                "option2,option3,option6": "Entry 7",
+                "option2,option3,option7": "Entry 8",
+                "option2,option4,option6": "Entry 9",
+                "option2,option4,option7": "Entry 10",
+                "option2,option5,option6": "Entry 11",
+                // "option2,option5,option7": "Entry 12"
+            };
+            var key = Array.from(rows, function (row) { return row.value; }).join(',');
+            var entry = lookup[key];
+            document.getElementById("text").innerHTML = entry;
+            var selectedValues = Array.from(rows, function (row) { return row.value; });
+            var validValues = [];
+            for (var value in lookup) {
+                if (!selectedValues.every(function (selectedValue) { return lookup[selectedValue + ',' + value]; })) {
+                    validValues.push(value);
+                }
+            }
+            console.log(validValues);
+        }
+    </script>
+</body>
+</html>
