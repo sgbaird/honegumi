@@ -95,9 +95,9 @@
             var currentConfig = Array.from(rows, function (row) { return row.value; });
 
             var optionRows = [
-                {"description": "row1", "options": ['A', 'B', 'C']},
-                {"description": "row2", "options": ['D', 'E']},
-                {"description": "row3", "options": ['F', 'G', 'H']}
+                {"description": "row1", "options": ['A', 'B']},
+                {"description": "row2", "options": ['C', 'D', 'E']},
+                {"description": "row3", "options": ['F', 'G']}
             ];
             var invalidConfigs = [
                 ['B', 'D', 'F'],
@@ -105,22 +105,29 @@
                 ['A', 'C', 'G']
             ];
 
-            // Generate all possible configurations that deviate by one option from the current configuration
+            // Generate all possible configurations that deviate by zero or one option from the current configuration
+            // start with current config
+            // var possibleDeviatingConfigs = [currentConfig.slice()];
             var possibleDeviatingConfigs = [];
+            // add all configs that deviate by one option
             for (var i = 0; i < optionRows.length; i++) {
                 var options = optionRows[i]['options'];
                 for (var j = 0; j < options.length; j++) {
                     var option = options[j];
-                    if (option !== currentConfig[i]) {
-                        var deviation = currentConfig.slice();
-                        deviation[i] = option;
-                        possibleDeviatingConfigs.push(deviation);
-                    }
+                    // if (option !== currentConfig[i]) {
+                    var deviation = currentConfig.slice();
+                    deviation[i] = option;
+                    possibleDeviatingConfigs.push(deviation);
+                    // }
                 }
             }
+            // Remove duplicates
+            possibleDeviatingConfigs = possibleDeviatingConfigs.filter(function (config, index) {
+                return possibleDeviatingConfigs.indexOf(config) === index;
+            });
             console.log(possibleDeviatingConfigs)
 
-            // Find the invalid options that match the deviating configurations
+            // Find the invalid configurations that match the deviating configurations
             var deviatingConfigs = [];
             for (var i = 0; i < invalidConfigs.length; i++) {
                 var config = invalidConfigs[i];
@@ -138,6 +145,19 @@
                     return value !== currentConfig[index];
                 })[0];
             });
+
+            // Check if the current configuration is invalid
+            var isInvalid = invalidConfigs.some(function (config) {
+                return config.every(function (value, index) {
+                    return value === currentConfig[index];
+                });
+            });
+
+            // If the current configuration is invalid, add all selected options to the list of deviatingOptions
+            if (isInvalid) {
+                deviatingOptions = deviatingOptions.concat(currentConfig);
+            }
+
             // Log the deviations
             console.log(deviatingConfigs)
             console.log(deviatingOptions)
@@ -152,3 +172,7 @@
     </script>
 </body>
 </html>
+
+<!-- // Generate all possible configurations that deviate by zero or one option from the current configuration
+// start with current config
+var possibleDeviatingConfigs = [currentConfig.slice()]; -->
