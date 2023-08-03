@@ -23,10 +23,30 @@ allowable_opts = {
     model_opt_name: [Models.GPEI.name, Models.FULLYBAYESIAN.name],
     use_custom_gen_opt_name: [True, False],
 }
+
+# E.g.,
+# {
+#     "objective": ["single", "multi"],
+#     "model": ["GPEI", "FULLYBAYESIAN"],
+#     "use_custom_gen": [True, False],
+# }
+
 option_names = list(allowable_opts.keys())
 # create all combinations of objective_opts and model_opts while retaining keys
 # make it scalable to more option combinations
 all_opts = [dict(zip(allowable_opts, v)) for v in product(*allowable_opts.values())]
+
+# E.g.,
+# [
+#     {"objective": "single", "model": "GPEI", "use_custom_gen": True},
+#     {"objective": "single", "model": "GPEI", "use_custom_gen": False},
+#     {"objective": "single", "model": "FULLYBAYESIAN", "use_custom_gen": True},
+#     {"objective": "single", "model": "FULLYBAYESIAN", "use_custom_gen": False},
+#     {"objective": "multi", "model": "GPEI", "use_custom_gen": True},
+#     {"objective": "multi", "model": "GPEI", "use_custom_gen": False},
+#     {"objective": "multi", "model": "FULLYBAYESIAN", "use_custom_gen": True},
+#     {"objective": "multi", "model": "FULLYBAYESIAN", "use_custom_gen": False},
+# ]
 
 # remove cases where use_custom_gen_opt_name is False and model_opt_name is
 # FULLYBAYESIAN
@@ -55,8 +75,6 @@ for data in all_opts:
 
     gen_template_name = f"{rendered_template_stem}.py"
     gen_template_path = path.join(gen_template_dir, gen_template_name)
-    # prepend test_ and save in tests directory
-    test_template_path = path.join(test_template_dir, f"test_{gen_template_name}")
 
     rendered_template = template.render(data)
     # apply black formatting
@@ -71,6 +89,8 @@ for data in all_opts:
         ["    " + line for line in rendered_template.split("\n")]
     )
 
+    # save in tests directory with test_ prefix
+    test_template_path = path.join(test_template_dir, f"test_{gen_template_name}")
     with open(test_template_path, "w") as f:
         f.write(rendered_test_template)
     1 + 1
