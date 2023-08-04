@@ -14,6 +14,10 @@ Add a short description here!
 > about how to document your project and how to configure your preferences.
 
 
+```{raw} html
+:file: sandbox/jinja2/main.html
+```
+
 ## Contents
 
 ```{toctree}
