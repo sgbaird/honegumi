@@ -1,7 +1,9 @@
+import time
 from itertools import product
 from os import path
 from pathlib import Path
 
+import pytest
 from ax.modelbridge.factory import Models
 from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader
@@ -63,7 +65,8 @@ all_opts = [
 Path(gen_template_dir).mkdir(parents=True, exist_ok=True)
 Path(test_template_dir).mkdir(parents=True, exist_ok=True)
 
-rendered_templates = {}
+
+# rendered_templates = {}
 
 for data in all_opts:
     template_name = "main.py.jinja"
@@ -83,7 +86,8 @@ for data in all_opts:
         rendered_template, fast=False, mode=FileMode()
     )
 
-    rendered_templates[rendered_template_stem] = rendered_template
+    # rendered_templates[rendered_template_stem] = rendered_template
+    data["rendered_template"] = rendered_template
 
     with open(gen_template_path, "w") as f:
         f.write(rendered_template)
@@ -97,7 +101,71 @@ for data in all_opts:
     test_template_path = path.join(test_template_dir, f"test_{gen_template_name}")
     with open(test_template_path, "w") as f:
         f.write(rendered_test_template)
-    1 + 1
+
+# # write data to json file
+# with open(path.join("data", "processed", "data.json"), "w") as f:
+#     json.dump(all_opts, f, indent=4)
+
+# # write rendered_templates to json file
+# with open(path.join("data", "processed", "rendered_templates.json"), "w") as f:
+#     json.dump(rendered_templates, f, indent=4)
+
+# run pytest on one of the test scripts
+
+
+class ResultsCollector:
+    def __init__(self):
+        self.reports = []
+        self.collected = 0
+        self.exitcode = 0
+        self.passed = 0
+        self.failed = 0
+        self.xfailed = 0
+        self.skipped = 0
+        self.total_duration = 0
+
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(self, item, call):
+        outcome = yield
+        report = outcome.get_result()
+        if report.when == "call":
+            self.reports.append(report)
+
+    def pytest_collection_modifyitems(self, items):
+        self.collected = len(items)
+
+    def pytest_terminal_summary(self, terminalreporter, exitstatus):
+        print(exitstatus, dir(exitstatus))
+        self.exitcode = exitstatus
+        self.passed = len(terminalreporter.stats.get("passed", []))
+        self.failed = len(terminalreporter.stats.get("failed", []))
+        self.xfailed = len(terminalreporter.stats.get("xfailed", []))
+        self.skipped = len(terminalreporter.stats.get("skipped", []))
+
+        self.total_duration = time.time() - terminalreporter._sessionstarttime
+
+
+collector = ResultsCollector()
+retcode = pytest.main(["-v", test_template_path], plugins=[collector])
+for report in collector.reports:
+    print("id:", report.nodeid, "outcome:", report.outcome)  # etc
+print("exit code:", collector.exitcode)
+print(
+    "passed:",
+    collector.passed,
+    "failed:",
+    collector.failed,
+    "xfailed:",
+    collector.xfailed,
+    "skipped:",
+    collector.skipped,
+)
+print("total duration:", collector.total_duration)
+
+
+# pytest.main(["-v", test_template_dir])
+
+1 + 1
 
 # # %% Code Graveyard
 
