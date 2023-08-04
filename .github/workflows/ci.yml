@@ -81,15 +81,15 @@ jobs:
           pipx run --python '${{ steps.setup-python.outputs.python-path }}'
           tox --installpkg '${{ needs.prepare.outputs.wheel-distribution }}'
           -- -rFEx --durations 10 --color yes  # pytest args
-      # - name: Generate coverage report
-      #   run: pipx run coverage lcov -o coverage.lcov
-      # - name: Upload partial coverage report
-      #   uses: coverallsapp/github-action@master
-      #   with:
-      #     path-to-lcov: coverage.lcov
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     flag-name: ${{ matrix.platform }} - py${{ matrix.python }}
-      #     parallel: true
+  #     - name: Generate coverage report
+  #       run: pipx run coverage lcov -o coverage.lcov
+  #     - name: Upload partial coverage report
+  #       uses: coverallsapp/github-action@master
+  #       with:
+  #         path-to-lcov: coverage.lcov
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         flag-name: ${{ matrix.platform }} - py${{ matrix.python }}
+  #         parallel: true
 
   # finalize:
   #   needs: test
@@ -102,7 +102,7 @@ jobs:
   #         parallel-finished: true
 
   publish:
-    needs: finalize
+    needs: prepare
     if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     permissions:
