@@ -63,6 +63,7 @@ all_opts = [
 Path(gen_template_dir).mkdir(parents=True, exist_ok=True)
 Path(test_template_dir).mkdir(parents=True, exist_ok=True)
 
+rendered_templates = {}
 
 for data in all_opts:
     template_name = "main.py.jinja"
@@ -81,6 +82,9 @@ for data in all_opts:
     rendered_template = format_file_contents(
         rendered_template, fast=False, mode=FileMode()
     )
+
+    rendered_templates[rendered_template_stem] = rendered_template
+
     with open(gen_template_path, "w") as f:
         f.write(rendered_template)
 
