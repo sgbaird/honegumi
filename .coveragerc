@@ -1,7 +1,9 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = honegumi.core
+source =
+    honegumi.core
+    honegumi.ax
 # omit = bad_file.py
 
 [paths]
