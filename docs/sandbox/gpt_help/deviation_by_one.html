@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deviating Configurations</title>
+</head>
+<body>
+    <script>
+        var optionRows = [
+            {"description": "Option 1", "options": ['A', 'B', 'C']},
+            {"description": "Option 2", "options": ['D', 'E']},
+            {"description": "Option 3", "options": ['F', 'G', 'H']}
+        ];
+        var currentConfig = ['A', 'D', 'F'];
+        var invalidConfigs = [
+            ['C', 'D', 'F'],
+            ['B', 'E', 'H'],
+            ['C', 'D', 'G']
+        ];
+
+        // Generate all possible configurations that deviate by one option from the current configuration
+        var possibleDeviatingConfigs = [];
+        for (var i = 0; i < optionRows.length; i++) {
+            var options = optionRows[i]['options'];
+            for (var j = 0; j < options.length; j++) {
+                var option = options[j];
+                if (option !== currentConfig[i]) {
+                    var deviation = currentConfig.slice();
+                    deviation[i] = option;
+                    possibleDeviatingConfigs.push(deviation);
+                }
+            }
+        }
+        console.log(possibleDeviatingConfigs)
+
+        // Find the invalid options that match the deviating configurations
+        var deviatingConfigs = [];
+        for (var i = 0; i < invalidConfigs.length; i++) {
+            var config = invalidConfigs[i];
+            if (possibleDeviatingConfigs.some(function (deviation) {
+                return deviation.every(function (value, index) {
+                    return value === config[index];
+                });
+            })) {
+                deviatingConfigs.push(config);
+            }
+        }
+        // Track the one option that was the deviation for each deviating config
+        var deviatingOptions = deviatingConfigs.map(function (config) {
+            return config.filter(function (value, index) {
+                return value !== currentConfig[index];
+            })[0];
+        });
+        // Display the deviating options in an HTML element
+        var textElement = document.createElement('div');
+        textElement.id = 'text';
+        textElement.innerHTML = deviatingConfigs;
+        document.body.appendChild(textElement);
+    </script>
+</body>
+</html>

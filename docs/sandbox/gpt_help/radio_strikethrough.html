@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Toggle Strikethrough Radio Buttons</title>
+    <style>
+        .strikethrough {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <label><input type="radio" name="option" value="1">Option 1</label><br>
+        <label><input type="radio" name="option" value="2">Option 2</label><br>
+        <label><input type="radio" name="option" value="3">Option 3</label><br>
+    </form>
+    <script>
+        function updateText() {
+            var labels = document.querySelectorAll('label');
+            for (var i = 0; i < labels.length; i++) {
+                var label = labels[i];
+                label.classList.remove('strikethrough');
+            }
+            var rows = document.querySelectorAll('input[type="radio"]:checked');
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var label = row.parentElement;
+                label.classList.toggle('strikethrough');
+            }
+        }
+        var radios = document.querySelectorAll('input[type="radio"]');
+        for (var i = 0; i < radios.length; i++) {
+            var radio = radios[i];
+            radio.addEventListener('click', updateText);
+        }
+    </script>
+</body>
+</html>

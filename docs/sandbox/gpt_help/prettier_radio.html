@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prettier Radio Buttons</title>
+    <style>
+        input[type="radio"] {
+            display: none;
+        }
+
+        label.radio {
+            display: inline-block;
+            position: relative;
+            padding-left: 35px;
+            margin-right: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-size: 20px;
+            user-select: none;
+        }
+
+        label.radio:before {
+            content: "";
+            display: inline-block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            background-color: #fff;
+        }
+
+        label.radio:hover:before {
+            border-color: #007bff;
+        }
+
+        input[type="radio"]:checked + label.radio:before {
+            border-color: #007bff;
+            background-color: #007bff;
+        }
+
+        label.radio:after {
+            content: "";
+            display: inline-block;
+            position: absolute;
+            left: 7px;
+            top: 7px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #fff;
+            transform: scale(0);
+            transition: transform 0.2s ease;
+        }
+
+        input[type="radio"]:checked + label.radio:after {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <input type="radio" name="option" id="option1" value="1">
+        <label class="radio" for="option1">Option 1</label>
+
+        <input type="radio" name="option" id="option2" value="2">
+        <label class="radio" for="option2">Option 2</label>
+
+        <input type="radio" name="option" id="option3" value="3">
+        <label class="radio" for="option3">Option 3</label>
+    </form>
+</body>
+</html>

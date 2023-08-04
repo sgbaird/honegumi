@@ -18,23 +18,23 @@ repos:
   - id: mixed-line-ending
     args: ['--fix=auto']  # replace 'auto' with 'lf' to enforce Linux/Mac line endings or 'crlf' for Windows
 
-## If you want to automatically "modernize" your Python code:
+# # If you want to automatically "modernize" your Python code:
 # - repo: https://github.com/asottile/pyupgrade
-#   rev: v3.3.1
+#   rev: v3.9.0
 #   hooks:
 #   - id: pyupgrade
 #     args: ['--py37-plus']
 
-## If you want to avoid flake8 errors due to unused vars or imports:
-# - repo: https://github.com/PyCQA/autoflake
-#   rev: v2.0.2
-#   hooks:
-#   - id: autoflake
-#     args: [
-#       --in-place,
-#       --remove-all-unused-imports,
-#       --remove-unused-variables,
-#     ]
+# If you want to avoid flake8 errors due to unused vars or imports:
+- repo: https://github.com/PyCQA/autoflake
+  rev: v2.2.0
+  hooks:
+  - id: autoflake
+    args: [
+      --in-place,
+      --remove-all-unused-imports,
+      # --remove-unused-variables,
+    ]
 
 - repo: https://github.com/PyCQA/isort
   rev: 5.12.0
@@ -42,22 +42,34 @@ repos:
   - id: isort
 
 - repo: https://github.com/psf/black
-  rev: 23.3.0
+  rev: 23.7.0
   hooks:
   - id: black
+    exclude: ^tests/generated_scripts/
     language_version: python3
 
-## If like to embrace black styles even in the docs:
-# - repo: https://github.com/asottile/blacken-docs
-#   rev: v1.13.0
-#   hooks:
-#   - id: blacken-docs
-#     additional_dependencies: [black]
+- repo: https://github.com/psf/black
+  rev: 23.7.0
+  hooks:
+  - id: black
+    exclude: ^(?!tests/generated_scripts/).* # any string that does not start with tests/generated_scripts/
+    language_version: python3
+    args: ['--line-length=92'] # to account for the 4 space indent when using `def test():`
+
+# If like to embrace black styles even in the docs:
+- repo: https://github.com/asottile/blacken-docs
+  rev: 1.15.0
+  hooks:
+  - id: blacken-docs
+    additional_dependencies: [black]
+    exclude: ^reports/copilot-chat/
+
 
 - repo: https://github.com/PyCQA/flake8
   rev: 6.0.0
   hooks:
   - id: flake8
+    exclude: ^tests/generated_scripts/
   ## You can add flake8 plugins via `additional_dependencies`:
   #  additional_dependencies: [flake8-bugbear]
 
