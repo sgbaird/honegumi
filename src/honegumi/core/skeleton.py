@@ -1,4 +1,6 @@
 """
+This module contains Honegumi's core functionality.
+
 This is a skeleton file that can serve as a starting point for a Python
 console script. To run this script uncomment the following lines in the
 ``[options.entry_points]`` section in ``setup.cfg``::
@@ -11,6 +13,23 @@ which will install the command ``fibonacci`` inside your current environment.
 
 Besides console scripts, the header (i.e. until ``_logger``...) of this file can
 also be used as template for Python modules.
+
+Functions:
+    get_rendered_template_stem(data, option_names):
+        Returns a string that represents the rendered template stem based on the
+        given data and option names.
+    unpack_rendered_template_stem(rendered_template_stem):
+        Extracts option values from a rendered template stem string.
+    fib(n):
+        Fibonacci example function that returns the n-th Fibonacci number.
+    parse_args(args):
+        Parses command line parameters.
+    setup_logging(loglevel):
+        Sets up basic logging.
+    main(args):
+        Wrapper allowing fib to be called with string arguments in a CLI fashion.
+    run():
+        Calls main passing the CLI arguments extracted from sys.argv.
 
 Note:
     This file can be renamed depending on your needs or safely removed if not needed.
@@ -40,6 +59,70 @@ _logger = logging.getLogger(__name__)
 # Python scripts/interactive interpreter, e.g. via
 # `from honegumi.core.skeleton import fib`,
 # when using this Python module as a library.
+
+
+def get_rendered_template_stem(data, option_names):
+    """
+    Returns a string that represents the rendered template stem based on the given data
+    and option names.
+
+    Parameters
+    ----------
+    data : dict
+        A dictionary containing the data to be used in the rendered template stem.
+    option_names : list
+        A list of strings representing the names of the options to be included in the
+        rendered template stem.
+
+    Returns
+    -------
+    str
+        A string representing the rendered template stem.
+
+    Examples
+    --------
+    >>> data = {'option1': 'value1', 'option2': 'value2'}
+    >>> option_names = ['option1', 'option2']
+    >>> get_rendered_template_stem(data, option_names)
+    'option1-value1__option2-value2'
+    """
+    rendered_template_stem = "__".join(
+        [f"{option_name}-{str(data[option_name])}" for option_name in option_names]
+    )
+    return rendered_template_stem
+
+
+def unpack_rendered_template_stem(rendered_template_stem):
+    """
+    This function takes a rendered template stem as input and returns a dictionary of
+    options and their values.
+
+    Parameters
+    ----------
+    rendered_template_stem : str
+        The rendered template stem to be unpacked.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the options and their values.
+
+    Examples
+    --------
+    >>> unpack_rendered_template_stem("option1-value1__option2-value2__option3-value3")
+    {'option1': 'value1', 'option2': 'value2', 'option3': 'value3'}
+    """
+    options = {}
+
+    # split the string into a list of option-value pairs
+    option_value_pairs = rendered_template_stem.split("__")
+
+    # extract the option names and values from the pairs and add them to a dictionary
+    for pair in option_value_pairs:
+        option_name, option_value = pair.split("-")
+        options[option_name] = option_value
+
+    return options
 
 
 def fib(n):
