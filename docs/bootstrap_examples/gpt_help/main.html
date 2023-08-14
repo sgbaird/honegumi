@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Grid Example</title>
+    <style>
+        input[type="radio"] {
+          opacity: 0;
+          position: absolute;
+          width: 0;
+          height: 0;
+        }
+
+        form {
+          display: inline-flex;
+          flex-direction: column;
+        }
+
+        .row {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #f2f2f2;
+          border: 0px solid #ccc;
+        }
+
+        .row label {
+            display: inline-block;
+            border: 1px solid #ccc;
+            padding: 5px;
+            cursor: pointer;
+            background-color: #f2f2f2;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        input[type="radio"]:checked + label {
+          background-color: #b1b1b1;
+        }
+      </style>
+</head>
+<body onload="updateText()">
+    <form>
+        <div class="row">
+            <input type="radio" id="A" name="row1" value="A" checked onclick="updateText()">
+            <label for="A">Option A</label>
+            <input type="radio" id="B" name="row1" value="B" onclick="updateText()">
+            <label for="B">Option B</label>
+        </div>
+        <div class="row">
+            <input type="radio" id="C" name="row2" value="C" checked onclick="updateText()">
+            <label for="C">Option C</label>
+            <input type="radio" id="D" name="row2" value="D" onclick="updateText()">
+            <label for="D">Option D</label>
+            <input type="radio" id="E" name="row2" value="E" onclick="updateText()">
+            <label for="E">Option E</label>
+        </div>
+
+        <div class="row">
+            <input type="radio" id="F" name="row3" value="F" checked onclick="updateText()">
+            <label for="F">Option F</label>
+            <input type="radio" id="G" name="row3" value="G" onclick="updateText()">
+            <label for="G">Option G</label>
+        </div>
+        <div class="row">
+            <p id="text"></p>
+        </div>
+    </form>
+    <script>
+        function updateText() {
+            var rows = document.querySelectorAll('input[type="radio"]:checked');
+            // Remove strikethrough formatting from all labels except for the selected radio button's label
+            var labels = document.querySelectorAll('label');
+            labels.forEach(function (label) {
+                if (label.htmlFor !== rows.id) {
+                    label.innerHTML = label.textContent;
+                }
+            }); // NOTE: Super close! When I click a button, the strikethrough goes away but should stay there
+            var lookup = {
+                "A,C,F": "ACF",
+                "A,C,G": "INVALID",
+                "A,D,F": "ADF",
+                "A,D,G": "ADG",
+                "A,E,F": "AEF",
+                "A,E,G": "AEG",
+                "B,C,F": "BCF",
+                "B,C,G": "BCG",
+                "B,D,F": "INVALID",
+                "B,D,G": "BDG",
+                "B,E,F": "INVALID",
+                "B,E,G": "BEG"
+            };
+            var key = Array.from(rows, function (row) { return row.value; }).join(',');
+            var entry = lookup[key];
+            document.getElementById("text").innerHTML = entry;
+            var currentConfig = Array.from(rows, function (row) { return row.value; });
+
+            var optionRows = [
+                {"description": "row1", "options": ['A', 'B', 'C']},
+                {"description": "row2", "options": ['D', 'E']},
+                {"description": "row3", "options": ['F', 'G', 'H']}
+            ];
+            var invalidConfigs = [
+                ['B', 'D', 'F'],
+                ['B', 'E', 'F'],
+                ['A', 'C', 'G']
+            ];
+
+            // Generate all possible configurations that deviate by one option from the current configuration
+            var possibleDeviatingConfigs = [];
+            for (var i = 0; i < optionRows.length; i++) {
+                var options = optionRows[i]['options'];
+                for (var j = 0; j < options.length; j++) {
+                    var option = options[j];
+                    if (option !== currentConfig[i]) {
+                        var deviation = currentConfig.slice();
+                        deviation[i] = option;
+                        possibleDeviatingConfigs.push(deviation);
+                    }
+                }
+            }
+            console.log(possibleDeviatingConfigs)
+
+            // Find the invalid options that match the deviating configurations
+            var deviatingConfigs = [];
+            for (var i = 0; i < invalidConfigs.length; i++) {
+                var config = invalidConfigs[i];
+                if (possibleDeviatingConfigs.some(function (deviation) {
+                    return deviation.every(function (value, index) {
+                        return value === config[index];
+                    });
+                })) {
+                    deviatingConfigs.push(config);
+                }
+            }
+            // Track the one option that was the deviation for each deviating config
+            var deviatingOptions = deviatingConfigs.map(function (config) {
+                return config.filter(function (value, index) {
+                    return value !== currentConfig[index];
+                })[0];
+            });
+            // Log the deviations
+            console.log(deviatingConfigs)
+            console.log(deviatingOptions)
+            // Add strikethrough for each deviating option
+            deviatingOptions.forEach(function (option) {
+                var label = document.querySelector('label[for="' + option + '"]');
+                if (label) {
+                    label.innerHTML = '<s>' + label.innerHTML + '</s>';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
