@@ -42,7 +42,7 @@
 
 <body onload="updateText()">
     <script>
-        var optionRows = [{"name": "row1", "options": ["A", "B"]}, {"name": "row2", "options": ["C", "D", "E"]}, {"name": "row3", "options": ["F", "G"]}];
+        var optionRows = {{ option_rows|tojson }};
         // E.g.,
         // var optionRows = [
         //     { "name": "row1", "options": ["A", "B"] },
@@ -50,7 +50,7 @@
         //     { "name": "row3", "options": ["F", "G"] }
         // ];
 
-        var lookup = {"A,C,F": "ACF", "A,C,G": "INVALID", "A,D,F": "ADF", "A,D,G": "ADG", "A,E,F": "AEF", "A,E,G": "AEG", "B,C,F": "BCF", "B,C,G": "BCG", "B,D,F": "INVALID", "B,D,G": "BDG", "B,E,F": "INVALID", "B,E,G": "BEG"};
+        var lookup = {{ lookup|tojson }};
         // E.g.,
         // var lookup = {
         //     "A,C,F": "ACF",
@@ -67,7 +67,7 @@
         //     "B,E,G": "BEG"
         // };
 
-        var invalidConfigs = [["B", "D", "F"], ["B", "E", "F"], ["A", "C", "G"]];
+        var invalidConfigs = {{ invalid_configs|tojson }};
         // E.g.,
         // var invalidConfigs = [
         //     ["B", "D", "F"],
@@ -76,42 +76,20 @@
         // ];
     </script>
     <form>
-
+        {% for row in option_rows %}
         <div class="row">
-
-            <input type="radio" id="A" name="row1" value="A" checked onclick="updateText()">
-            <label for="A">Option A</label>
-
-            <input type="radio" id="B" name="row1" value="B" onclick="updateText()">
-            <label for="B">Option B</label>
-
+            {% for option in row.options %}
+            <input type="radio" id="{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
+                option==row.options[0] %} checked{% endif %} onclick="updateText()">
+            <label for="{{ option }}">{{ option }}</label>
+            {% endfor %}
         </div>
-
-        <div class="row">
-
-            <input type="radio" id="C" name="row2" value="C" checked onclick="updateText()">
-            <label for="C">Option C</label>
-
-            <input type="radio" id="D" name="row2" value="D" onclick="updateText()">
-            <label for="D">Option D</label>
-
-            <input type="radio" id="E" name="row2" value="E" onclick="updateText()">
-            <label for="E">Option E</label>
-
-        </div>
-
-        <div class="row">
-
-            <input type="radio" id="F" name="row3" value="F" checked onclick="updateText()">
-            <label for="F">Option F</label>
-
-            <input type="radio" id="G" name="row3" value="G" onclick="updateText()">
-            <label for="G">Option G</label>
-
-        </div>
-
-        <div class="row">
+        {% endfor %}
+        {# <div class="row" style="white-space: pre-wrap">
             <p id="text"></p>
+        </div> #}
+        <div style="white-space: pre-wrap;">
+            <textarea id="text" style="min-width: 88ch; min-height: 50em;"></textarea>
         </div>
     </form>
     <script>
@@ -177,7 +155,7 @@
                 deviatingOptions = deviatingOptions.concat(currentConfig);
             }
 
-            // Log the deviations
+            // Log the deviations (OK to comment out)
             console.group('Deviations');
             console.group('Possible Deviating Configs');
             console.table(possibleDeviatingConfigs);

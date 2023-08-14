@@ -42,6 +42,9 @@ References:
 import argparse
 import logging
 import sys
+import time
+
+import pytest
 
 from honegumi.core import __version__
 
@@ -61,7 +64,7 @@ _logger = logging.getLogger(__name__)
 # when using this Python module as a library.
 
 
-def get_rendered_template_stem(data, option_names):
+def get_rendered_template_stem(datum, option_names):
     """
     Returns a string that represents the rendered template stem based on the given data
     and option names.
@@ -87,7 +90,7 @@ def get_rendered_template_stem(data, option_names):
     'option1-value1__option2-value2'
     """
     rendered_template_stem = "__".join(
-        [f"{option_name}-{str(data[option_name])}" for option_name in option_names]
+        [f"{option_name}-{str(datum[option_name])}" for option_name in option_names]
     )
     return rendered_template_stem
 
@@ -120,9 +123,60 @@ def unpack_rendered_template_stem(rendered_template_stem):
     # extract the option names and values from the pairs and add them to a dictionary
     for pair in option_value_pairs:
         option_name, option_value = pair.split("-")
+
+        if option_value == "True" or option_value == "False":
+            option_value = bool(option_value)
+
         options[option_name] = option_value
 
     return options
+
+
+class ResultsCollector:
+    def __init__(self):
+        self.reports = []
+        # self.data = []
+        self.collected = 0
+        self.exitcode = 0
+        self.passed = 0
+        self.failed = 0
+        self.xfailed = 0
+        self.skipped = 0
+        self.total_duration = 0
+
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(self, item, call):
+        outcome = yield
+        report = outcome.get_result()
+        # report_info = {
+        #     "stderr": report.capstderr,
+        #     "stdout": report.capstdout,
+        #     "caplog": report.caplog,
+        #     "passed": report.passed,
+        #     "duration": report.duration,
+        #     "nodeid": report.nodeid,
+        #     "fspath": report.fspath,
+        # }
+        if report.when == "call":
+            self.reports.append(report)
+            # self.data.append(report_info)
+
+    def pytest_collection_modifyitems(self, items):
+        self.collected = len(items)
+
+    def pytest_terminal_summary(self, terminalreporter, exitstatus):
+        print(exitstatus, dir(exitstatus))
+        self.exitcode = exitstatus
+        self.passed = terminalreporter.stats.get("passed", [])
+        self.failed = terminalreporter.stats.get("failed", [])
+        self.xfailed = terminalreporter.stats.get("xfailed", [])
+        self.skipped = terminalreporter.stats.get("skipped", [])
+        self.num_passed = len(self.passed)
+        self.num_failed = len(self.failed)
+        self.num_xfailed = len(self.xfailed)
+        self.num_skipped = len(self.skipped)
+
+        self.total_duration = time.time() - terminalreporter._sessionstarttime
 
 
 def fib(n):
