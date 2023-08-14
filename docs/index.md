@@ -23,7 +23,7 @@ License <license>
 Authors <authors>
 Changelog <changelog>
 Module Reference <api/modules>
-GitHub Source <https://github.com/sparks-baird/xtal2png>
+GitHub Source <https://github.com/sgbaird/honegumi>
 ```
 
 ## Indices and tables
