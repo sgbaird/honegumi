@@ -149,3 +149,8 @@ def test_main(capsys):
     main(["7"])
     captured = capsys.readouterr()
     assert "The 7-th Fibonacci number is 13" in captured.out
+
+
+if __name__ == "__main__":
+    """Execute the test suite"""
+    test_unpack_rendered_template_stem()

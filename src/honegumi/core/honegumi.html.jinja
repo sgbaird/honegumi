@@ -30,7 +30,6 @@
             padding: 5px;
             cursor: pointer;
             background-color: #f2f2f2;
-            flex-grow: 1;
             text-align: center;
         }
 
@@ -38,6 +37,8 @@
             background-color: #b1b1b1;
         }
     </style>
+    <link rel="stylesheet" href="prism.css">
+    <script src="prism.js"></script>
 </head>
 
 <body onload="updateText()">
@@ -81,16 +82,18 @@
             {% for option in row.options %}
             <input type="radio" id="{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
                 option==row.options[0] %} checked{% endif %} onclick="updateText()">
-            <label for="{{ option }}">{{ option }}</label>
+            <label for="{{ option }}" style="flex-basis: {{ 100 / row.options|length }}%">{{ option }}</label>
             {% endfor %}
         </div>
         {% endfor %}
-        {# <div class="row" style="white-space: pre-wrap">
-            <p id="text"></p>
-        </div> #}
-        <div style="white-space: pre-wrap;">
-            <textarea id="text" style="min-width: 88ch; min-height: 50em;"></textarea>
+        <div class="row">
+        <pre class="language-python" style="width: 88ch; height: 45ch; overflow: auto;">
+            <code id="text"></code>
+        </pre>
         </div>
+        {# <div style="white-space: pre-wrap;">
+            <textarea id="text" style="min-width: 88ch; min-height: 50em;"></textarea>
+        </div> #}
     </form>
     <script>
         function updateText() {
@@ -176,6 +179,11 @@
                 }
             });
         }
+    </script>
+    <script>
+    window.addEventListener('DOMContentLoaded', () => {
+        Prism.highlightAll();
+    });
     </script>
 </body>
 

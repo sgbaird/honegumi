@@ -43,7 +43,9 @@ import argparse
 import logging
 import sys
 import time
+from typing import List
 
+import _pytest
 import pytest
 
 from honegumi.core import __version__
@@ -91,7 +93,7 @@ def get_rendered_template_stem(datum, option_names):
     """
     rendered_template_stem = "__".join(
         [f"{option_name}-{str(datum[option_name])}" for option_name in option_names]
-    )
+    )  # `str()` was intended for boolean values, but no longer using booleans
     return rendered_template_stem
 
 
@@ -124,8 +126,14 @@ def unpack_rendered_template_stem(rendered_template_stem):
     for pair in option_value_pairs:
         option_name, option_value = pair.split("-")
 
-        if option_value == "True" or option_value == "False":
-            option_value = bool(option_value)
+        if option_value.lower() == "true":
+            option_value = True
+        elif option_value.lower() == "false":
+            option_value = False
+        elif option_value.isdigit():
+            option_value = int(option_value)
+        elif option_value.replace(".", "", 1).isdigit():
+            option_value = float(option_value)
 
         options[option_name] = option_value
 
@@ -133,39 +141,110 @@ def unpack_rendered_template_stem(rendered_template_stem):
 
 
 class ResultsCollector:
-    def __init__(self):
-        self.reports = []
-        # self.data = []
-        self.collected = 0
-        self.exitcode = 0
-        self.passed = 0
-        self.failed = 0
-        self.xfailed = 0
-        self.skipped = 0
-        self.total_duration = 0
+    """A class for collecting and summarizing results of pytest test runs.
+
+    https://stackoverflow.com/a/72278485/13697228
+
+    Attributes
+    ----------
+    reports : List[pytest.TestReport]
+        A list of test reports generated during the test run.
+    collected : int
+        The number of test items collected for the test run.
+    exitcode : int
+        The exit code of the test run.
+    passed : List[pytest.TestReport]
+        A list of test reports for tests that passed.
+    failed : List[pytest.TestReport]
+        A list of test reports for tests that failed.
+    xfailed : List[pytest.TestReport]
+        A list of test reports for tests that were expected to fail but passed.
+    skipped : List[pytest.TestReport]
+        A list of test reports for tests that were skipped.
+    total_duration : float
+        The total duration of the test run in seconds.
+
+    Examples
+    --------
+    >>> collector = ResultsCollector()
+    >>> # run pytest tests
+    >>> collector.total_duration
+    10.123456789
+    """
+
+    def __init__(self) -> None:
+        self.reports: List[pytest.TestReport] = []
+        self.collected: int = 0
+        self.exitcode: int = 0
+        self.passed: List[pytest.TestReport] = []
+        self.failed: List[pytest.TestReport] = []
+        self.xfailed: List[pytest.TestReport] = []
+        self.skipped: List[pytest.TestReport] = []
+        self.total_duration: float = 0
 
     @pytest.hookimpl(hookwrapper=True)
-    def pytest_runtest_makereport(self, item, call):
+    def pytest_runtest_makereport(
+        self, item: pytest.Item, call: pytest.CallInfo
+    ) -> None:
+        """A pytest hook for collecting test reports.
+
+        Parameters
+        ----------
+        item : pytest.Item
+            The test item being run.
+        call : pytest.CallInfo
+            The result of running the test item.
+
+        Examples
+        --------
+        >>> item = ...
+        >>> call = ...
+        >>> collector = ResultsCollector()
+        >>> collector.pytest_runtest_makereport(item, call)
+        """
+
         outcome = yield
         report = outcome.get_result()
-        # report_info = {
-        #     "stderr": report.capstderr,
-        #     "stdout": report.capstdout,
-        #     "caplog": report.caplog,
-        #     "passed": report.passed,
-        #     "duration": report.duration,
-        #     "nodeid": report.nodeid,
-        #     "fspath": report.fspath,
-        # }
         if report.when == "call":
             self.reports.append(report)
-            # self.data.append(report_info)
 
-    def pytest_collection_modifyitems(self, items):
+    def pytest_collection_modifyitems(self, items: List[pytest.Item]) -> None:
+        """A pytest hook for modifying collected test items.
+
+        Parameters
+        ----------
+        items : List[pytest.Item]
+            A list of pytest.Item objects representing the collected test items.
+
+        Examples
+        --------
+        >>> items = ...
+        >>> collector = ResultsCollector()
+        >>> collector.pytest_collection_modifyitems(items)
+        """
+
         self.collected = len(items)
 
-    def pytest_terminal_summary(self, terminalreporter, exitstatus):
-        print(exitstatus, dir(exitstatus))
+    def pytest_terminal_summary(
+        self, terminalreporter: _pytest.terminal.TerminalReporter, exitstatus: int
+    ) -> None:
+        """A pytest hook for summarizing test results.
+
+        Parameters
+        ----------
+        terminalreporter : pytest.terminal.TerminalReporter
+            The terminal reporter object used to report test results.
+        exitstatus : int
+            The exit status code of the test run.
+
+        Examples
+        --------
+        >>> terminalreporter = ...
+        >>> exitstatus = ...
+        >>> collector = ResultsCollector()
+        >>> collector.pytest_terminal_summary(terminalreporter, exitstatus)
+        """
+
         self.exitcode = exitstatus
         self.passed = terminalreporter.stats.get("passed", [])
         self.failed = terminalreporter.stats.get("failed", [])
@@ -304,3 +383,52 @@ if __name__ == "__main__":
     #     python -m honegumi.core.skeleton 42
     #
     run()
+
+
+# %% Code Graveyard
+
+# class ResultsCollector:
+#     def __init__(self):
+#         self.reports = []
+#         # self.data = []
+#         self.collected = 0
+#         self.exitcode = 0
+#         self.passed = 0
+#         self.failed = 0
+#         self.xfailed = 0
+#         self.skipped = 0
+#         self.total_duration = 0
+
+#     @pytest.hookimpl(hookwrapper=True)
+#     def pytest_runtest_makereport(self, item, call):
+#         outcome = yield
+#         report = outcome.get_result()
+#         # report_info = {
+#         #     "stderr": report.capstderr,
+#         #     "stdout": report.capstdout,
+#         #     "caplog": report.caplog,
+#         #     "passed": report.passed,
+#         #     "duration": report.duration,
+#         #     "nodeid": report.nodeid,
+#         #     "fspath": report.fspath,
+#         # }
+#         if report.when == "call":
+#             self.reports.append(report)
+#             # self.data.append(report_info)
+
+#     def pytest_collection_modifyitems(self, items):
+#         self.collected = len(items)
+
+#     def pytest_terminal_summary(self, terminalreporter, exitstatus):
+#         print(exitstatus, dir(exitstatus))
+#         self.exitcode = exitstatus
+#         self.passed = terminalreporter.stats.get("passed", [])
+#         self.failed = terminalreporter.stats.get("failed", [])
+#         self.xfailed = terminalreporter.stats.get("xfailed", [])
+#         self.skipped = terminalreporter.stats.get("skipped", [])
+#         self.num_passed = len(self.passed)
+#         self.num_failed = len(self.failed)
+#         self.num_xfailed = len(self.xfailed)
+#         self.num_skipped = len(self.skipped)
+
+#         self.total_duration = time.time() - terminalreporter._sessionstarttime

@@ -8,6 +8,7 @@ from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader
 
 from honegumi.ax.utils.constants import (
+    doc_dir,
     gen_template_dir,
     model_opt_name,
     objective_opt_name,
@@ -45,7 +46,7 @@ option_rows = [
 # {
 #     "objective": ["single", "multi"],
 #     "model": ["GPEI", "FULLYBAYESIAN"],
-#     "use_custom_gen": [True, False],
+#     "use_custom_gen": ["Yes", "No"],
 # }
 
 option_names = [row["name"] for row in option_rows]
@@ -206,13 +207,17 @@ merged_df = pd.merge(data_df, report_df, on=option_names, how="outer")
 # find the configs that either failed or were incompatible
 
 invalid_configs = merged_df[
-    (merged_df["passed"] is False) | (merged_df[is_compatible_key] is False)
+    (merged_df["passed"] == False) | (merged_df[is_compatible_key] == False)  # noqa
 ][option_names].to_dict(orient="records")
 
 # extract the values for each option name
 invalid_configs = [
-    [opt[option_name] for option_name in option_names] for opt in invalid_configs
+    [str(opt[option_name]) for option_name in option_names] for opt in invalid_configs
 ]
+
+# NOTE: `use_custom_gen_opt_name` gets converted to a string from a boolean to
+# simply things on a Python/Jinja/Javascript side (i.e., strings are strings,
+# but boolean syntax can vary).
 
 # lookup keys should be a string
 lookup = {
@@ -263,7 +268,7 @@ html = template.render(
 )
 
 # Write the rendered HTML to a file
-with open(path.join(template_dir, "main.html"), "w") as f:
+with open(path.join(doc_dir, "honegumi.html"), "w") as f:
     f.write(html)
 
 

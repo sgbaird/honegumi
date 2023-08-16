@@ -15,7 +15,7 @@ Add a short description here!
 
 
 ```{raw} html
-:file: sandbox/jinja2/main.html
+:file: honegumi.html
 ```
 
 ## Contents
