@@ -31,7 +31,7 @@ from honegumi.core.skeleton import (
 # i.e., hard-code the model names instead of accessing them programatically
 # see https://github.com/facebook/Ax/issues/1781
 
-dummy = True
+dummy = False
 
 rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
