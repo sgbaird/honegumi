@@ -31,6 +31,8 @@ from honegumi.core.skeleton import (
 # i.e., hard-code the model names instead of accessing them programatically
 # see https://github.com/facebook/Ax/issues/1781
 
+dummy = True
+
 rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
 preamble_key = "preamble"
@@ -146,6 +148,7 @@ for datum in data:
     )
     # replace "<" with "&lt;" to avoid HTML parsing issues within prism.js
     preamble = preamble.replace("<", "&lt;")
+    datum[preamble_key] = preamble
 
     with open(gen_script_path, "w") as f:
         f.write(script)
@@ -162,11 +165,17 @@ for datum in data:
         f.write(rendered_test_template)
 
     # create an intermediate file object for gen_script and prepend colab link
-    gen_script_file = io.StringIO(script)
-    gen_script_file = io.StringIO(
-        f"# %% [markdown] \n {colab_badge}\n\n# %%\n{gen_script_file.read()}"
-    )
-    # print(gen_script_file.getvalue())
+    nb_text = f"""
+    # %% [markdown]
+    {colab_badge}
+
+    # %%
+    %pip install ax-platform
+
+    # %%
+    {script}
+    """
+    gen_script_file = io.StringIO(nb_text)
 
     # generate the notebook
     notebook = jupytext.read(gen_script_file, fmt="py:percent")
@@ -174,16 +183,14 @@ for datum in data:
     with open(notebook_path, "w") as f:
         jupytext.write(notebook, f, fmt="notebook")
 
-    1 + 1
-
-
+# run pytest on all or just one of the test scripts
 collector = ResultsCollector()
-# run pytest on one of the test scripts
-# (i.e., just the last one assigned to test_template_path)
-retcode = pytest.main(["-v", test_template_path], plugins=[collector])
-# retcode = pytest.main(["-v", "tests/test_skeleton.py"], plugins=[collector])
+file_filter = test_template_dir if not dummy else test_template_path
+retcode = pytest.main(["-v", file_filter], plugins=[collector])
+
 for report in collector.reports:
     print("id:", report.nodeid, "outcome:", report.outcome)  # etc
+
 print("exit code:", collector.exitcode)
 print(
     "passed:",
@@ -260,6 +267,8 @@ def generate_lookup_dict(df, option_names, key):
     >>> generate_lookup_dict(df, ['option1', 'option2'], 'key')
     {'a,1': 'foo', 'b,2': 'bar', 'c,3': 'baz'}
     """
+    if key not in df.columns:
+        raise ValueError(f"key {key} not in {df.columns}")
     return {
         ",".join([str(opt[option_name]) for option_name in option_names]): opt[key]
         for opt in df.to_dict(orient="records")
@@ -485,3 +494,9 @@ with open(path.join(doc_dir, "honegumi.html"), "w") as f:
 #  "nbformat": 4,
 #  "nbformat_minor": 2
 # }
+
+# gen_script_file = io.StringIO()
+# print(gen_script_file.getvalue())
+# nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
+
+# retcode = pytest.main(["-v", "tests/test_skeleton.py"], plugins=[collector])
