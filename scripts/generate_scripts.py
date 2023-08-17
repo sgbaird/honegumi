@@ -165,16 +165,7 @@ for datum in data:
         f.write(rendered_test_template)
 
     # create an intermediate file object for gen_script and prepend colab link
-    nb_text = f"""
-    # %% [markdown]
-    {colab_badge}
-
-    # %%
-    %pip install ax-platform
-
-    # %%
-    {script}
-    """
+    nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
     gen_script_file = io.StringIO(nb_text)
 
     # generate the notebook
@@ -500,3 +491,15 @@ with open(path.join(doc_dir, "honegumi.html"), "w") as f:
 # nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
 
 # retcode = pytest.main(["-v", "tests/test_skeleton.py"], plugins=[collector])
+
+
+# nb_text = f"""
+# # %% [markdown]
+# {colab_badge}
+
+# # %%
+# %pip install ax-platform
+
+# # %%
+# {script}
+# """
