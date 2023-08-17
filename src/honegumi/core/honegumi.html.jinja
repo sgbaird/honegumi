@@ -42,7 +42,7 @@
 
 <body onload="updateText()">
     <script>
-        var optionRows = {{ option_rows|tojson }};
+        var optionRows = {{ jinja_option_rows|tojson }};
         // E.g.,
         // var optionRows = [
         //     { "name": "row1", "options": ["A", "B"] },
@@ -50,7 +50,7 @@
         //     { "name": "row3", "options": ["F", "G"] }
         // ];
 
-        var lookup = {{ lookup|tojson }};
+        var scriptLookup = {{ script_lookup|tojson }};
         // E.g.,
         // var lookup = {
         //     "A,C,F": "ACF",
@@ -67,7 +67,7 @@
         //     "B,E,G": "BEG"
         // };
 
-        var preamble = {{ preamble|tojson }};
+        var preambleLookup = {{ preamble_lookup|tojson }};
 
         var invalidConfigs = {{ invalid_configs|tojson }};
         // E.g.,
@@ -78,8 +78,11 @@
         // ];
     </script>
     <form>
-        {% for row in option_rows %}
+        {% for row in jinja_option_rows %}
         <div class="row">
+            <label style="width: 20ch; pointer-events: none; cursor: default; text-align: left; border: none; border-left: 3px solid #868686;">
+                {{row.name}}
+            </label>
             {% for option in row.options %}
             <input type="radio" id="{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
                 option==row.options[0] %} checked{% endif %} onclick="updateText()">
@@ -88,8 +91,10 @@
         </div>
         {% endfor %}
         <div class="row">
-        <p id="preamble"></p>
-        <pre class="language-python" style="width: 88ch; height: 45ch; overflow: auto;">
+            <p id="preamble"></p>
+        </div>
+        <div class="row">
+        <pre class="language-python" style="width: 88ch; overflow: auto;">
             <code id="text"></code>
         </pre>
         </div>
@@ -109,12 +114,12 @@
                 }
             });
             var key = Array.from(rows, function (row) { return row.value; }).join(',');
-            var renderedTemplate = lookup[key];
-            var githubLink = preamble[key];
+            var rendered = scriptLookup[key];
+            var preamble = preambleLookup[key];
 
             // Update the GitHub link
-            document.getElementById("preamble").innerHTML = "<a href=\"" + githubLink + "\">GitHub Source</a>";
-            document.getElementById("text").innerHTML = "\n" + renderedTemplate;
+            document.getElementById("preamble").innerHTML = preamble
+            document.getElementById("text").innerHTML = "\n" + rendered;
             var currentConfig = Array.from(rows, function (row) { return row.value; });
 
             // Generate all possible configurations that deviate by zero or one option from the current configuration
@@ -164,7 +169,9 @@
                 deviatingOptions = deviatingOptions.concat(currentConfig);
             }
 
-            // Log the deviations (OK to comment out)
+            // Logging (OK to comment out)
+            console.group('Current Config');
+            console.table(currentConfig);
             console.group('Deviations');
             console.group('Possible Deviating Configs');
             console.table(possibleDeviatingConfigs);

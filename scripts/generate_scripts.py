@@ -100,6 +100,7 @@ for datum in data:
         datum[
             rendered_key
         ] = "INVALID: Models.FULLYBAYESIAN requires a custom generation strategy"
+        datum[preamble_key] = ""
         continue
 
     datum[is_compatible_key] = True
@@ -124,7 +125,7 @@ for datum in data:
     github_prefix = f"https://github.com/{github_username}/honegumi/tree/main/"
     github_link = urljoin(github_prefix, gen_script_path)
 
-    github_badge = f'<img alt="Static Badge" src="https://img.shields.io/badge/Open%20GitHub%20Source-blue?logo=github&labelColor=grey&link=<{github_link}>">'  # noqa E501
+    github_badge = f'<a href="{github_link}"><img alt="Open in GitHub" src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey"></a>'  # noqa E501
 
     colab_prefix = (
         "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
@@ -134,20 +135,7 @@ for datum in data:
     colab_link = urljoin(colab_prefix, notebook_path)
     colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
 
-    preamble = f"{github_badge} {colab_badge}"
-
-    preamble = (
-        preamble.replace("/", "%2F")
-        .replace(":", "%3A")
-        .replace("+", "%2B")
-        .replace("-", "%2D")
-        .replace("_", "%5F")
-        .replace(".", "%2E")
-        .replace("!", "%21")
-        .replace("~", "%7E")
-    )
-    # replace "<" with "&lt;" to avoid HTML parsing issues within prism.js
-    preamble = preamble.replace("<", "&lt;")
+    preamble = f"{colab_badge} {github_badge}"
     datum[preamble_key] = preamble
 
     with open(gen_script_path, "w") as f:
@@ -266,8 +254,8 @@ def generate_lookup_dict(df, option_names, key):
     }
 
 
-lookup = generate_lookup_dict(merged_df, option_names, rendered_key)
-preamble = generate_lookup_dict(merged_df, option_names, preamble_key)
+script_lookup = generate_lookup_dict(merged_df, option_names, rendered_key)
+preamble_lookup = generate_lookup_dict(merged_df, option_names, preamble_key)
 
 
 # Define the path to your HTML template file
@@ -276,11 +264,16 @@ template_path = "honegumi.html.jinja"
 # Create a Jinja2 environment and load the template file
 script_template = core_env.get_template(template_path)
 
+# convert boolean values within option_rows to strings
+jinja_option_rows = option_rows.copy()
+for row in jinja_option_rows:
+    row["options"] = [str(opt) for opt in row["options"]]
+
 # Render the template with your variables
 html = script_template.render(
-    option_rows=option_rows,
-    lookup=lookup,
-    preamble=preamble,
+    jinja_option_rows=jinja_option_rows,
+    script_lookup=script_lookup,
+    preamble_lookup=preamble_lookup,
     invalid_configs=invalid_configs,
 )
 
@@ -503,3 +496,23 @@ with open(path.join(doc_dir, "honegumi.html"), "w") as f:
 # # %%
 # {script}
 # """
+
+# preamble = (
+#     preamble.replace("/", "%2F")
+#     .replace(":", "%3A")
+#     .replace("+", "%2B")
+#     .replace("-", "%2D")
+#     .replace("_", "%5F")
+#     .replace(".", "%2E")
+#     .replace("!", "%21")
+#     .replace("~", "%7E")
+# )
+# # replace "<" with "&lt;" to avoid HTML parsing issues within prism.js
+# preamble = preamble.replace("<", "&lt;")
+
+# following wasn't clickable, even though it was copy-pasted from shields. Maybe
+# I misunderstood the "link" property from https://shields.io/badges
+
+# github_badge = f'<img alt="Static Badge"
+# src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey&link=<{github_link}>">'
+# # noqa E501
