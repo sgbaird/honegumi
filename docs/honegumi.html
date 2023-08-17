@@ -37,7 +37,7 @@
             background-color: #b1b1b1;
         }
     </style>
-    <link rel="stylesheet" href="prism/prism.css">
+    <link rel="stylesheet" href="_static/prism/prism.css">
 </head>
 
 <body onload="updateText()">
@@ -67,7 +67,7 @@
         //     "B,E,G": "BEG"
         // };
 
-        var preambleLookup = {"multi,FULLYBAYESIAN,False": "", "multi,FULLYBAYESIAN,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-multi__model-FULLYBAYESIAN__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-multi__model-FULLYBAYESIAN__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "multi,GPEI,False": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-multi__model-GPEI__use_custom_gen-False.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-multi__model-GPEI__use_custom_gen-False.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "multi,GPEI,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-multi__model-GPEI__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-multi__model-GPEI__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "single,FULLYBAYESIAN,False": "", "single,FULLYBAYESIAN,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-single__model-FULLYBAYESIAN__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-single__model-FULLYBAYESIAN__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "single,GPEI,False": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-single__model-GPEI__use_custom_gen-False.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-single__model-GPEI__use_custom_gen-False.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "single,GPEI,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-single__model-GPEI__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-single__model-GPEI__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e"};
+        var preambleLookup = {"multi,FULLYBAYESIAN,False": "\n", "multi,FULLYBAYESIAN,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-multi__model-FULLYBAYESIAN__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-multi__model-FULLYBAYESIAN__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "multi,GPEI,False": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-multi__model-GPEI__use_custom_gen-False.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-multi__model-GPEI__use_custom_gen-False.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "multi,GPEI,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-multi__model-GPEI__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-multi__model-GPEI__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "single,FULLYBAYESIAN,False": "\n", "single,FULLYBAYESIAN,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-single__model-FULLYBAYESIAN__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-single__model-FULLYBAYESIAN__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "single,GPEI,False": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-single__model-GPEI__use_custom_gen-False.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-single__model-GPEI__use_custom_gen-False.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e", "single,GPEI,True": "\u003ca href=\"https://colab.research.google.com/github/sgbaird/honegumi/blob/main/docs\\generated_notebooks\\ax\\objective-single__model-GPEI__use_custom_gen-True.ipynb\"\u003e\u003cimg alt=\"Open In Colab\" src=\"https://colab.research.google.com/assets/colab-badge.svg\"\u003e\u003c/a\u003e \u003ca href=\"https://github.com/sgbaird/honegumi/tree/main/docs\\generated_scripts\\ax\\objective-single__model-GPEI__use_custom_gen-True.py\"\u003e\u003cimg alt=\"Open in GitHub\" src=\"https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github\u0026labelColor=grey\"\u003e\u003c/a\u003e"};
 
         var invalidConfigs = [["single", "FULLYBAYESIAN", "False"], ["multi", "FULLYBAYESIAN", "False"]];
         // E.g.,
@@ -81,7 +81,7 @@
 
         <div class="row">
             <label style="width: 20ch; pointer-events: none; cursor: default; text-align: left; border: none; border-left: 3px solid #868686;">
-                objective
+                objective:
             </label>
 
             <input type="radio" id="single" name="objective" value="single" checked onclick="updateText()">
@@ -94,7 +94,7 @@
 
         <div class="row">
             <label style="width: 20ch; pointer-events: none; cursor: default; text-align: left; border: none; border-left: 3px solid #868686;">
-                model
+                model:
             </label>
 
             <input type="radio" id="GPEI" name="model" value="GPEI" checked onclick="updateText()">
@@ -107,7 +107,7 @@
 
         <div class="row">
             <label style="width: 20ch; pointer-events: none; cursor: default; text-align: left; border: none; border-left: 3px solid #868686;">
-                use_custom_gen
+                use_custom_gen:
             </label>
 
             <input type="radio" id="True" name="use_custom_gen" value="True" checked onclick="updateText()">
@@ -123,7 +123,7 @@
         </div>
         <div class="row">
         <pre class="language-python" style="width: 88ch; overflow: auto; font-size: 12px;">
-            <code id="text"></code>
+            <code id="text" style="border: none;"></code>
         </pre>
         </div>
 
@@ -220,7 +220,7 @@
             Prism.highlightAll();
         }
     </script>
-    <script src="prism/prism.js"></script>
+    <script src="_static/prism/prism.js"></script>
 </body>
 
 </html>
