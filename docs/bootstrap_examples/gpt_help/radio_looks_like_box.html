@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Radio Button Example</title>
+  <style>
+    input[type="radio"] {
+      opacity: 0;
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+
+    form {
+      display: inline-flex;
+      flex-direction: column;
+    }
+
+    .row {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f2f2f2;
+      border: 0px solid #ccc;
+    }
+
+    .row label {
+        display: inline-block;
+        border: 1px solid #ccc;
+        padding: 5px;
+        cursor: pointer;
+        background-color: #f2f2f2;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    input[type="radio"]:checked + label {
+      background-color: #b1b1b1;
+    }
+  </style>
+</head>
+<body>
+  <form>
+    <div class="row">
+      <input type="radio" id="option1" name="row1" value="option1">
+      <label for="option1">Option 1</label>
+
+      <input type="radio" id="option2" name="row1" value="option2">
+      <label for="option2">Option 2</label>
+    </div>
+
+    <div class="row">
+      <input type="radio" id="option3" name="row2" value="option3">
+      <label for="option3">Option 3</label>
+
+      <input type="radio" id="option4" name="row2" value="option4">
+      <label for="option4">Option 4</label>
+
+      <input type="radio" id="option5" name="row2" value="option5">
+      <label for="option5">Option 5</label>
+    </div>
+  </form>
+</body>
+</html>

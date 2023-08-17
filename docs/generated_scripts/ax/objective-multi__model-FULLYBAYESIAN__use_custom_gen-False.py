@@ -32,4 +32,5 @@ for _ in range(15):
     results = branin_moo(parameters["x1"], parameters["x2"])
     ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
+
 pareto_results = ax_client.get_pareto_optimal_parameters()

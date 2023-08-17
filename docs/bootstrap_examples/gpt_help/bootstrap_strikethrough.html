@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Toggle Strikethrough Button</title>
+    <style>
+        .strikethrough {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <button id="toggleButton">Toggle Strikethrough</button>
+    <script>
+        var button = document.getElementById('toggleButton');
+        button.addEventListener('click', function () {
+            button.classList.toggle('strikethrough');
+        });
+    </script>
+</body>
+</html>
