@@ -27,7 +27,6 @@ gs = GenerationStrategy(
     ]
 )
 
-
 ax_client = AxClient()
 ax_client.create_experiment(
     parameters=[

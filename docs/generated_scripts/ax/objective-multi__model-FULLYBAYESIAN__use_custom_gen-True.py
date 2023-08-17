@@ -41,7 +41,6 @@ gs = GenerationStrategy(
     ]
 )
 
-
 ax_client = AxClient()
 ax_client.create_experiment(
     parameters=[
@@ -58,6 +57,5 @@ for _ in range(15):
     parameters, trial_index = ax_client.get_next_trial()
     results = branin_moo(parameters["x1"], parameters["x2"])
     ax_client.complete_trial(trial_index=trial_index, raw_data=results)
-
 
 pareto_results = ax_client.get_pareto_optimal_parameters()

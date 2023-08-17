@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prism Syntax Highlighting MWE</title>
+  <link href="../../prism/prism.css" rel="stylesheet" />
+</head>
+<body onload="updateText()">
+  <pre><code class="language-python">def hello_world():
+    print("Hello, world!")</code></pre>
+
+  <div class="row">
+  <pre class="language-python" style="width: 88ch; height: 45ch; overflow: auto;">
+      <code id="text"></code>
+  </pre>
+  </div>
+
+  <script>
+    function updateText() {
+        document.getElementById("text").innerHTML = "\ndef hello_world():\n    print(\"Hello, world!\")";
+        Prism.highlightAll();
+    }
+  </script>
+  <script src="../../prism/prism.js"></script>
+</body>
+</html>

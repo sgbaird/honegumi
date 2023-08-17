@@ -37,8 +37,7 @@
             background-color: #b1b1b1;
         }
     </style>
-    <link rel="stylesheet" href="prism.css">
-    <script src="prism.js"></script>
+    <link rel="stylesheet" href="prism/prism.css">
 </head>
 
 <body onload="updateText()">
@@ -68,6 +67,8 @@
         //     "B,E,G": "BEG"
         // };
 
+        var preamble = {{ preamble|tojson }};
+
         var invalidConfigs = {{ invalid_configs|tojson }};
         // E.g.,
         // var invalidConfigs = [
@@ -87,6 +88,7 @@
         </div>
         {% endfor %}
         <div class="row">
+        <p id="preamble"></p>
         <pre class="language-python" style="width: 88ch; height: 45ch; overflow: auto;">
             <code id="text"></code>
         </pre>
@@ -107,8 +109,12 @@
                 }
             });
             var key = Array.from(rows, function (row) { return row.value; }).join(',');
-            var entry = lookup[key];
-            document.getElementById("text").innerHTML = entry;
+            var renderedTemplate = lookup[key];
+            var githubLink = preamble[key];
+
+            // Update the GitHub link
+            document.getElementById("preamble").innerHTML = "<a href=\"" + githubLink + "\">GitHub Source</a>";
+            document.getElementById("text").innerHTML = "\n" + renderedTemplate;
             var currentConfig = Array.from(rows, function (row) { return row.value; });
 
             // Generate all possible configurations that deviate by zero or one option from the current configuration
@@ -178,13 +184,10 @@
                     label.innerHTML = '<s>' + label.innerHTML + '</s>';
                 }
             });
+            Prism.highlightAll();
         }
     </script>
-    <script>
-    window.addEventListener('DOMContentLoaded', () => {
-        Prism.highlightAll();
-    });
-    </script>
+    <script src="prism/prism.js"></script>
 </body>
 
 </html>
