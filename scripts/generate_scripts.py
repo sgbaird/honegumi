@@ -1,4 +1,5 @@
 import io
+import os
 from itertools import product
 from os import path
 from pathlib import Path
@@ -31,7 +32,10 @@ from honegumi.core.skeleton import (
 # i.e., hard-code the model names instead of accessing them programatically
 # see https://github.com/facebook/Ax/issues/1781
 
-dummy = False
+dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
+
+if dummy:
+    print("Dummy run / smoke test for faster debugging")
 
 rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
