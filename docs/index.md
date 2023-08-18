@@ -1,16 +1,16 @@
 # honegumi
 
-```{note}
-🚧 This package is still under construction. Contributions are welcome!
-```
-
-Honegumi (骨組み) is an interactive "skeleton code" generator for API tutorials focusing on optimization packages. For a high-level roadmap of Honegumi's development, see https://github.com/sgbaird/honegumi/discussions/2. The top-level interface will be something like the following:
+Honegumi (骨組み) is an interactive "skeleton code" generator for API tutorials focusing on optimization packages, and the tool is just below!👇👇👇
 
 ```{raw} html
 :file: honegumi.html
 ```
 
-For a list of generated scripts, see https://github.com/sgbaird/honegumi/tree/main/docs/generated_scripts/ax. As of 2023-08-07, the available options are limited. Each script is tested [via `pytest`](https://github.com/sgbaird/honegumi/tree/main/tests) and [GitHub Actions](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml) to ensure it can run error-free.
+## Developers
+```{note}
+🚧 This package is under active development. We are looking for contributors, so please let us know if you're interested!
+```
+For a high-level roadmap of Honegumi's development, see https://github.com/sgbaird/honegumi/discussions/2. Start by looking at our contribution guide and our Google Colab tutorial: [_A Gentle Introduction to Jinja2_](https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb). The generated scripts are [available on GitHub](https://github.com/sgbaird/honegumi/tree/main/docs/generated_scripts/ax). Each script is tested [via `pytest`](https://github.com/sgbaird/honegumi/tree/main/tests) and [GitHub Actions](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml) to ensure it can run error-free. The main template file for Meta's Adaptive Experimentation (Ax) Platform is [`ax/main.py.jinja`](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja). The main file that interacts with this template is at [`scripts/generate_scripts.py`](https://github.com/sgbaird/honegumi/blob/main/scripts/generate_scripts.py).
 
 ## Contents
 
