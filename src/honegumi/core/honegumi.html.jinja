@@ -37,7 +37,7 @@
             background-color: #b1b1b1;
         }
     </style>
-    <link rel="stylesheet" href="prism/prism.css">
+    <link rel="stylesheet" href="_static/prism/prism.css">
 </head>
 
 <body onload="updateText()">
@@ -81,7 +81,7 @@
         {% for row in jinja_option_rows %}
         <div class="row">
             <label style="width: 20ch; pointer-events: none; cursor: default; text-align: left; border: none; border-left: 3px solid #868686;">
-                {{row.name}}
+                {{row.name}}:
             </label>
             {% for option in row.options %}
             <input type="radio" id="{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
@@ -95,7 +95,7 @@
         </div>
         <div class="row">
         <pre class="language-python" style="width: 88ch; overflow: auto; font-size: 12px;">
-            <code id="text"></code>
+            <code id="text" style="border: none;"></code>
         </pre>
         </div>
         {# <div style="white-space: pre-wrap;">
@@ -194,7 +194,7 @@
             Prism.highlightAll();
         }
     </script>
-    <script src="prism/prism.js"></script>
+    <script src="_static/prism/prism.js"></script>
 </body>
 
 </html>

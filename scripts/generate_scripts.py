@@ -35,7 +35,7 @@ from honegumi.core.skeleton import (
 dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
 
 if dummy:
-    print("Dummy run / smoke test for faster debugging")
+    print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
 
 rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
@@ -104,7 +104,7 @@ for datum in data:
         datum[
             rendered_key
         ] = "INVALID: Models.FULLYBAYESIAN requires a custom generation strategy"
-        datum[preamble_key] = ""
+        datum[preamble_key] = "\n"
         continue
 
     datum[is_compatible_key] = True
