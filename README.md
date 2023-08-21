@@ -34,11 +34,11 @@ However, applications of state-of-the-art algorithms to these materials science 
 
 ## Quick Start
 
-No installation is needed. Just navigate to https://honegumi.readthedocs.io/, select the desired options, and click the "Open in Colab" badge.
+You don't need to install anything. Just navigate to https://honegumi.readthedocs.io/, select the desired options, and click the "Open in Colab" badge.
 
 ## Advanced
 
-See the contribution guidelines.
+See [the contribution guidelines](https://github.com/sgbaird/honegumi/blob/main/CONTRIBUTING.md).
 
 ### Installation
 In order to set up the necessary environment:
