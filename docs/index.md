@@ -1,6 +1,6 @@
 ![honegumi-logo](https://github.com/sgbaird/honegumi/raw/main/reports/figures/honegumi-logo.png)
 
-# 
+#
 
 ```{note}
 🚧 This package is under active development. We are [looking for contributors](https://honegumi.readthedocs.io/en/latest/contributing.html), so please let us know if you're interested! See [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2).
