@@ -48,7 +48,7 @@ core_env = Environment(loader=FileSystemLoader(core_template_dir))
 option_rows = [
     {"name": objective_opt_name, "options": ["single", "multi"]},
     {"name": model_opt_name, "options": ["GPEI", "FULLYBAYESIAN"]},
-    {"name": use_custom_gen_opt_name, "options": [True, False]},
+    {"name": use_custom_gen_opt_name, "options": [False, True]},
 ]
 
 # E.g.,
