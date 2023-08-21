@@ -15,7 +15,7 @@
 > Honegumi (骨組み, pronounced "ho neh goo mee"), which means "skeletal framework" in Japanese, is a package for
 > interactively creating API tutorials with a focus on optimization packages such as Meta's Ax
 > Platform. We are looking for contributors!
-> Start by taking a look at [our Google Colab tutorial: *A Gentle Introduction to Jinja2*](https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb).
+> Start by taking a look at our contribution guide.
 
 <!-- > Unlock the power of advanced optimization in materials science with Honegumi (骨組み,
 > pronounced "ho-neh-goo-mee"), our interactive "skeleton code" generator. -->
