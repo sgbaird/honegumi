@@ -72,9 +72,6 @@ that any documentation update is done in the same way was a code contribution.
 
     e.g.,  [reStructuredText] or [CommonMark] with [MyST] extensions.
 ```
-
-```{todo} If your project is hosted on GitHub, you can also mention the following tip:
-
    :::{tip}
       Please notice that the [GitHub web interface] provides a quick way of
       propose changes in `honegumi`'s files. While this mechanism can
@@ -89,7 +86,6 @@ that any documentation update is done in the same way was a code contribution.
       which changes have you made and what are the motivations behind them and
       submit your proposal.
    :::
-```
 
 When working on documentation changes in your local machine, you can
 compile them using [tox] :
@@ -107,12 +103,16 @@ python3 -m http.server --directory 'docs/_build/html'
 
 ## Code Contributions
 
-```{todo} Please include a reference or explanation about the internals of the project.
+For a high-level roadmap of Honegumi's development, see https://github.com/sgbaird/honegumi/discussions/2. Honegumi uses Python, Javascript, Jinja2, pytest, and GitHub actions to automate the generation, testing, and deployment of templates with a focus on Bayesian optimization packages. As of 2023-08-21, only a single package ([Meta's Ax Platform](https://ax.dev) for a small set of features. However, the plumbing and logic that creates this is thorough and scalable. I focused first on getting all the pieces together before scaling up to many features (and thus slowing down the development cycle).
 
-   An architecture description, design principles or at least a summary of the
-   main concepts will make it easy for potential contributors to get started
-   quickly.
-```
+Here are some ways you can help with the project:
+1. Use the tool and let me know what you think 😉
+2. [Provide feedback](https://github.com/sgbaird/honegumi/discussions/2) on the overall organization, logic, and workflow of the project
+3. Extend the Ax features to additional options (i.e., additional rows and options within rows) via direct edits to [ax/main.py.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja)
+4. Extend Honegumi to additional platforms such as BoFire or Atlas
+5. Spread the word about the tool
+
+For those unfamiliar with Jinja2, see the Google Colab tutorial: [_A Gentle Introduction to Jinja2_](https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb). The main template file for Meta's Adaptive Experimentation (Ax) Platform is [`ax/main.py.jinja`](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja). The main file that interacts with this template is at [`scripts/generate_scripts.py`](https://github.com/sgbaird/honegumi/blob/main/scripts/generate_scripts.py). The generated scripts are [available on GitHub](https://github.com/sgbaird/honegumi/tree/main/docs/generated_scripts/ax). Each script is tested [via `pytest`](https://github.com/sgbaird/honegumi/tree/main/tests) and [GitHub Actions](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml) to ensure it can run error-free. Finally, the results are passed to [core/honegumi.html.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.html.jinja) and [core/honegumi.ipynb.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.ipynb.jinja) to create the scripts and notebooks, respectively.
 
 ### Submit an issue
 
