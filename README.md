@@ -23,7 +23,8 @@
 <!-- TODO: refactor this paragraph to emphasize general API tutorial creation, and then focus in on materials science as one example that I'll be focusing on here -->
 
 Real-world materials science optimization tasks are complex! To cite a few examples:
-- The measurements are **noisy**.
+
+- The measurements are **noisy**
 - Some measurements are higher quality but much more costly (**multi-fidelity**)
 - Almost always, tasks have multiple properties that are important (**multi-objective**)
 - Like finding the proverbial "needle-in-a-haystack", the search spaces are enormous (**high-dimensional**)
