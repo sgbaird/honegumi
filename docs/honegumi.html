@@ -42,7 +42,7 @@
 
 <body onload="updateText()">
     <script>
-        var optionRows = [{"name": "objective", "options": ["single", "multi"]}, {"name": "model", "options": ["GPEI", "FULLYBAYESIAN"]}, {"name": "use_custom_gen", "options": ["True", "False"]}];
+        var optionRows = [{"name": "objective", "options": ["single", "multi"]}, {"name": "model", "options": ["GPEI", "FULLYBAYESIAN"]}, {"name": "use_custom_gen", "options": ["False", "True"]}];
         // E.g.,
         // var optionRows = [
         //     { "name": "row1", "options": ["A", "B"] },
@@ -117,11 +117,11 @@
                 use_custom_gen:
             </label>
 
-            <input type="radio" id="True" name="use_custom_gen" value="True" checked onclick="updateText()">
-            <label for="True" style="flex-basis: 50.0%">True</label>
-
-            <input type="radio" id="False" name="use_custom_gen" value="False" onclick="updateText()">
+            <input type="radio" id="False" name="use_custom_gen" value="False" checked onclick="updateText()">
             <label for="False" style="flex-basis: 50.0%">False</label>
+
+            <input type="radio" id="True" name="use_custom_gen" value="True" onclick="updateText()">
+            <label for="True" style="flex-basis: 50.0%">True</label>
 
         </div>
 
