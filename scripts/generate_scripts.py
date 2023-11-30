@@ -48,9 +48,9 @@ core_env = Environment(loader=FileSystemLoader(core_template_dir))
 # TODO: make names more accessible and include tooltip text with details
 # REVIEW: consider using only high-level features, not platform-specific details
 option_rows = [
-    {"name": objective_opt_name, "options": ["single", "multi"]},
-    {"name": model_opt_name, "options": ["GPEI", "FULLYBAYESIAN"]},
-    {"name": use_custom_gen_opt_name, "options": [False, True]},
+    {"name": objective_opt_name, "options": ["single", "multi"], "hidden": False},
+    {"name": model_opt_name, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
+    {"name": use_custom_gen_opt_name, "options": [False, True], "hidden": True},
 ]
 
 # E.g.,
@@ -61,13 +61,29 @@ option_rows = [
 # }
 
 option_names = [row["name"] for row in option_rows]
+visible_option_names = [
+    row["name"] for row in option_rows if not row.get("hidden", False)
+]
 
 # create all combinations of objective_opts and model_opts while retaining keys
 # make it scalable to more option combinations
 all_opts = [
-    dict(zip(option_names, v))
+    dict(zip(visible_option_names, v))
     for v in product(*[row["options"] for row in option_rows])
 ]
+
+for opt in all_opts:
+    # If the key-value pair is not already there, then add it based on
+    # conditions. For example, if use_custom_gen is a hidden variable, and the
+    # model is FULLYBAYESIAN, then use_custom_gen should be True.
+    # Do this for each hidden variable.
+    opt.setdefault(use_custom_gen_opt_name, opt[model_opt_name] == "FULLYBAYESIAN")
+
+    # verify that all variables (hidden and visible) are represented
+    assert all(
+        [opt.get(option_name, None) is not None for option_name in option_names]
+    ), f"option_names {option_names} not in opt {opt}"
+
 # E.g.,
 # [
 #     {"objective": "single", "model": "GPEI", "use_custom_gen": True},
@@ -80,12 +96,32 @@ all_opts = [
 #     {"objective": "multi", "model": "FULLYBAYESIAN", "use_custom_gen": False},
 # ]
 
-# track cases where use_custom_gen_opt_name is False and model_opt_name is FULLYBAYESIAN
-incompatible_configs = [
-    opt
-    for opt in all_opts
-    if opt[use_custom_gen_opt_name] is False and opt[model_opt_name] == "FULLYBAYESIAN"
-]
+
+def check_incompatibility(opt):
+    """
+    Check if the given option is incompatible with other options.
+
+    REVIEW: consider adding a note about why the option is incompatible (could
+    get complicated). A compromise would be to indicate whether it's due to not being
+    implemented, an API incompatibility, or due to being logically inconsistent.
+
+    Parameters
+    ----------
+    opt : dict
+        The option to check for incompatibility.
+
+    Returns
+    -------
+    bool
+        True if the option is incompatible with other options, False otherwise.
+    """
+    return (
+        opt[use_custom_gen_opt_name] is False and opt[model_opt_name] == "FULLYBAYESIAN"
+    )
+
+
+# track cases where certain combinations of non-hidden options are invalid
+incompatible_configs = [opt for opt in all_opts if check_incompatibility(opt)]
 
 # create the directory if it doesn't exist
 Path(gen_script_dir).mkdir(parents=True, exist_ok=True)
@@ -103,9 +139,13 @@ for datum in data:
 
     if datum in incompatible_configs:
         datum[is_compatible_key] = False
+        # HACK: the string for this is hard-coded
+        # datum[
+        #     rendered_key
+        # ] = "INVALID: Models.FULLYBAYESIAN requires a custom generation strategy"
         datum[
             rendered_key
-        ] = "INVALID: Models.FULLYBAYESIAN requires a custom generation strategy"
+        ] = "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
         datum[preamble_key] = "\n"
         continue
 
@@ -260,8 +300,8 @@ def generate_lookup_dict(df, option_names, key):
     }
 
 
-script_lookup = generate_lookup_dict(merged_df, option_names, rendered_key)
-preamble_lookup = generate_lookup_dict(merged_df, option_names, preamble_key)
+script_lookup = generate_lookup_dict(merged_df, visible_option_names, rendered_key)
+preamble_lookup = generate_lookup_dict(merged_df, visible_option_names, preamble_key)
 
 
 # Define the path to your HTML template file
@@ -271,7 +311,7 @@ template_path = "honegumi.html.jinja"
 script_template = core_env.get_template(template_path)
 
 # convert boolean values within option_rows to strings
-jinja_option_rows = option_rows.copy()
+jinja_option_rows = [row for row in option_rows if not row.get("hidden", False)]
 for row in jinja_option_rows:
     row["options"] = [str(opt) for opt in row["options"]]
 
@@ -522,3 +562,9 @@ with open(path.join(doc_dir, "honegumi.html"), "w") as f:
 # github_badge = f'<img alt="Static Badge"
 # src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey&link=<{github_link}>">'
 # # noqa E501
+
+
+# # track cases where certain combinations of non-hidden options are invalid
+# incompatible_configs = [ opt for opt in all_opts if
+#     opt[use_custom_gen_opt_name] is False and opt[model_opt_name] ==
+#     "FULLYBAYESIAN" ]
