@@ -27,6 +27,7 @@ ax_client.create_experiment(
     },
 )
 
+
 for _ in range(15):
     parameters, trial_index = ax_client.get_next_trial()
     results = branin_moo(parameters["x1"], parameters["x2"])

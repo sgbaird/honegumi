@@ -11,6 +11,7 @@ ax_client.create_experiment(
     minimize=True,
 )
 
+
 for _ in range(15):
     parameters, trial_index = ax_client.get_next_trial()
     results = branin(parameters["x1"], parameters["x2"])

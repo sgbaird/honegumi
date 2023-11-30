@@ -19,29 +19,23 @@ def branin_moo(x1, x2):
 
 gs = GenerationStrategy(
     steps=[
-        # 1. Initialization step (does not require pre-existing data and is well-suited
-        # for initial sampling of the search space)
         GenerationStep(
             model=Models.SOBOL,
-            num_trials=5,  # How many trials to produce during generation step
-            min_trials_observed=3,  # How many trials to be completed before next model
-            max_parallelism=5,  # Max parallelism for this step
-            model_kwargs={"seed": 999},  # Any kwargs you want passed into the model
-            model_gen_kwargs={},  # Any kwargs you want passed to `modelbridge.gen`
+            num_trials=5,
+            min_trials_observed=3,
+            max_parallelism=5,
+            model_kwargs={"seed": 999},
+            model_gen_kwargs={},
         ),
-        # 2. Bayesian optimization step (requires data obtained from previous phase and
-        # learns from all data available at the time of each new candidate generation)
         GenerationStep(
             model=Models.FULLYBAYESIAN,
-            num_trials=-1,  # No limitation on how many trials from this step
-            max_parallelism=3,  # Parallelism limit for this step
-            # More on parallelism vs. required samples in BayesOpt:
-            # https://ax.dev/docs/bayesopt.html#tradeoff-between-parallelism-and-total-number-of-trials # noqa:E501
+            num_trials=-1,
+            max_parallelism=3,
         ),
     ]
 )
 
-ax_client = AxClient()
+ax_client = AxClient(generation_strategy=gs)
 ax_client.create_experiment(
     parameters=[
         {"name": "x1", "type": "range", "bounds": [-5.0, 10.0]},
@@ -52,6 +46,7 @@ ax_client.create_experiment(
         obj2_name: ObjectiveProperties(minimize=True, threshold=None),
     },
 )
+
 
 for _ in range(15):
     parameters, trial_index = ax_client.get_next_trial()
