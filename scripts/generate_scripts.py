@@ -45,6 +45,8 @@ env = Environment(loader=FileSystemLoader(template_dir))
 core_env = Environment(loader=FileSystemLoader(core_template_dir))
 
 # opts stands for options
+# TODO: make names more accessible and include tooltip text with details
+# REVIEW: consider using only high-level features, not platform-specific details
 option_rows = [
     {"name": objective_opt_name, "options": ["single", "multi"]},
     {"name": model_opt_name, "options": ["GPEI", "FULLYBAYESIAN"]},
