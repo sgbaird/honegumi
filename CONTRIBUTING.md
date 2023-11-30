@@ -114,6 +114,46 @@ Here are some ways you can help with the project:
 
 For those unfamiliar with Jinja2, see the Google Colab tutorial: [_A Gentle Introduction to Jinja2_](https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb). The main template file for Meta's Adaptive Experimentation (Ax) Platform is [`ax/main.py.jinja`](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja). The main file that interacts with this template is at [`scripts/generate_scripts.py`](https://github.com/sgbaird/honegumi/blob/main/scripts/generate_scripts.py). The generated scripts are [available on GitHub](https://github.com/sgbaird/honegumi/tree/main/docs/generated_scripts/ax). Each script is tested [via `pytest`](https://github.com/sgbaird/honegumi/tree/main/tests) and [GitHub Actions](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml) to ensure it can run error-free. Finally, the results are passed to [core/honegumi.html.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.html.jinja) and [core/honegumi.ipynb.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.ipynb.jinja) to create the scripts and notebooks, respectively.
 
+## Project Organization
+
+```
+├── AUTHORS.md              <- List of developers and maintainers.
+├── CHANGELOG.md            <- Changelog to keep track of new features and fixes.
+├── CONTRIBUTING.md         <- Guidelines for contributing to this project.
+├── Dockerfile              <- Build a docker container with `docker build .`.
+├── LICENSE.txt             <- License as chosen on the command-line.
+├── README.md               <- The top-level README for developers.
+├── configs                 <- Directory for configurations of model & application.
+├── data
+│   ├── external            <- Data from third party sources.
+│   ├── interim             <- Intermediate data that has been transformed.
+│   ├── processed           <- The final, canonical data sets for modeling.
+│   └── raw                 <- The original, immutable data dump.
+├── docs                    <- Directory for Sphinx documentation in rst or md.
+├── environment.yml         <- The conda environment file for reproducibility.
+├── models                  <- Trained and serialized models, model predictions,
+│                              or model summaries.
+├── notebooks               <- Jupyter notebooks. Naming convention is a number (for
+│                              ordering), the creator's initials and a description,
+│                              e.g. `1.0-fw-initial-data-exploration`.
+├── pyproject.toml          <- Build configuration. Don't change! Use `pip install -e .`
+│                              to install for development or to build `tox -e build`.
+├── references              <- Data dictionaries, manuals, and all other materials.
+├── reports                 <- Generated analysis as HTML, PDF, LaTeX, etc.
+│   └── figures             <- Generated plots and figures for reports.
+├── scripts                 <- Analysis and production scripts which import the
+│                              actual PYTHON_PKG, e.g. train_model.
+├── setup.cfg               <- Declarative configuration of your project.
+├── setup.py                <- [DEPRECATED] Use `python setup.py develop` to install for
+│                              development or `python setup.py bdist_wheel` to build.
+├── src
+│   └── core              <- Actual Python package where the main functionality goes.
+├── tests                   <- Unit tests which can be run with `pytest`.
+├── .coveragerc             <- Configuration for coverage reports of unit tests.
+├── .isort.cfg              <- Configuration for git hook that sorts imports.
+└── .pre-commit-config.yaml <- Configuration of pre-commit git hooks.
+```
+
 ### Submit an issue
 
 Before you work on any non-trivial code contribution it's best to first create
@@ -335,6 +375,20 @@ on [PyPI], the following steps can be used to release a new version for
     to collectively create software are general and can be applied to all sorts
     of environments, including private companies and proprietary code bases.
 
+### Dependency Management & Reproducibility
+
+1. Always keep your abstract (unpinned) dependencies updated in `environment.yml` and eventually
+   in `setup.cfg` if you want to ship and install your package via `pip` later on.
+2. Create concrete dependencies as `environment.lock.yml` for the exact reproduction of your
+   environment with:
+   ```bash
+   conda env export -n honegumi -f environment.lock.yml
+   ```
+   For multi-OS development, consider using `--no-builds` during the export.
+3. Update your current environment with respect to a new `environment.lock.yml` using:
+   ```bash
+   conda env update -f environment.lock.yml --prune
+   ```
 
 [black]: https://pypi.org/project/black/
 [commonmark]: https://commonmark.org/
