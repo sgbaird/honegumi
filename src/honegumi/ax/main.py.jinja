@@ -1,5 +1,6 @@
 from ax.service.ax_client import AxClient
 from ax.utils.measurement.synthetic_functions import branin
+
 {% if objective == "multi" -%}
 from ax.service.utils.instantiation import ObjectiveProperties
 {%- endif %}
@@ -12,7 +13,9 @@ from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrateg
 {% if use_existing_data -%}
 import pandas as pd
 import numpy as np
+{% endif %}
 
+{% if use_existing_data -%}
 # Define the training data
 X_train = np.array([
     [-3.0, 2.0],
@@ -57,6 +60,7 @@ gs = GenerationStrategy(
             model=Models.{{ model }},
             num_trials=-1,
             max_parallelism=3,
+            model_kwargs={{ model_kwargs }},
         ),
     ]
 )
@@ -67,6 +71,14 @@ ax_client.create_experiment(
     parameters=[
         {"name": "x1", "type": "range", "bounds": [-5.0, 10.0]},
         {"name": "x2", "type": "range", "bounds": [0.0, 10.0]},
+        {% if use_categorical %}
+                {
+                    "name": "gain",
+                    "type": "choice",
+                    "is_ordered": False,
+                    "values": [""]
+                },
+        {% endif %}
     ],
 {% if objective == "multi" -%}
     objectives={
@@ -77,6 +89,13 @@ ax_client.create_experiment(
     objective_name="branin",
     minimize=True,
 {%- endif %}
+{% if use_constraint %}
+    parameter_constraints=[
+        "x1 + x2 <= 20.0", # sum constraint example
+        "x1 < x2", # order constraint example
+        "1.0 * x1 + 0.5 * x2 <= 10.0", # linear constraint example
+        ],
+{% endif %}
 )
 
 {% if use_existing_data -%}
@@ -86,7 +105,7 @@ for i in range(n_train):
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 
-for _ in range(15):
+for _ in range(10):
     parameters, trial_index = ax_client.get_next_trial()
     results = branin{% if objective == "multi" %}_moo{% endif %}(
         parameters["x1"], parameters["x2"]

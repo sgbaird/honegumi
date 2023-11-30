@@ -91,9 +91,9 @@
                 {{row.name}}:
             </label>
             {% for option in row.options %}
-            <input type="radio" id="{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
+            <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
                 option==row.options[0] %} checked{% endif %} onclick="updateText()">
-            <label for="{{ option }}" style="flex-basis: {{ 100 / row.options|length }}%">{{ option }}</label>
+            <label for="{{ row.name }}-{{ option }}" style="flex-basis: {{ 100 / row.options|length }}%">{{ option }}</label>
             {% endfor %}
         </div>
         {% endfor %}

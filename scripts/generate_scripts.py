@@ -12,15 +12,18 @@ from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader
 
 from honegumi.ax.utils.constants import (
-    core_template_dir,
-    doc_dir,
-    gen_notebook_dir,
-    gen_script_dir,
-    model_opt_name,
-    objective_opt_name,
-    template_dir,
-    test_template_dir,
-    use_custom_gen_opt_name,
+    CORE_TEMPLATE_DIR,
+    DOC_DIR,
+    GEN_NOTEBOOK_DIR,
+    GEN_SCRIPT_DIR,
+    MODEL_KWARGS_NAME,
+    MODEL_OPT_NAME,
+    OBJECTIVE_OPT_NAME,
+    TEMPLATE_DIR,
+    TEST_TEMPLATE_DIR,
+    USE_CONSTRAINTS_NAME,
+    USE_CUSTOM_GEN_OPT_NAME,
+    USE_EXISTING_DATA_NAME,
 )
 from honegumi.core.skeleton import (
     ResultsCollector,
@@ -37,21 +40,35 @@ dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
 if dummy:
     print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
 
+# REVIEW: requires some refactoring to get these options into the template, and
+# only for FULLYBAYESIAN. Would speed up testing, but perhaps not worth the complexity
+# focus on other tasks
+
+if dummy:
+    num_samples = 16
+    warmup_steps = 32
+else:
+    num_samples = 256
+    warmup_steps = 512
+
 rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
 preamble_key = "preamble"
 
-env = Environment(loader=FileSystemLoader(template_dir))
-core_env = Environment(loader=FileSystemLoader(core_template_dir))
+env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
+core_env = Environment(loader=FileSystemLoader(CORE_TEMPLATE_DIR))
 
 # opts stands for options
 # TODO: make names more accessible and include tooltip text with details
 # REVIEW: consider using only high-level features, not platform-specific details
 option_rows = [
-    {"name": objective_opt_name, "options": ["single", "multi"], "hidden": False},
-    {"name": model_opt_name, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
-    {"name": use_custom_gen_opt_name, "options": [False, True], "hidden": True},
+    {"name": OBJECTIVE_OPT_NAME, "options": ["single", "multi"], "hidden": False},
+    {"name": MODEL_OPT_NAME, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
+    {"name": USE_CUSTOM_GEN_OPT_NAME, "options": [False, True], "hidden": True},
+    {"name": USE_EXISTING_DATA_NAME, "options": [False, True], "hidden": False},
+    {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
 ]
+
 
 # E.g.,
 # {
@@ -61,9 +78,13 @@ option_rows = [
 # }
 
 option_names = [row["name"] for row in option_rows]
+
 visible_option_names = [
     row["name"] for row in option_rows if not row.get("hidden", False)
 ]
+
+extra_jinja_var_names = [MODEL_KWARGS_NAME]
+jinja_var_names = option_names + extra_jinja_var_names
 
 # create all combinations of objective_opts and model_opts while retaining keys
 # make it scalable to more option combinations
@@ -77,7 +98,13 @@ for opt in all_opts:
     # conditions. For example, if use_custom_gen is a hidden variable, and the
     # model is FULLYBAYESIAN, then use_custom_gen should be True.
     # Do this for each hidden variable.
-    opt.setdefault(use_custom_gen_opt_name, opt[model_opt_name] == "FULLYBAYESIAN")
+    opt.setdefault(USE_CUSTOM_GEN_OPT_NAME, opt[MODEL_OPT_NAME] == "FULLYBAYESIAN")
+
+    opt["model_kwargs"] = (
+        {"num_samples": num_samples, "warmup_steps": warmup_steps}
+        if opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
+        else {}
+    )
 
     # verify that all variables (hidden and visible) are represented
     assert all(
@@ -116,7 +143,7 @@ def check_incompatibility(opt):
         True if the option is incompatible with other options, False otherwise.
     """
     return (
-        opt[use_custom_gen_opt_name] is False and opt[model_opt_name] == "FULLYBAYESIAN"
+        opt[USE_CUSTOM_GEN_OPT_NAME] is False and opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
     )
 
 
@@ -124,12 +151,14 @@ def check_incompatibility(opt):
 incompatible_configs = [opt for opt in all_opts if check_incompatibility(opt)]
 
 # create the directory if it doesn't exist
-Path(gen_script_dir).mkdir(parents=True, exist_ok=True)
-Path(gen_notebook_dir).mkdir(parents=True, exist_ok=True)
-Path(test_template_dir).mkdir(parents=True, exist_ok=True)
+Path(GEN_SCRIPT_DIR).mkdir(parents=True, exist_ok=True)
+Path(GEN_NOTEBOOK_DIR).mkdir(parents=True, exist_ok=True)
+Path(TEST_TEMPLATE_DIR).mkdir(parents=True, exist_ok=True)
 
 # lookup = {} # could probably be a list of dicts instead, but
 data = all_opts.copy()
+
+first_test_template_path = None
 
 for datum in data:
     # save the rendered template
@@ -150,14 +179,15 @@ for datum in data:
         continue
 
     datum[is_compatible_key] = True
+    datum["dummy"] = dummy
 
     script_template_name = "main.py.jinja"
     script_template = env.get_template(script_template_name)
 
     gen_script_name = f"{rendered_template_stem}.py"
-    gen_script_path = path.join(gen_script_dir, gen_script_name)
+    gen_script_path = path.join(GEN_SCRIPT_DIR, gen_script_name)
 
-    render_datum = {option_name: datum[option_name] for option_name in option_names}
+    render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
     script = script_template.render(render_datum)
 
     # apply black formatting
@@ -177,7 +207,7 @@ for datum in data:
         "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
     )
 
-    notebook_path = path.join(gen_notebook_dir, f"{rendered_template_stem}.ipynb")
+    notebook_path = path.join(GEN_NOTEBOOK_DIR, f"{rendered_template_stem}.ipynb")
     colab_link = urljoin(colab_prefix, notebook_path)
     colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
 
@@ -194,9 +224,14 @@ for datum in data:
     )
 
     # save in tests directory with test_ prefix
-    test_template_path = path.join(test_template_dir, f"test_{gen_script_name}")
+    test_template_path = path.join(TEST_TEMPLATE_DIR, f"test_{gen_script_name}")
     with open(test_template_path, "w") as f:
         f.write(rendered_test_template)
+
+    # If this is the first iteration of the loop, store the test_template_path
+    # NOTE: this is just to make debugging faster (i.e., skip FULLYBAYESIAN, etc.)
+    if first_test_template_path is None:
+        first_test_template_path = test_template_path
 
     # create an intermediate file object for gen_script and prepend colab link
     nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
@@ -210,7 +245,7 @@ for datum in data:
 
 # run pytest on all or just one of the test scripts
 collector = ResultsCollector()
-file_filter = test_template_dir if not dummy else test_template_path
+file_filter = TEST_TEMPLATE_DIR if not dummy else first_test_template_path
 retcode = pytest.main(["-v", file_filter], plugins=[collector])
 
 for report in collector.reports:
@@ -324,7 +359,7 @@ html = script_template.render(
 )
 
 # Write the rendered HTML to a file
-with open(path.join(doc_dir, "honegumi.html"), "w") as f:
+with open(path.join(DOC_DIR, "honegumi.html"), "w") as f:
     f.write(html)
 
 1 + 1
