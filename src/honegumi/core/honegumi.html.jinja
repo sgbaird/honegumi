@@ -159,9 +159,10 @@
             }
             // Track the one option that was the deviation for each deviating config
             var deviatingOptions = deviatingConfigs.map(function (config) {
-                return config.filter(function (value, index) {
+                var deviatingIndex = config.findIndex(function (value, index) {
                     return value !== currentConfig[index];
-                })[0];
+                });
+                return optionRows[deviatingIndex]['name'] + '-' + config[deviatingIndex];
             });
 
             // Check if the current configuration is invalid
@@ -173,7 +174,10 @@
 
             // If the current configuration is invalid, add all selected options to the list of deviatingOptions
             if (isInvalid) {
-                deviatingOptions = deviatingOptions.concat(currentConfig);
+                var currentConfigWithName = currentConfig.map(function (value, index) {
+                    return optionRows[index]['name'] + '-' + value;
+                });
+                deviatingOptions = deviatingOptions.concat(currentConfigWithName);
             }
 
             // Logging (OK to comment out)
