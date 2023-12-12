@@ -21,8 +21,10 @@ from honegumi.ax.utils.constants import (
     OBJECTIVE_OPT_NAME,
     TEMPLATE_DIR,
     TEST_TEMPLATE_DIR,
+    USE_CATEGORICAL_NAME,
     USE_CONSTRAINTS_NAME,
     USE_CUSTOM_GEN_OPT_NAME,
+    USE_CUSTOM_THRESHOLD_NAME,
     USE_EXISTING_DATA_NAME,
 )
 from honegumi.core.skeleton import (
@@ -45,8 +47,8 @@ if dummy:
 # focus on other tasks
 
 if dummy:
-    num_samples = 16
-    warmup_steps = 32
+    num_samples = 16  # 8 was too low
+    warmup_steps = 32  # 16 was too low
 else:
     num_samples = 256
     warmup_steps = 512
@@ -61,14 +63,16 @@ core_env = Environment(loader=FileSystemLoader(CORE_TEMPLATE_DIR))
 # opts stands for options
 # TODO: make names more accessible and include tooltip text with details
 # REVIEW: consider using only high-level features, not platform-specific details
+# NOTE: Hidden variables are ones that I might want to unhide later
 option_rows = [
     {"name": OBJECTIVE_OPT_NAME, "options": ["single", "multi"], "hidden": False},
     {"name": MODEL_OPT_NAME, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
     {"name": USE_CUSTOM_GEN_OPT_NAME, "options": [False, True], "hidden": True},
     {"name": USE_EXISTING_DATA_NAME, "options": [False, True], "hidden": False},
     {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
+    {"name": USE_CATEGORICAL_NAME, "options": [False, True], "hidden": False},
+    {"name": USE_CUSTOM_THRESHOLD_NAME, "options": [False, True], "hidden": False},
 ]
-
 
 # E.g.,
 # {
@@ -79,9 +83,8 @@ option_rows = [
 
 option_names = [row["name"] for row in option_rows]
 
-visible_option_names = [
-    row["name"] for row in option_rows if not row.get("hidden", False)
-]
+visible_option_names = [row["name"] for row in option_rows if not row["hidden"]]
+visible_option_rows = [row for row in option_rows if not row["hidden"]]
 
 extra_jinja_var_names = [MODEL_KWARGS_NAME]
 jinja_var_names = option_names + extra_jinja_var_names
@@ -90,7 +93,7 @@ jinja_var_names = option_names + extra_jinja_var_names
 # make it scalable to more option combinations
 all_opts = [
     dict(zip(visible_option_names, v))
-    for v in product(*[row["options"] for row in option_rows])
+    for v in product(*[row["options"] for row in visible_option_rows])
 ]
 
 for opt in all_opts:
@@ -124,7 +127,7 @@ for opt in all_opts:
 # ]
 
 
-def check_incompatibility(opt):
+def is_incompatible(opt):
     """
     Check if the given option is incompatible with other options.
 
@@ -142,18 +145,37 @@ def check_incompatibility(opt):
     bool
         True if the option is incompatible with other options, False otherwise.
     """
-    return (
-        opt[USE_CUSTOM_GEN_OPT_NAME] is False and opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
-    )
+    use_custom_gen = opt[USE_CUSTOM_GEN_OPT_NAME]
+    model_is_fully_bayesian = opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
+    use_custom_threshold = opt[USE_CUSTOM_THRESHOLD_NAME]
+    objective_is_single = opt[OBJECTIVE_OPT_NAME] == "single"
+
+    checks = [
+        model_is_fully_bayesian and not use_custom_gen,
+        objective_is_single and use_custom_threshold,
+        # add new incompatibility checks here
+    ]
+    return any(checks)
 
 
 # track cases where certain combinations of non-hidden options are invalid
-incompatible_configs = [opt for opt in all_opts if check_incompatibility(opt)]
+incompatible_configs = [opt for opt in all_opts if is_incompatible(opt)]
 
-# create the directory if it doesn't exist
-Path(GEN_SCRIPT_DIR).mkdir(parents=True, exist_ok=True)
-Path(GEN_NOTEBOOK_DIR).mkdir(parents=True, exist_ok=True)
-Path(TEST_TEMPLATE_DIR).mkdir(parents=True, exist_ok=True)
+
+directories = [GEN_SCRIPT_DIR, GEN_NOTEBOOK_DIR, TEST_TEMPLATE_DIR]
+
+for directory in directories:
+    # create the directory if it doesn't exist
+    Path(directory).mkdir(parents=True, exist_ok=True)
+
+    # clear out the directory (to avoid confusion/running old scripts)
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
 
 # lookup = {} # could probably be a list of dicts instead, but
 data = all_opts.copy()
@@ -223,6 +245,9 @@ for datum in data:
         [four_spaces + line for line in script.split("\n")]
     )
 
+    # append the if __name__ == "__main__": block
+    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
+
     # save in tests directory with test_ prefix
     test_template_path = path.join(TEST_TEMPLATE_DIR, f"test_{gen_script_name}")
     with open(test_template_path, "w") as f:
@@ -246,6 +271,7 @@ for datum in data:
 # run pytest on all or just one of the test scripts
 collector = ResultsCollector()
 file_filter = TEST_TEMPLATE_DIR if not dummy else first_test_template_path
+# file_filter = TEST_TEMPLATE_DIR
 retcode = pytest.main(["-v", file_filter], plugins=[collector])
 
 for report in collector.reports:
@@ -303,7 +329,8 @@ invalid_configs = merged_df[
 
 # extract the values for each option name
 invalid_configs = [
-    [str(opt[option_name]) for option_name in option_names] for opt in invalid_configs
+    [str(opt[option_name]) for option_name in visible_option_names]
+    for opt in invalid_configs
 ]
 
 # NOTE: `use_custom_gen_opt_name` gets converted to a string from a boolean to
@@ -346,7 +373,7 @@ template_path = "honegumi.html.jinja"
 script_template = core_env.get_template(template_path)
 
 # convert boolean values within option_rows to strings
-jinja_option_rows = [row for row in option_rows if not row.get("hidden", False)]
+jinja_option_rows = [row for row in visible_option_rows]
 for row in jinja_option_rows:
     row["options"] = [str(opt) for opt in row["options"]]
 
