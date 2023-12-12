@@ -1,9 +1,6 @@
-from ax.service.ax_client import AxClient
-from ax.utils.measurement.synthetic_functions import branin
-
-{% if objective == "multi" -%}
-from ax.service.utils.instantiation import ObjectiveProperties
-{%- endif %}
+import numpy as np
+from ax.service.ax_client import AxClient, ObjectiveProperties
+{# from ax.utils.measurement.synthetic_functions import branin #}
 
 {% if use_custom_gen -%}
 from ax.modelbridge.factory import Models
@@ -12,37 +9,73 @@ from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrateg
 
 {% if use_existing_data -%}
 import pandas as pd
-import numpy as np
-{% endif %}
-
-{% if use_existing_data -%}
-# Define the training data
-X_train = np.array([
-    [-3.0, 2.0],
-    [0.0, 7.0],
-    [3.0, 5.0],
-    [5.0, 0.0],
-    [10.0, 10.0]
-])
-
-# Convert to a DataFrame for easier manipulation
-X_train = pd.DataFrame(X_train, columns=["x1", "x2"])
-
-# Define the number of training examples
-n_train = len(X_train)
- {% endif %}
+{%- endif %}
 
 {% if objective == "multi" -%}
 obj1_name = "branin"
-obj2_name = "neg_branin"
+obj2_name = "branin_swapped"
+{%- endif %}
 
-def branin_moo(x1, x2):
-    """Multi-objective branin function
+def branin(x1, x2{% if use_categorical %}, c1{% endif %}):
+    y = float(
+        (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
+        + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x1)
+        + 10
+    )
+    {% if use_categorical %}
+    # add a categorical penalty (only to y)
+    penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
+    y += penalty_lookup[c1]
+    {% endif %}
+    {% if objective == "multi" -%}
+    # second objective has x1 and x2 swapped
+    y2 = float(
+        (x1 - 5.1 / (4 * np.pi**2) * x2**2 + 5.0 / np.pi * x2 - 6.0) ** 2
+        + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x2)
+        + 10
+    )
+    {% if use_categorical %}
+    # add a categorical penalty
+    penalty_lookup = {"A": 0.0, "B": 2.0, "C": 1.0}
+    y2 += penalty_lookup[c1]
+    {% endif %}
+    return {obj1_name: y, obj2_name: y2}
+    {% else %} {# single objective #}
+    return y
+    {%- endif %}
 
-    The first objective is the normal branin value and the second
-    objective is the negative branin value.
-    """
-    return {obj1_name: branin(x1, x2), obj2_name: -branin(x1, x2)}
+{# Set the objective function based on the objective #}
+{% if objective == "multi" -%}
+    {% set objective_function = "branin_moo" %}
+{% else %}
+    {% set objective_function = "branin" %}
+{%- endif %}
+
+{# add MOO to FULLYBAYESIAN if multi-objective #}
+{% if model == "FULLYBAYESIAN" and objective == "multi" -%}
+    {% set model_name = model + "MOO" %}
+{% else %}
+    {% set model_name = model %}
+{%- endif %}
+
+{% if use_existing_data -%} {# use_categorical inline/repeated because will be clearer to readers #}
+# Define the training data
+X_train = np.array([
+    [-3.0, 2.0, {% if use_categorical %}"A"{% endif %}],
+    [0.0, 7.0, {% if use_categorical %}"B"{% endif %}],
+    [3.0, 5.0, {% if use_categorical %}"C"{% endif %}],
+    [5.0, 0.0, {% if use_categorical %}"A"{% endif %}],
+    [10.0, 10.0, {% if use_categorical %}"B"{% endif %}]
+])
+
+# Convert to a DataFrame for easier manipulation
+X_train = pd.DataFrame(X_train, columns=["x1", "x2"{% if use_categorical %}, "c1"{% endif %}])
+
+# Define the number of training examples
+n_train = len(X_train)
+
+# Calculate y_train using the objective function
+y_train = np.array([{{ objective_function }}(x1, x2) for x1, x2 in X_train.values])
 {%- endif %}
 
 {% if use_custom_gen -%}
@@ -57,7 +90,7 @@ gs = GenerationStrategy(
             model_gen_kwargs={},
         ),
         GenerationStep(
-            model=Models.{{ model }},
+            model=Models.{{ model_name }},
             num_trials=-1,
             max_parallelism=3,
             model_kwargs={{ model_kwargs }},
@@ -73,27 +106,24 @@ ax_client.create_experiment(
         {"name": "x2", "type": "range", "bounds": [0.0, 10.0]},
         {% if use_categorical %}
                 {
-                    "name": "gain",
+                    "name": "c1",
                     "type": "choice",
                     "is_ordered": False,
-                    "values": [""]
+                    "values": ["A", "B", "C"]
                 },
         {% endif %}
     ],
-{% if objective == "multi" -%}
     objectives={
-        obj1_name: ObjectiveProperties(minimize=True, threshold=None),
-        obj2_name: ObjectiveProperties(minimize=True, threshold=None),
-    },
-{% else %}
-    objective_name="branin",
-    minimize=True,
+        obj1_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% else %}None{% endif %}),
+{% if objective == "multi" -%}
+        obj2_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% else %}None{% endif %}),
 {%- endif %}
+    },
 {% if use_constraint %}
     parameter_constraints=[
         "x1 + x2 <= 20.0", # sum constraint example
-        "x1 < x2", # order constraint example
-        "1.0 * x1 + 0.5 * x2 <= 10.0", # linear constraint example
+        "x1 <= x2", # order constraint example
+        "1.0*x1 + 0.5*x2 <= 10.0", # linear constraint example (note there is no space around operator *)
         ],
 {% endif %}
 )
@@ -101,13 +131,13 @@ ax_client.create_experiment(
 {% if use_existing_data -%}
 # Add existing data to the AxClient
 for i in range(n_train):
-    ax_client.attach_trial(X_train.iloc[i, :-1].to_dict())
+    ax_client.attach_trial(X_train.iloc[i].to_dict())
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 
 for _ in range(10):
     parameters, trial_index = ax_client.get_next_trial()
-    results = branin{% if objective == "multi" %}_moo{% endif %}(
+    results = {{ objective_function }}(
         parameters["x1"], parameters["x2"]
         )
     ax_client.complete_trial(trial_index=trial_index, raw_data=results)
@@ -117,3 +147,19 @@ pareto_results = ax_client.get_pareto_optimal_parameters()
 {% else %}
 best_parameters, metrics = ax_client.get_best_parameters()
 {%- endif %}
+
+
+{# CODE GRAVEYARD #}
+
+{# {% if objective == "multi" -%}
+obj1_name = "branin"
+obj2_name = "neg_branin"
+
+def branin_moo(x1, x2):
+    """Multi-objective branin function
+
+    The first objective is the normal branin value and the second
+    objective is the negative branin value.
+    """
+    return {obj1_name: branin(x1, x2), obj2_name: -branin(x1, x2)}
+{%- endif %} #}
