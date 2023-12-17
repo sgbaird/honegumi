@@ -7,6 +7,13 @@ USE_EXISTING_DATA_NAME = "use_existing_data"
 USE_CONSTRAINTS_NAME = "use_constraint"
 USE_CATEGORICAL_NAME = "use_categorical"
 USE_CUSTOM_THRESHOLD_NAME = "use_custom_threshold"
+USE_PREDEFINED_CANDIDATES_NAME = "use_predefined_candidates"
+USE_FEATURIZATION_NAME = "use_featurization"
+USE_CONTEXTUAL_NAME = "use_contextual"
+FIDELITY_OPT_NAME = "fidelity"
+TASK_OPT_NAME = "task"
+SYNCHRONY_OPT_NAME = "synchrony"  # single, batch, asynchronous
+
 TEMPLATE_DIR = path.join("src", "honegumi", "ax")
 CORE_TEMPLATE_DIR = path.join("src", "honegumi", "core")
 GEN_SCRIPT_DIR = path.join("docs", "generated_scripts", "ax")
