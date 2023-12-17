@@ -11,12 +11,12 @@ from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrateg
 import pandas as pd
 {%- endif %}
 
-{% if objective == "multi" -%}
 obj1_name = "branin"
+{% if objective == "multi" -%}
 obj2_name = "branin_swapped"
 {%- endif %}
 
-def branin(x1, x2{% if use_categorical %}, c1{% endif %}):
+def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if use_categorical %}, c1{% endif %}):
     y = float(
         (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
         + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x1)
@@ -60,22 +60,23 @@ def branin(x1, x2{% if use_categorical %}, c1{% endif %}):
 
 {% if use_existing_data -%} {# use_categorical inline/repeated because will be clearer to readers #}
 # Define the training data
-X_train = np.array([
-    [-3.0, 2.0, {% if use_categorical %}"A"{% endif %}],
-    [0.0, 7.0, {% if use_categorical %}"B"{% endif %}],
-    [3.0, 5.0, {% if use_categorical %}"C"{% endif %}],
-    [5.0, 0.0, {% if use_categorical %}"A"{% endif %}],
-    [10.0, 10.0, {% if use_categorical %}"B"{% endif %}]
+X_train = pd.DataFrame([
+    {"x1": -3.0, "x2": 2.0, {% if use_categorical %}"c1": "A"{% endif %}},
+    {"x1": 0.0, "x2": 7.0, {% if use_categorical %}"c1": "B"{% endif %}},
+    {"x1": 3.0, "x2": 5.0, {% if use_categorical %}"c1": "C"{% endif %}},
+    {"x1": 5.0, "x2": 0.0, {% if use_categorical %}"c1": "A"{% endif %}},
+    {"x1": 10.0, "x2": 10.0, {% if use_categorical %}"c1": "B"{% endif %}}
 ])
 
-# Convert to a DataFrame for easier manipulation
-X_train = pd.DataFrame(X_train, columns=["x1", "x2"{% if use_categorical %}, "c1"{% endif %}])
+# Calculate y_train using the objective function
+y_train = [
+    {% for _, row in X_train.iterrows() %}
+    {{ objective_function }}(row["x1"], row["x2"]{% if use_categorical %}, row["c1"]{% endif %}){% if not loop.last %}, {% endif %}
+    {% endfor %}
+]
 
 # Define the number of training examples
 n_train = len(X_train)
-
-# Calculate y_train using the objective function
-y_train = np.array([{{ objective_function }}(x1, x2) for x1, x2 in X_train.values])
 {%- endif %}
 
 {% if use_custom_gen -%}
@@ -83,7 +84,7 @@ gs = GenerationStrategy(
     steps=[
         GenerationStep(
             model=Models.SOBOL,
-            num_trials=5,
+            num_trials={{ '3' if dummy else '5' }},
             min_trials_observed=3,
             max_parallelism=5,
             model_kwargs={"seed": 999},
@@ -114,9 +115,9 @@ ax_client.create_experiment(
         {% endif %}
     ],
     objectives={
-        obj1_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% else %}None{% endif %}),
+        obj1_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% endif %}),
 {% if objective == "multi" -%}
-        obj2_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% else %}None{% endif %}),
+        obj2_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% endif %}),
 {%- endif %}
     },
 {% if use_constraint %}
@@ -135,10 +136,10 @@ for i in range(n_train):
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 
-for _ in range(10):
+for _ in range({{ '5' if dummy else '10' }}):
     parameters, trial_index = ax_client.get_next_trial()
     results = {{ objective_function }}(
-        parameters["x1"], parameters["x2"]
+        parameters["x1"], parameters["x2"], {% if use_categorical %}parameters["c1"]{% endif %}
         )
     ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
