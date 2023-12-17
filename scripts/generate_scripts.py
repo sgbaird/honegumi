@@ -46,12 +46,12 @@ if dummy:
 # only for FULLYBAYESIAN. Would speed up testing, but perhaps not worth the complexity
 # focus on other tasks
 
-if dummy:
-    num_samples = 16  # 8 was too low
-    warmup_steps = 32  # 16 was too low
-else:
-    num_samples = 256
-    warmup_steps = 512
+# if dummy:
+#     num_samples = 16  # 8 was too low
+#     warmup_steps = 32  # 16 was too low
+# else:
+#     num_samples = 256
+#     warmup_steps = 512
 
 rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
@@ -72,6 +72,12 @@ option_rows = [
     {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     {"name": USE_CATEGORICAL_NAME, "options": [False, True], "hidden": False},
     {"name": USE_CUSTOM_THRESHOLD_NAME, "options": [False, True], "hidden": False},
+    # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501
+    # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501
+    # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501
+    # {"name": FIDELITY_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501
+    # {"name": TASK_OPT_NAME, "options": [False, True], "hidden": False}, # noqa E501
+    # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # noqa E501
 ]
 
 # E.g.,
@@ -104,10 +110,10 @@ for opt in all_opts:
     opt.setdefault(USE_CUSTOM_GEN_OPT_NAME, opt[MODEL_OPT_NAME] == "FULLYBAYESIAN")
 
     opt["model_kwargs"] = (
-        {"num_samples": num_samples, "warmup_steps": warmup_steps}
+        {"num_samples": 256, "warmup_steps": 512}
         if opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
         else {}
-    )
+    )  # override later to 16 and 32 later on, but only for test script
 
     # verify that all variables (hidden and visible) are represented
     assert all(
@@ -190,10 +196,7 @@ for datum in data:
 
     if datum in incompatible_configs:
         datum[is_compatible_key] = False
-        # HACK: the string for this is hard-coded
-        # datum[
-        #     rendered_key
-        # ] = "INVALID: Models.FULLYBAYESIAN requires a custom generation strategy"
+        # REVIEW: consider adding logic that indicates why
         datum[
             rendered_key
         ] = "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
@@ -215,6 +218,39 @@ for datum in data:
     # apply black formatting
     script = format_file_contents(script, fast=False, mode=FileMode())
 
+    with open(gen_script_path, "w") as f:
+        f.write(script)
+
+    # make sure tests run faster for SAASBO
+    test_render_datum = render_datum.copy()
+    model_kwargs = test_render_datum["model_kwargs"]
+
+    if "num_samples" in model_kwargs and "warmup_steps" in model_kwargs:
+        model_kwargs["num_samples"] = 16
+        model_kwargs["warmup_steps"] = 32
+
+    test_script = script_template.render(test_render_datum)
+    test_script = format_file_contents(test_script, fast=False, mode=FileMode())
+
+    # indent each line by 4 spaces and prefix def test_script():
+    four_spaces = "    "
+    rendered_test_template = "def test_script():\n" + "\n".join(
+        [four_spaces + line for line in test_script.split("\n")]
+    )
+
+    # append the if __name__ == "__main__": block
+    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
+
+    # save in tests directory with test_ prefix
+    test_template_path = path.join(TEST_TEMPLATE_DIR, f"test_{gen_script_name}")
+    with open(test_template_path, "w") as f:
+        f.write(rendered_test_template)
+
+    # If this is the first iteration of the loop, store the test_template_path
+    # NOTE: this is just to make debugging faster (i.e., skip FULLYBAYESIAN, etc.)
+    if first_test_template_path is None:
+        first_test_template_path = test_template_path
+
     # rendered_templates[rendered_template_stem] = rendered_template
     datum[rendered_key] = script
 
@@ -235,28 +271,6 @@ for datum in data:
 
     preamble = f"{colab_badge} {github_badge}"
     datum[preamble_key] = preamble
-
-    with open(gen_script_path, "w") as f:
-        f.write(script)
-
-    # indent each line by 4 spaces and prefix def test_script():
-    four_spaces = "    "
-    rendered_test_template = "def test_script():\n" + "\n".join(
-        [four_spaces + line for line in script.split("\n")]
-    )
-
-    # append the if __name__ == "__main__": block
-    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
-
-    # save in tests directory with test_ prefix
-    test_template_path = path.join(TEST_TEMPLATE_DIR, f"test_{gen_script_name}")
-    with open(test_template_path, "w") as f:
-        f.write(rendered_test_template)
-
-    # If this is the first iteration of the loop, store the test_template_path
-    # NOTE: this is just to make debugging faster (i.e., skip FULLYBAYESIAN, etc.)
-    if first_test_template_path is None:
-        first_test_template_path = test_template_path
 
     # create an intermediate file object for gen_script and prepend colab link
     nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
