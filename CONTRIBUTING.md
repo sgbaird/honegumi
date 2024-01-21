@@ -106,7 +106,7 @@ python3 -m http.server --directory 'docs/_build/html'
 For a high-level roadmap of Honegumi's development, see https://github.com/sgbaird/honegumi/discussions/2. Honegumi uses Python, Javascript, Jinja2, pytest, and GitHub actions to automate the generation, testing, and deployment of templates with a focus on Bayesian optimization packages. As of 2023-08-21, only a single package ([Meta's Ax Platform](https://ax.dev) for a small set of features. However, the plumbing and logic that creates this is thorough and scalable. I focused first on getting all the pieces together before scaling up to many features (and thus slowing down the development cycle).
 
 Here are some ways you can help with the project:
-1. Use the tool and let me know what you think 😉
+1. Use the tool and let us know what you think 😉
 2. [Provide feedback](https://github.com/sgbaird/honegumi/discussions/2) on the overall organization, logic, and workflow of the project
 3. Extend the Ax features to additional options (i.e., additional rows and options within rows) via direct edits to [ax/main.py.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja)
 4. Extend Honegumi to additional platforms such as BoFire or Atlas
