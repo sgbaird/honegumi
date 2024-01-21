@@ -23,7 +23,7 @@ def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if use_categoric
         + 10
     )
     {% if use_categorical %}
-    # add a categorical penalty (only to y)
+    # add a made-up penalty based on category
     penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
     y += penalty_lookup[c1]
     {% endif %}
@@ -35,7 +35,7 @@ def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if use_categoric
         + 10
     )
     {% if use_categorical %}
-    # add a categorical penalty
+    # add a made-up penalty based on category
     penalty_lookup = {"A": 0.0, "B": 2.0, "C": 1.0}
     y2 += penalty_lookup[c1]
     {% endif %}
@@ -61,19 +61,22 @@ def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if use_categoric
 {% if use_existing_data -%} {# use_categorical inline/repeated because will be clearer to readers #}
 # Define the training data
 X_train = pd.DataFrame([
-    {"x1": -3.0, "x2": 2.0, {% if use_categorical %}"c1": "A"{% endif %}},
-    {"x1": 0.0, "x2": 7.0, {% if use_categorical %}"c1": "B"{% endif %}},
-    {"x1": 3.0, "x2": 5.0, {% if use_categorical %}"c1": "C"{% endif %}},
-    {"x1": 5.0, "x2": 0.0, {% if use_categorical %}"c1": "A"{% endif %}},
-    {"x1": 10.0, "x2": 10.0, {% if use_categorical %}"c1": "B"{% endif %}}
+    {"x1": -3.0, "x2": 2.0{% if use_categorical %}, "c1": "A"{% endif %}},
+    {"x1": 0.0, "x2": 7.0{% if use_categorical %}, "c1": "B"{% endif %}},
+    {"x1": 3.0, "x2": 5.0{% if use_categorical %}, "c1": "C"{% endif %}},
+    {"x1": 5.0, "x2": 0.0{% if use_categorical %}, "c1": "A"{% endif %}},
+    {"x1": 10.0, "x2": 10.0{% if use_categorical %}, "c1": "B"{% endif %}}
 ])
 
-# Calculate y_train using the objective function
+# Define y_train (normally the values would be supplied directly instead of calculating here)
+y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if use_categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
+
+{# # Calculate y_train using the objective function (didn't work due to not being able to execute Python code)
 y_train = [
     {% for _, row in X_train.iterrows() %}
     {{ objective_function }}(row["x1"], row["x2"]{% if use_categorical %}, row["c1"]{% endif %}){% if not loop.last %}, {% endif %}
     {% endfor %}
-]
+] #}
 
 # Define the number of training examples
 n_train = len(X_train)
@@ -117,14 +120,14 @@ ax_client.create_experiment(
     objectives={
         obj1_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% endif %}),
 {% if objective == "multi" -%}
-        obj2_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% endif %}),
+        obj2_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=15.0{% endif %}),
 {%- endif %}
     },
 {% if use_constraint %}
     parameter_constraints=[
-        "x1 + x2 <= 20.0", # sum constraint example
-        "x1 <= x2", # order constraint example
-        "1.0*x1 + 0.5*x2 <= 10.0", # linear constraint example (note there is no space around operator *)
+        "x1 + x2 <= 20.0", # example of a sum constraint
+        "x1 <= x2", # example of an order constraint
+        "1.0*x1 + 0.5*x2 <= 10.0" # example of a linear constraint. Note the lack of space around the asterisks
         ],
 {% endif %}
 )
