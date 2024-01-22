@@ -13,6 +13,7 @@ USE_CONTEXTUAL_NAME = "use_contextual"
 FIDELITY_OPT_NAME = "fidelity"
 TASK_OPT_NAME = "task"
 SYNCHRONY_OPT_NAME = "synchrony"  # single, batch, asynchronous
+USE_COMPOSITIONAL_CONSTRAINT_NAME = "use_compositional_linear_constraint"
 
 TEMPLATE_DIR = path.join("src", "honegumi", "ax")
 CORE_TEMPLATE_DIR = path.join("src", "honegumi", "core")
