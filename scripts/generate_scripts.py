@@ -72,6 +72,7 @@ option_rows = [
     {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     {"name": USE_CATEGORICAL_NAME, "options": [False, True], "hidden": False},
     {"name": USE_CUSTOM_THRESHOLD_NAME, "options": [False, True], "hidden": False},
+    # {"name": "USE_COMPOSITIONAL_CONSTRAINT_NAME", "options": [False, True], "hidden": False}, # TODO: Add option for compositional linear constraint! # noqa E501 # NOTE: AC Microcourses
     # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses
     # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
