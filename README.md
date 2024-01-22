@@ -1,5 +1,5 @@
 [![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
-[![ReadTheDocs](https://readthedocs.org/projects/honegumi/badge/?version=latest)](https://honegumi.readthedocs.io/en/stable/)
+[![ReadTheDocs](https://readthedocs.org/projects/honegumi/badge/?version=latest)](https://honegumi.readthedocs.io/en/latest/)
 [![tests](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml/badge.svg)](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml)
 [![GitHub issues](https://img.shields.io/github/issues/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/issues)
 [![GitHub Discussions](https://img.shields.io/github/discussions/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/discussions)
