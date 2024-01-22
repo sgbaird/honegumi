@@ -10,7 +10,7 @@
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Twitter)](https://twitter.com/honegumi)
 -->
 [![tests](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml/badge.svg)](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml)
-[![GitHub License](https://img.shields.io/github/license/sgbaird/honegumi)](https://github.com/hiirrxnn/honegumi/blob/main/LICENSE.txt)
+[![GitHub License](https://img.shields.io/github/license/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/blob/main/LICENSE.txt)
 [![GitHub issues](https://img.shields.io/github/issues/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/issues)
 [![GitHub Discussions](https://img.shields.io/github/discussions/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/discussions)
 [![Last Committed](https://img.shields.io/github/last-commit/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/commits/main/)
