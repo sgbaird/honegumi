@@ -1,6 +1,10 @@
 [![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
-<a href="https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-[![ReadTheDocs](https://readthedocs.org/projects/honegumi/badge/?version=latest)](https://honegumi.readthedocs.io/en/stable/)
+[![ReadTheDocs](https://readthedocs.org/projects/honegumi/badge/?version=latest)](https://honegumi.readthedocs.io/en/latest/)
+[![tests](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml/badge.svg)](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml)
+[![GitHub issues](https://img.shields.io/github/issues/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/issues)
+[![GitHub Discussions](https://img.shields.io/github/discussions/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/discussions)
+[![Last Committed](https://img.shields.io/github/last-commit/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/commits/main/)
+
 <!-- These are examples of badges you might also want to add to your README. Update the URLs accordingly.
 [![Built Status](https://api.cirrus-ci.com/github/<USER>/honegumi.svg?branch=main)](https://cirrus-ci.com/github/<USER>/honegumi)
 [![PyPI-Server](https://img.shields.io/pypi/v/honegumi.svg)](https://pypi.org/project/honegumi/)
@@ -8,6 +12,7 @@
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/honegumi.svg)](https://anaconda.org/conda-forge/honegumi)
 [![Monthly Downloads](https://pepy.tech/badge/honegumi/month)](https://pepy.tech/project/honegumi)
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Twitter)](https://twitter.com/honegumi)
+<a href="https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 -->
 
 ![honegumi-logo](reports/figures/honegumi-logo.png)
@@ -39,6 +44,10 @@ You don't need to install anything. Just navigate to https://honegumi.readthedoc
 
 If you're interested in collaborating, see [the contribution
 guidelines](https://github.com/sgbaird/honegumi/blob/main/CONTRIBUTING.md) or get in touch.
+
+## License
+
+[![GitHub License](https://img.shields.io/github/license/sgbaird/honegumi)](https://github.com/sgbaird/honegumi/blob/main/LICENSE.txt)
 
 ## Note
 
