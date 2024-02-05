@@ -12,7 +12,7 @@ def branin_moo(x1, x2, c1):
         + 10
     )
 
-    # add a categorical penalty (only to y)
+    # add a made-up penalty based on category
     penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
     y += penalty_lookup[c1]
 
@@ -23,7 +23,7 @@ def branin_moo(x1, x2, c1):
         + 10
     )
 
-    # add a categorical penalty
+    # add a made-up penalty based on category
     penalty_lookup = {"A": 0.0, "B": 2.0, "C": 1.0}
     y2 += penalty_lookup[c1]
 
@@ -44,12 +44,12 @@ ax_client.create_experiment(
     ],
     objectives={
         obj1_name: ObjectiveProperties(minimize=True, threshold=25.0),
-        obj2_name: ObjectiveProperties(minimize=True, threshold=25.0),
+        obj2_name: ObjectiveProperties(minimize=True, threshold=15.0),
     },
     parameter_constraints=[
-        "x1 + x2 <= 20.0",  # sum constraint example
-        "x1 <= x2",  # order constraint example
-        "1.0*x1 + 0.5*x2 <= 10.0",  # linear constraint example (note there is no space around operator *)
+        "x1 + x2 <= 15.0",  # example of a sum constraint
+        "x1 <= x2",  # example of an order constraint
+        "1.0*x1 + 0.5*x2 <= 10.0",  # example of a linear constraint. Note the lack of space around the asterisks
     ],
 )
 

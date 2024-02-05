@@ -27,30 +27,15 @@ def test_script():
     # Define the training data
     X_train = pd.DataFrame(
         [
-            {
-                "x1": -3.0,
-                "x2": 2.0,
-            },
-            {
-                "x1": 0.0,
-                "x2": 7.0,
-            },
-            {
-                "x1": 3.0,
-                "x2": 5.0,
-            },
-            {
-                "x1": 5.0,
-                "x2": 0.0,
-            },
-            {
-                "x1": 10.0,
-                "x2": 10.0,
-            },
+            {"x1": -3.0, "x2": 2.0},
+            {"x1": 0.0, "x2": 7.0},
+            {"x1": 3.0, "x2": 5.0},
+            {"x1": 5.0, "x2": 0.0},
+            {"x1": 10.0, "x2": 10.0},
         ]
     )
 
-    # Calculate y_train using the objective function
+    # Define y_train (normally the values would be supplied directly instead of calculating here)
     y_train = [branin_moo(row["x1"], row["x2"]) for _, row in X_train.iterrows()]
 
     # Define the number of training examples

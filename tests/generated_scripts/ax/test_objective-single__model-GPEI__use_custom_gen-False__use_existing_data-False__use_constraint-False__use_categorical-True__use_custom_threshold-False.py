@@ -11,7 +11,7 @@ def test_script():
             + 10
         )
 
-        # add a categorical penalty (only to y)
+        # add a made-up penalty based on category
         penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
         y += penalty_lookup[c1]
 

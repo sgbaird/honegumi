@@ -50,7 +50,7 @@ def test_script():
         ],
         objectives={
             obj1_name: ObjectiveProperties(minimize=True, threshold=25.0),
-            obj2_name: ObjectiveProperties(minimize=True, threshold=25.0),
+            obj2_name: ObjectiveProperties(minimize=True, threshold=15.0),
         },
     )
 

@@ -32,9 +32,9 @@ def test_script():
             obj2_name: ObjectiveProperties(minimize=True),
         },
         parameter_constraints=[
-            "x1 + x2 <= 20.0",  # sum constraint example
-            "x1 <= x2",  # order constraint example
-            "1.0*x1 + 0.5*x2 <= 10.0",  # linear constraint example (note there is no space around operator *)
+            "x1 + x2 <= 15.0",  # example of a sum constraint
+            "x1 <= x2",  # example of an order constraint
+            "1.0*x1 + 0.5*x2 <= 10.0",  # example of a linear constraint. Note the lack of space around the asterisks
         ],
     )
 

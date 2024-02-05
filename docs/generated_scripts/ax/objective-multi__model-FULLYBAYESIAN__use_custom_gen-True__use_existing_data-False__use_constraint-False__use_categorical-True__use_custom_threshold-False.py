@@ -14,7 +14,7 @@ def branin_moo(x1, x2, c1):
         + 10
     )
 
-    # add a categorical penalty (only to y)
+    # add a made-up penalty based on category
     penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
     y += penalty_lookup[c1]
 
@@ -25,7 +25,7 @@ def branin_moo(x1, x2, c1):
         + 10
     )
 
-    # add a categorical penalty
+    # add a made-up penalty based on category
     penalty_lookup = {"A": 0.0, "B": 2.0, "C": 1.0}
     y2 += penalty_lookup[c1]
 

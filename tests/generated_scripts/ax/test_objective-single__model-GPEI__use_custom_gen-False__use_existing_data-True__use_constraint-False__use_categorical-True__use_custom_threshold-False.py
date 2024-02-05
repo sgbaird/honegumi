@@ -12,7 +12,7 @@ def test_script():
             + 10
         )
 
-        # add a categorical penalty (only to y)
+        # add a made-up penalty based on category
         penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
         y += penalty_lookup[c1]
 
@@ -29,7 +29,7 @@ def test_script():
         ]
     )
 
-    # Calculate y_train using the objective function
+    # Define y_train (normally the values would be supplied directly instead of calculating here)
     y_train = [branin(row["x1"], row["x2"], row["c1"]) for _, row in X_train.iterrows()]
 
     # Define the number of training examples

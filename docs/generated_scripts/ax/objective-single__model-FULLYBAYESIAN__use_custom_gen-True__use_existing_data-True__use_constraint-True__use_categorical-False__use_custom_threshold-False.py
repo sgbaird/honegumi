@@ -20,30 +20,15 @@ def branin(x1, x2):
 # Define the training data
 X_train = pd.DataFrame(
     [
-        {
-            "x1": -3.0,
-            "x2": 2.0,
-        },
-        {
-            "x1": 0.0,
-            "x2": 7.0,
-        },
-        {
-            "x1": 3.0,
-            "x2": 5.0,
-        },
-        {
-            "x1": 5.0,
-            "x2": 0.0,
-        },
-        {
-            "x1": 10.0,
-            "x2": 10.0,
-        },
+        {"x1": -3.0, "x2": 2.0},
+        {"x1": 0.0, "x2": 7.0},
+        {"x1": 3.0, "x2": 5.0},
+        {"x1": 5.0, "x2": 0.0},
+        {"x1": 10.0, "x2": 10.0},
     ]
 )
 
-# Calculate y_train using the objective function
+# Define y_train (normally the values would be supplied directly instead of calculating here)
 y_train = [branin(row["x1"], row["x2"]) for _, row in X_train.iterrows()]
 
 
@@ -79,9 +64,9 @@ ax_client.create_experiment(
         obj1_name: ObjectiveProperties(minimize=True),
     },
     parameter_constraints=[
-        "x1 + x2 <= 20.0",  # sum constraint example
-        "x1 <= x2",  # order constraint example
-        "1.0*x1 + 0.5*x2 <= 10.0",  # linear constraint example (note there is no space around operator *)
+        "x1 + x2 <= 15.0",  # example of a sum constraint
+        "x1 <= x2",  # example of an order constraint
+        "1.0*x1 + 0.5*x2 <= 10.0",  # example of a linear constraint. Note the lack of space around the asterisks
     ],
 )
 
