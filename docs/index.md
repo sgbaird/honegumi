@@ -14,7 +14,7 @@ aria-label="Follow @sgbaird on GitHub">Follow @sgbaird</a>
 <a class="github-button" href="https://github.com/sgbaird/honegumi/issues"
 data-icon="octicon-issue-opened" data-color-scheme="no-preference: light; light: light; dark: dark;" data-size="large" data-show-count="true"
 aria-label="Issue sgbaird/honegumi on GitHub">Issue</a>
-<a class="github-button" href="https://github.com/sparks-baird/xtal2png/discussions" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-comment-discussion" data-size="large" aria-label="Discuss sparks-baird/xtal2png on GitHub">Discuss</a>
+<a class="github-button" href="https://github.com/sgbaird/honegumi/discussions" data-color-scheme="no-preference: light; light: light; dark: dark;" data-icon="octicon-comment-discussion" data-size="large" aria-label="Discuss sgbaird/honegumi on GitHub">Discuss</a>
 <br><br>
 
 Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), which means _skeletal framework_ in Japanese, is a package for interactively creating API tutorials with a focus on optimization packages such as Meta's Ax Platform. You can interact with Honegumi "in the flesh." Using the interactive grid below, select one option per row and watch the template dynamically appear. Click the "Open in Colab" badge to open a self-contained Google Colab notebook corresponding to the selected template. Click "Open in GitHub" to view the notebook source directly.
