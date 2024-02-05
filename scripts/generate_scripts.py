@@ -198,9 +198,9 @@ for datum in data:
     if datum in incompatible_configs:
         datum[is_compatible_key] = False
         # REVIEW: consider adding logic that indicates why
-        datum[
-            rendered_key
-        ] = "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
+        datum[rendered_key] = (
+            "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
+        )
         datum[preamble_key] = "\n"
         continue
 
