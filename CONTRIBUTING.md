@@ -109,8 +109,9 @@ Here are some ways you can help with the project:
 1. Use the tool and let us know what you think 😉
 2. [Provide feedback](https://github.com/sgbaird/honegumi/discussions/2) on the overall organization, logic, and workflow of the project
 3. Extend the Ax features to additional options (i.e., additional rows and options within rows) via direct edits to [ax/main.py.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja)
-4. Extend Honegumi to additional platforms such as BoFire or Atlas
-5. Spread the word about the tool
+4. Improve the `honegumi.html` and `honegumi.ipynb` templates (may also need to update `generate_scripts.py`). See below for more information.
+5. Extend Honegumi to additional platforms such as BoFire or Atlas
+6. Spread the word about the tool
 
 For those unfamiliar with Jinja2, see the Google Colab tutorial: [_A Gentle Introduction to Jinja2_](https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb). The main template file for Meta's Adaptive Experimentation (Ax) Platform is [`ax/main.py.jinja`](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja). The main file that interacts with this template is at [`scripts/generate_scripts.py`](https://github.com/sgbaird/honegumi/blob/main/scripts/generate_scripts.py). The generated scripts are [available on GitHub](https://github.com/sgbaird/honegumi/tree/main/docs/generated_scripts/ax). Each script is tested [via `pytest`](https://github.com/sgbaird/honegumi/tree/main/tests) and [GitHub Actions](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml) to ensure it can run error-free. Finally, the results are passed to [core/honegumi.html.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.html.jinja) and [core/honegumi.ipynb.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.ipynb.jinja) to create the scripts and notebooks, respectively.
 
