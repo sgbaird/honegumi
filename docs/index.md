@@ -1,7 +1,7 @@
 ![honegumi-logo](https://github.com/sgbaird/honegumi/raw/main/reports/figures/honegumi-logo.png)
 
-```{note}
-🚧 This package is under active development. We are [looking for contributors](https://honegumi.readthedocs.io/en/latest/contributing.html), so please let us know if you're interested! See [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2). If you like this package, please consider [starring it on GitHub](https://github.com/sgbaird/honegumi).
+```{note} 🚧 This package is under active development.
+We are [looking for contributors](https://honegumi.readthedocs.io/en/latest/contributing.html), so please let us know if you're interested! See [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2). If you like this package, please consider [starring it on GitHub](https://github.com/sgbaird/honegumi).
 ```
 
 <a class="github-button" href="https://github.com/sgbaird/honegumi"
@@ -25,9 +25,15 @@ Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E
 :file: honegumi.html
 ```
 
-```{tip} Use Honegumi with ChatGPT
-LLMs are good at recognizing patterns, but are really bad at suggesting Bayesian optimization scripts from scratch. Since Honegumi is really good at programatically giving Bayes opt scripts (i.e., patterns), you can use Honegumi to get a template and then ask an LLM to adapt it to your use case. The two-minute video below shows how a Honegumi template can be adapted to a cookie taste optimization as a function of flour, sugar, and butter content using GPT-4.
+<br><br>
+
+## A Perfect Pairing with LLMs
+
+```{tip}
+Use Honegumi with ChatGPT to create non-halucinatory, custom Bayesian optimization scripts. See below for more info.
 ```
+
+LLMs are good at recognizing patterns, but are really bad at suggesting Bayesian optimization scripts from scratch. Since Honegumi is really good at programatically giving valid Bayes opt scripts, you can use Honegumi to get a template and then ask an LLM to adapt it to your use case. The two-minute video below shows how a Honegumi template can be adapted to a cookie taste optimization as a function of flour, sugar, and butter content using GPT-4.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/rnI2BvGgP9o?si=HGODRbP19MlkC662" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
