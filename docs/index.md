@@ -1,7 +1,7 @@
 ![honegumi-logo](https://github.com/sgbaird/honegumi/raw/main/reports/figures/honegumi-logo.png)
 
-```{note} 🚧 This package is under active development.
-We are [looking for contributors](https://honegumi.readthedocs.io/en/latest/contributing.html), so please let us know if you're interested! See [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2). If you like this package, please consider [starring it on GitHub](https://github.com/sgbaird/honegumi).
+```{note} 🚧 This tool is under active development.
+We are [looking for contributors](https://honegumi.readthedocs.io/en/latest/contributing.html), so please let us know if you're interested! See [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2). If you like this tool, please consider [starring it on GitHub](https://github.com/sgbaird/honegumi).
 ```
 
 <a class="github-button" href="https://github.com/sgbaird/honegumi"
@@ -15,7 +15,7 @@ aria-label="Follow @sgbaird on GitHub">Follow @sgbaird</a>
 data-icon="octicon-issue-opened" data-size="large" data-show-count="true"
 aria-label="Issue sgbaird/honegumi on GitHub">Issue</a>
 <a class="github-button" href="https://github.com/sgbaird/honegumi/discussions" data-icon="octicon-comment-discussion" data-size="large" aria-label="Discuss sgbaird/honegumi on GitHub">Discuss</a>
-<br><br>
+<br>
 
 <!-- data-color-scheme="no-preference: light; light: light; dark: dark;"  -->
 
@@ -25,7 +25,7 @@ Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E
 :file: honegumi.html
 ```
 
-<br><br>
+#
 
 ## A Perfect Pairing with LLMs
 
