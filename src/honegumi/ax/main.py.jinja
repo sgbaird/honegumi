@@ -2,12 +2,12 @@ import numpy as np
 from ax.service.ax_client import AxClient, ObjectiveProperties
 {# from ax.utils.measurement.synthetic_functions import branin #}
 
-{% if use_custom_gen -%}
+{% if custom_gen -%}
 from ax.modelbridge.factory import Models
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
 {%- endif %}
 
-{% if use_existing_data -%}
+{% if existing_data -%}
 import pandas as pd
 {%- endif %}
 
@@ -16,13 +16,13 @@ obj1_name = "branin"
 obj2_name = "branin_swapped"
 {%- endif %}
 
-def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if use_categorical %}, c1{% endif %}):
+def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if categorical %}, c1{% endif %}):
     y = float(
         (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
         + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x1)
         + 10
     )
-    {% if use_categorical %}
+    {% if categorical %}
     # add a made-up penalty based on category
     penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
     y += penalty_lookup[c1]
@@ -34,7 +34,7 @@ def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if use_categoric
         + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x2)
         + 10
     )
-    {% if use_categorical %}
+    {% if categorical %}
     # add a made-up penalty based on category
     penalty_lookup = {"A": 0.0, "B": 2.0, "C": 1.0}
     y2 += penalty_lookup[c1]
@@ -58,23 +58,23 @@ def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if use_categoric
     {% set model_name = model %}
 {%- endif %}
 
-{% if use_existing_data -%} {# use_categorical inline/repeated because will be clearer to readers #}
+{% if existing_data -%} {# categorical inline/repeated because will be clearer to readers #}
 # Define the training data
 X_train = pd.DataFrame([
-    {"x1": -3.0, "x2": 2.0{% if use_categorical %}, "c1": "A"{% endif %}},
-    {"x1": 0.0, "x2": 7.0{% if use_categorical %}, "c1": "B"{% endif %}},
-    {"x1": 3.0, "x2": 5.0{% if use_categorical %}, "c1": "C"{% endif %}},
-    {"x1": 5.0, "x2": 0.0{% if use_categorical %}, "c1": "A"{% endif %}},
-    {"x1": 10.0, "x2": 10.0{% if use_categorical %}, "c1": "B"{% endif %}}
+    {"x1": -3.0, "x2": 2.0{% if categorical %}, "c1": "A"{% endif %}},
+    {"x1": 0.0, "x2": 7.0{% if categorical %}, "c1": "B"{% endif %}},
+    {"x1": 3.0, "x2": 5.0{% if categorical %}, "c1": "C"{% endif %}},
+    {"x1": 5.0, "x2": 0.0{% if categorical %}, "c1": "A"{% endif %}},
+    {"x1": 10.0, "x2": 10.0{% if categorical %}, "c1": "B"{% endif %}}
 ])
 
 # Define y_train (normally the values would be supplied directly instead of calculating here)
-y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if use_categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
+y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
 
 {# # Calculate y_train using the objective function (didn't work due to not being able to execute Python code)
 y_train = [
     {% for _, row in X_train.iterrows() %}
-    {{ objective_function }}(row["x1"], row["x2"]{% if use_categorical %}, row["c1"]{% endif %}){% if not loop.last %}, {% endif %}
+    {{ objective_function }}(row["x1"], row["x2"]{% if categorical %}, row["c1"]{% endif %}){% if not loop.last %}, {% endif %}
     {% endfor %}
 ] #}
 
@@ -82,7 +82,7 @@ y_train = [
 n_train = len(X_train)
 {%- endif %}
 
-{% if use_custom_gen -%}
+{% if custom_gen -%}
 gs = GenerationStrategy(
     steps=[
         GenerationStep(
@@ -103,12 +103,16 @@ gs = GenerationStrategy(
 )
 {%- endif %}
 
-ax_client = AxClient({% if use_custom_gen %}generation_strategy=gs{% endif %})
+{% if composition_constraint %}
+total = 10.0
+{% endif %}
+
+ax_client = AxClient({% if custom_gen %}generation_strategy=gs{% endif %})
 ax_client.create_experiment(
     parameters=[
-        {"name": "x1", "type": "range", "bounds": [-5.0, 10.0]},
+        {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, 10.0]{% else %}[-5.0, 10.0]{% endif %}},
         {"name": "x2", "type": "range", "bounds": [0.0, 10.0]},
-        {% if use_categorical %}
+        {% if categorical %}
                 {
                     "name": "c1",
                     "type": "choice",
@@ -118,31 +122,37 @@ ax_client.create_experiment(
         {% endif %}
     ],
     objectives={
-        obj1_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=25.0{% endif %}),
+        obj1_name: ObjectiveProperties(minimize=True{% if custom_threshold %}, threshold=25.0{% endif %}),
 {% if objective == "multi" -%}
-        obj2_name: ObjectiveProperties(minimize=True{% if use_custom_threshold %}, threshold=15.0{% endif %}),
+        obj2_name: ObjectiveProperties(minimize=True{% if custom_threshold %}, threshold=15.0{% endif %}),
 {%- endif %}
     },
-{% if use_constraint %}
+{% if constraint %}
     parameter_constraints=[
-        "x1 + x2 <= 15.0", # example of a sum constraint
-        "x1 <= x2", # example of an order constraint
-        "1.0*x1 + 0.5*x2 <= 10.0" # example of a linear constraint. Note the lack of space around the asterisks
+        {% if sum_constraint %}"x1 + x2 <= 15.0", # example of a sum constraint
+        {% endif %}
+        {% if composition_constraint %}f"x1 + x2 <= {total}", # example of a reparameterized compositional constraint, which is a type of sum constraint
+        {% endif %}
+        {% if order_constraint %}"x1 <= x2", # example of an order constraint
+        {% endif %}
+        {% if linear_constraint %}"1.0*x1 + 0.5*x2 <= 10.0", # example of a linear constraint. Note the lack of space around the asterisks
+        {% endif %}
         ],
 {% endif %}
 )
 
-{% if use_existing_data -%}
+{% if existing_data -%}
 # Add existing data to the AxClient
 for i in range(n_train):
     ax_client.attach_trial(X_train.iloc[i].to_dict())
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 
-for _ in range({{ '5' if dummy else '10' }}):
+{# 10 because there can be up to 4 parameters which means 8 Sobol + 2 BO, where 2 BO is to accomodate later implementation of batches #}
+for _ in range({{ '10' if dummy else '15' }}):
     parameters, trial_index = ax_client.get_next_trial()
     results = {{ objective_function }}(
-        parameters["x1"], parameters["x2"], {% if use_categorical %}parameters["c1"]{% endif %}
+        parameters["x1"], parameters["x2"]{% if categorical %}, parameters["c1"]{% endif %}
         )
     ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
