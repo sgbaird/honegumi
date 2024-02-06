@@ -2,18 +2,21 @@ from os import path
 
 OBJECTIVE_OPT_NAME = "objective"
 MODEL_OPT_NAME = "model"
-USE_CUSTOM_GEN_OPT_NAME = "use_custom_gen"
-USE_EXISTING_DATA_NAME = "use_existing_data"
-USE_CONSTRAINTS_NAME = "use_constraint"
-USE_CATEGORICAL_NAME = "use_categorical"
-USE_CUSTOM_THRESHOLD_NAME = "use_custom_threshold"
-USE_PREDEFINED_CANDIDATES_NAME = "use_predefined_candidates"
-USE_FEATURIZATION_NAME = "use_featurization"
-USE_CONTEXTUAL_NAME = "use_contextual"
+CUSTOM_GEN_NAME = "custom_gen"
+EXISTING_DATA_NAME = "existing_data"
+# USE_CONSTRAINTS_NAME = "use_constraint"
+SUM_CONSTRAINT_NAME = "sum_constraint"
+ORDER_CONSTRAINT_NAME = "order_constraint"
+LINEAR_CONSTRAINT_NAME = "linear_constraint"
+COMPOSITIONAL_CONSTRAINT_NAME = "composition_constraint"
+CATEGORICAL_NAME = "categorical"
+USE_CUSTOM_THRESHOLD_NAME = "custom_threshold"
+PREDEFINED_CANDIDATES_NAME = "predef_candidates"
+FEATURIZATION_NAME = "featurize"
+CONTEXTUAL_VAR_NAME = "context"
 FIDELITY_OPT_NAME = "fidelity"
 TASK_OPT_NAME = "task"
 SYNCHRONY_OPT_NAME = "synchrony"  # single, batch, asynchronous
-USE_COMPOSITIONAL_CONSTRAINT_NAME = "use_compositional_linear_constraint"
 
 TEMPLATE_DIR = path.join("src", "honegumi", "ax")
 CORE_TEMPLATE_DIR = path.join("src", "honegumi", "core")

@@ -11,23 +11,27 @@ import pytest
 from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader
 
-from honegumi.ax.utils.constants import (
+import honegumi.ax.utils.constants as constants
+from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
+    CATEGORICAL_NAME,
+    COMPOSITIONAL_CONSTRAINT_NAME,
     CORE_TEMPLATE_DIR,
+    CUSTOM_GEN_NAME,
     DOC_DIR,
+    EXISTING_DATA_NAME,
     GEN_NOTEBOOK_DIR,
     GEN_SCRIPT_DIR,
+    LINEAR_CONSTRAINT_NAME,
     MODEL_KWARGS_NAME,
     MODEL_OPT_NAME,
     OBJECTIVE_OPT_NAME,
+    ORDER_CONSTRAINT_NAME,
+    SUM_CONSTRAINT_NAME,
     TEMPLATE_DIR,
     TEST_TEMPLATE_DIR,
-    USE_CATEGORICAL_NAME,
-    USE_CONSTRAINTS_NAME,
-    USE_CUSTOM_GEN_OPT_NAME,
     USE_CUSTOM_THRESHOLD_NAME,
-    USE_EXISTING_DATA_NAME,
 )
-from honegumi.core.skeleton import (
+from honegumi.core.honegumi import (
     ResultsCollector,
     get_rendered_template_stem,
     unpack_rendered_template_stem,
@@ -67,12 +71,19 @@ core_env = Environment(loader=FileSystemLoader(CORE_TEMPLATE_DIR))
 option_rows = [
     {"name": OBJECTIVE_OPT_NAME, "options": ["single", "multi"], "hidden": False},
     {"name": MODEL_OPT_NAME, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
-    {"name": USE_CUSTOM_GEN_OPT_NAME, "options": [False, True], "hidden": True},
-    {"name": USE_EXISTING_DATA_NAME, "options": [False, True], "hidden": False},
-    {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
-    {"name": USE_CATEGORICAL_NAME, "options": [False, True], "hidden": False},
+    {"name": CUSTOM_GEN_NAME, "options": [False, True], "hidden": True},
+    {"name": EXISTING_DATA_NAME, "options": [False, True], "hidden": False},
+    # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
+    {"name": SUM_CONSTRAINT_NAME, "options": [False, True], "hidden": False},
+    {"name": ORDER_CONSTRAINT_NAME, "options": [False, True], "hidden": False},
+    {"name": LINEAR_CONSTRAINT_NAME, "options": [False, True], "hidden": False},
+    {
+        "name": COMPOSITIONAL_CONSTRAINT_NAME,
+        "options": [False, True],
+        "hidden": False,
+    },  # TODO: Add option for compositional linear constraint! # noqa E501 # NOTE: AC Microcourses
+    {"name": CATEGORICAL_NAME, "options": [False, True], "hidden": False},
     {"name": USE_CUSTOM_THRESHOLD_NAME, "options": [False, True], "hidden": False},
-    # {"name": "USE_COMPOSITIONAL_CONSTRAINT_NAME", "options": [False, True], "hidden": False}, # TODO: Add option for compositional linear constraint! # noqa E501 # NOTE: AC Microcourses
     # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses
     # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
@@ -108,7 +119,7 @@ for opt in all_opts:
     # conditions. For example, if use_custom_gen is a hidden variable, and the
     # model is FULLYBAYESIAN, then use_custom_gen should be True.
     # Do this for each hidden variable.
-    opt.setdefault(USE_CUSTOM_GEN_OPT_NAME, opt[MODEL_OPT_NAME] == "FULLYBAYESIAN")
+    opt.setdefault(CUSTOM_GEN_NAME, opt[MODEL_OPT_NAME] == "FULLYBAYESIAN")
 
     opt["model_kwargs"] = (
         {"num_samples": 256, "warmup_steps": 512}
@@ -152,7 +163,7 @@ def is_incompatible(opt):
     bool
         True if the option is incompatible with other options, False otherwise.
     """
-    use_custom_gen = opt[USE_CUSTOM_GEN_OPT_NAME]
+    use_custom_gen = opt[CUSTOM_GEN_NAME]
     model_is_fully_bayesian = opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
     use_custom_threshold = opt[USE_CUSTOM_THRESHOLD_NAME]
     objective_is_single = opt[OBJECTIVE_OPT_NAME] == "single"
@@ -214,13 +225,25 @@ for datum in data:
     gen_script_path = path.join(GEN_SCRIPT_DIR, gen_script_name)
 
     render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
-    script = script_template.render(render_datum)
+    script = script_template.render(render_datum, names=constants)
 
     # apply black formatting
     script = format_file_contents(script, fast=False, mode=FileMode())
 
+    # try:
     with open(gen_script_path, "w") as f:
         f.write(script)
+
+    # except Exception as e:
+    #     # Get the absolute path of the file
+    #     abs_gen_script_path = os.path.abspath(gen_script_path)
+
+    #     # Add the \\?\ prefix to the absolute path to disable string parsing
+    #     # by Windows API
+    #     abs_gen_script_path = "\\\\?\\" + abs_gen_script_path
+
+    #     with open(abs_gen_script_path, "w") as f:
+    #         f.write(script)
 
     # make sure tests run faster for SAASBO
     test_render_datum = render_datum.copy()
