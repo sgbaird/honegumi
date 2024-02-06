@@ -31,7 +31,7 @@ from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
     TEST_TEMPLATE_DIR,
     USE_CUSTOM_THRESHOLD_NAME,
 )
-from honegumi.core.honegumi import (
+from honegumi.core._honegumi import (
     ResultsCollector,
     get_rendered_template_stem,
     unpack_rendered_template_stem,
