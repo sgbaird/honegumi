@@ -9,27 +9,28 @@ import jupytext
 import pandas as pd
 import pytest
 from black import FileMode, format_file_contents
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-import honegumi.ax.utils.constants as constants
+# import honegumi.ax.utils.constants as constants
 from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
-    CATEGORICAL_NAME,
-    COMPOSITIONAL_CONSTRAINT_NAME,
+    CATEGORICAL_KEY,
+    COMPOSITIONAL_CONSTRAINT_KEY,
     CORE_TEMPLATE_DIR,
-    CUSTOM_GEN_NAME,
+    CUSTOM_GEN_KEY,
+    CUSTOM_THRESHOLD_KEY,
     DOC_DIR,
-    EXISTING_DATA_NAME,
+    DUMMY_KEY,
+    EXISTING_DATA_KEY,
     GEN_NOTEBOOK_DIR,
     GEN_SCRIPT_DIR,
-    LINEAR_CONSTRAINT_NAME,
-    MODEL_KWARGS_NAME,
-    MODEL_OPT_NAME,
-    OBJECTIVE_OPT_NAME,
-    ORDER_CONSTRAINT_NAME,
-    SUM_CONSTRAINT_NAME,
+    LINEAR_CONSTRAINT_KEY,
+    MODEL_KWARGS_KEY,
+    MODEL_OPT_KEY,
+    OBJECTIVE_OPT_KEY,
+    ORDER_CONSTRAINT_KEY,
+    SUM_CONSTRAINT_KEY,
     TEMPLATE_DIR,
     TEST_TEMPLATE_DIR,
-    USE_CUSTOM_THRESHOLD_NAME,
 )
 from honegumi.core._honegumi import (
     ResultsCollector,
@@ -61,29 +62,31 @@ rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
 preamble_key = "preamble"
 
-env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
-core_env = Environment(loader=FileSystemLoader(CORE_TEMPLATE_DIR))
+env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), undefined=StrictUndefined)
+core_env = Environment(
+    loader=FileSystemLoader(CORE_TEMPLATE_DIR), undefined=StrictUndefined
+)
 
 # opts stands for options
 # TODO: make names more accessible and include tooltip text with details
 # REVIEW: consider using only high-level features, not platform-specific details
 # NOTE: Hidden variables are ones that I might want to unhide later
 option_rows = [
-    {"name": OBJECTIVE_OPT_NAME, "options": ["single", "multi"], "hidden": False},
-    {"name": MODEL_OPT_NAME, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
-    {"name": CUSTOM_GEN_NAME, "options": [False, True], "hidden": True},
-    {"name": EXISTING_DATA_NAME, "options": [False, True], "hidden": False},
+    {"name": OBJECTIVE_OPT_KEY, "options": ["single", "multi"], "hidden": False},
+    {"name": MODEL_OPT_KEY, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
+    {"name": CUSTOM_GEN_KEY, "options": [False, True], "hidden": True},
+    {"name": EXISTING_DATA_KEY, "options": [False, True], "hidden": False},
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
-    {"name": SUM_CONSTRAINT_NAME, "options": [False, True], "hidden": False},
-    {"name": ORDER_CONSTRAINT_NAME, "options": [False, True], "hidden": False},
-    {"name": LINEAR_CONSTRAINT_NAME, "options": [False, True], "hidden": False},
+    {"name": SUM_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
+    {"name": ORDER_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
+    {"name": LINEAR_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
     {
-        "name": COMPOSITIONAL_CONSTRAINT_NAME,
+        "name": COMPOSITIONAL_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
     },  # TODO: Add option for compositional linear constraint! # noqa E501 # NOTE: AC Microcourses
-    {"name": CATEGORICAL_NAME, "options": [False, True], "hidden": False},
-    {"name": USE_CUSTOM_THRESHOLD_NAME, "options": [False, True], "hidden": False},
+    {"name": CATEGORICAL_KEY, "options": [False, True], "hidden": False},
+    {"name": CUSTOM_THRESHOLD_KEY, "options": [False, True], "hidden": False},
     # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses
     # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
@@ -104,7 +107,7 @@ option_names = [row["name"] for row in option_rows]
 visible_option_names = [row["name"] for row in option_rows if not row["hidden"]]
 visible_option_rows = [row for row in option_rows if not row["hidden"]]
 
-extra_jinja_var_names = [MODEL_KWARGS_NAME]
+extra_jinja_var_names = [MODEL_KWARGS_KEY, DUMMY_KEY]
 jinja_var_names = option_names + extra_jinja_var_names
 
 # create all combinations of objective_opts and model_opts while retaining keys
@@ -119,11 +122,11 @@ for opt in all_opts:
     # conditions. For example, if use_custom_gen is a hidden variable, and the
     # model is FULLYBAYESIAN, then use_custom_gen should be True.
     # Do this for each hidden variable.
-    opt.setdefault(CUSTOM_GEN_NAME, opt[MODEL_OPT_NAME] == "FULLYBAYESIAN")
+    opt.setdefault(CUSTOM_GEN_KEY, opt[MODEL_OPT_KEY] == "FULLYBAYESIAN")
 
     opt["model_kwargs"] = (
         {"num_samples": 256, "warmup_steps": 512}
-        if opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
+        if opt[MODEL_OPT_KEY] == "FULLYBAYESIAN"
         else {}
     )  # override later to 16 and 32 later on, but only for test script
 
@@ -163,10 +166,10 @@ def is_incompatible(opt):
     bool
         True if the option is incompatible with other options, False otherwise.
     """
-    use_custom_gen = opt[CUSTOM_GEN_NAME]
-    model_is_fully_bayesian = opt[MODEL_OPT_NAME] == "FULLYBAYESIAN"
-    use_custom_threshold = opt[USE_CUSTOM_THRESHOLD_NAME]
-    objective_is_single = opt[OBJECTIVE_OPT_NAME] == "single"
+    use_custom_gen = opt[CUSTOM_GEN_KEY]
+    model_is_fully_bayesian = opt[MODEL_OPT_KEY] == "FULLYBAYESIAN"
+    use_custom_threshold = opt[CUSTOM_THRESHOLD_KEY]
+    objective_is_single = opt[OBJECTIVE_OPT_KEY] == "single"
 
     checks = [
         model_is_fully_bayesian and not use_custom_gen,
@@ -204,7 +207,7 @@ for datum in data:
     # save the rendered template
     rendered_template_stem = get_rendered_template_stem(datum, option_names)
 
-    datum["stem"] = rendered_template_stem
+    # datum["stem"] = rendered_template_stem # REVIEW: I don't think this is used
 
     if datum in incompatible_configs:
         datum[is_compatible_key] = False
@@ -216,7 +219,10 @@ for datum in data:
         continue
 
     datum[is_compatible_key] = True
-    datum["dummy"] = dummy
+
+    # NOTE: Decided to always keep dummy key false for scripts, let dummy only
+    # affect tests
+    datum[DUMMY_KEY] = False
 
     script_template_name = "main.py.jinja"
     script_template = env.get_template(script_template_name)
@@ -225,29 +231,20 @@ for datum in data:
     gen_script_path = path.join(GEN_SCRIPT_DIR, gen_script_name)
 
     render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
-    script = script_template.render(render_datum, names=constants)
+    script = script_template.render(render_datum)  # , names=constants
 
     # apply black formatting
     script = format_file_contents(script, fast=False, mode=FileMode())
 
-    # try:
+    # be mindful of max file component length (255?), regardless of path limits
+    # https://stackoverflow.com/a/61628356/13697228
     with open(gen_script_path, "w") as f:
         f.write(script)
 
-    # except Exception as e:
-    #     # Get the absolute path of the file
-    #     abs_gen_script_path = os.path.abspath(gen_script_path)
-
-    #     # Add the \\?\ prefix to the absolute path to disable string parsing
-    #     # by Windows API
-    #     abs_gen_script_path = "\\\\?\\" + abs_gen_script_path
-
-    #     with open(abs_gen_script_path, "w") as f:
-    #         f.write(script)
-
     # make sure tests run faster for SAASBO
     test_render_datum = render_datum.copy()
-    model_kwargs = test_render_datum["model_kwargs"]
+    test_render_datum[DUMMY_KEY] = dummy
+    model_kwargs = test_render_datum[MODEL_KWARGS_KEY]
 
     if "num_samples" in model_kwargs and "warmup_steps" in model_kwargs:
         model_kwargs["num_samples"] = 16
@@ -275,8 +272,7 @@ for datum in data:
     if first_test_template_path is None:
         first_test_template_path = test_template_path
 
-    # rendered_templates[rendered_template_stem] = rendered_template
-    datum[rendered_key] = script
+    datum[rendered_key] = script  # for the HTML template
 
     # store GitHub file link
     github_username = "sgbaird"
@@ -294,7 +290,7 @@ for datum in data:
     colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
 
     preamble = f"{colab_badge} {github_badge}"
-    datum[preamble_key] = preamble
+    datum[preamble_key] = preamble  # for the HTML template
 
     # create an intermediate file object for gen_script and prepend colab link
     nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
@@ -371,7 +367,7 @@ invalid_configs = [
     for opt in invalid_configs
 ]
 
-# NOTE: `use_custom_gen_opt_name` gets converted to a string from a boolean to
+# NOTE: `custom_gen_opt_name` gets converted to a string from a boolean to
 # simply things on a Python/Jinja/Javascript side (i.e., strings are strings,
 # but boolean syntax can vary).
 
@@ -428,3 +424,20 @@ with open(path.join(DOC_DIR, "honegumi.html"), "w") as f:
     f.write(html)
 
 1 + 1
+
+
+# doesn't work on Windows due to https://stackoverflow.com/a/61628356/13697228
+# try:
+#     with open(gen_script_path, "w") as f:
+#         f.write(script)
+
+# except Exception as e:
+#     # Get the absolute path of the file
+#     abs_gen_script_path = os.path.abspath(gen_script_path)
+
+#     # Add the \\?\ prefix to the absolute path to disable string parsing
+#     # by Windows API
+#     abs_gen_script_path = "\\\\?\\" + abs_gen_script_path
+
+#     with open(abs_gen_script_path, "w") as f:
+#         f.write(script)
