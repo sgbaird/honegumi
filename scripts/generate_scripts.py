@@ -77,6 +77,7 @@ option_rows = [
     {"name": CUSTOM_GEN_KEY, "options": [False, True], "hidden": True},
     {"name": EXISTING_DATA_KEY, "options": [False, True], "hidden": False},
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
+    # consider collapsing these three constraints into single option # noqa: E501
     {"name": SUM_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
     {"name": ORDER_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
     {"name": LINEAR_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
