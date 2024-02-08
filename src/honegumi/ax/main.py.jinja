@@ -54,11 +54,15 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" 
     return y
     {%- endif %}
 
+{% set objective_function = "branin" %}
+
+{% if composition_constraint -%}
+    {% set objective_function = objective_function + "3" %}
+{% endif %}
+
 {# Set the objective function based on the objective #}
 {% if objective == "multi" -%}
-    {% set objective_function = "branin_moo" %}
-{% else %}
-    {% set objective_function = "branin" %}
+    {% set objective_function = objective_function + "_moo" %}
 {%- endif %}
 
 {# add MOO to FULLYBAYESIAN if multi-objective #}
