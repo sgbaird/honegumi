@@ -115,6 +115,12 @@ Here are some ways you can help with the project:
 
 For those unfamiliar with Jinja2, see the Google Colab tutorial: [_A Gentle Introduction to Jinja2_](https://colab.research.google.com/github/sgbaird/honegumi/blob/main/notebooks/1.0-sgb-gentle-introduction-jinja.ipynb). The main template file for Meta's Adaptive Experimentation (Ax) Platform is [`ax/main.py.jinja`](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/main.py.jinja). The main file that interacts with this template is at [`scripts/generate_scripts.py`](https://github.com/sgbaird/honegumi/blob/main/scripts/generate_scripts.py). The generated scripts are [available on GitHub](https://github.com/sgbaird/honegumi/tree/main/docs/generated_scripts/ax). Each script is tested [via `pytest`](https://github.com/sgbaird/honegumi/tree/main/tests) and [GitHub Actions](https://github.com/sgbaird/honegumi/actions/workflows/ci.yml) to ensure it can run error-free. Finally, the results are passed to [core/honegumi.html.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.html.jinja) and [core/honegumi.ipynb.jinja](https://github.com/sgbaird/honegumi/blob/main/src/honegumi/core/honegumi.ipynb.jinja) to create the scripts and notebooks, respectively.
 
+NOTE: If you are committing some of the generated scripts or notebooks on Windows, you will [likely need to run this command](https://stackoverflow.com/questions/22575662/filename-too-long-in-git-for-windows) in a terminal (e.g., git bash) as an administrator to avoid an `lstat(...) Filename too long` error:
+
+```bash
+git config --system core.longpaths true
+```
+
 ## Project Organization
 
 ```
