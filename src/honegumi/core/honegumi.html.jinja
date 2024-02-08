@@ -129,7 +129,7 @@
             document.getElementById("text").innerHTML = "\n" + rendered;
             var currentConfig = Array.from(rows, function (row) { return row.value; });
 
-            // Generate all possible configurations that deviate by zero or one option from the current configuration
+            // Generate all possible configurations that deviate exactly by one option from the current configuration
             var possibleDeviatingConfigs = [];
             for (var i = 0; i < optionRows.length; i++) {
                 var options = optionRows[i]['options'];
@@ -137,7 +137,10 @@
                     var option = options[j];
                     var deviation = currentConfig.slice();
                     deviation[i] = option;
-                    possibleDeviatingConfigs.push(deviation);
+                    // Skip the configuration if it's the same as the current configuration
+                    if (JSON.stringify(deviation) !== JSON.stringify(currentConfig)) {
+                        possibleDeviatingConfigs.push(deviation);
+                    }
                 }
             }
             // Remove duplicates
