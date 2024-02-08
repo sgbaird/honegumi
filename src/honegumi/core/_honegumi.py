@@ -71,6 +71,9 @@ def get_rendered_template_stem(datum, option_names):
     Returns a string that represents the rendered template stem based on the given data
     and option names.
 
+    Filenames still have strict character limits even if longpaths enabled on Windows
+    (https://stackoverflow.com/a/61628356/13697228), so use folder structure instead
+
     Parameters
     ----------
     data : dict
@@ -89,9 +92,9 @@ def get_rendered_template_stem(datum, option_names):
     >>> data = {'option1': 'value1', 'option2': 'value2'}
     >>> option_names = ['option1', 'option2']
     >>> get_rendered_template_stem(data, option_names)
-    'option1-value1__option2-value2'
+    'option1-value1+option2-value2'
     """
-    rendered_template_stem = "__".join(
+    rendered_template_stem = "+".join(
         [f"{option_name}-{str(datum[option_name])}" for option_name in option_names]
     )  # `str()` was intended for boolean values, but no longer using booleans
     return rendered_template_stem
@@ -114,13 +117,13 @@ def unpack_rendered_template_stem(rendered_template_stem):
 
     Examples
     --------
-    >>> unpack_rendered_template_stem("option1-value1__option2-value2__option3-value3")
+    >>> unpack_rendered_template_stem("option1-value1+option2-value2+option3-value3")
     {'option1': 'value1', 'option2': 'value2', 'option3': 'value3'}
     """
     options = {}
 
     # split the string into a list of option-value pairs
-    option_value_pairs = rendered_template_stem.split("__")
+    option_value_pairs = rendered_template_stem.split("+")
 
     # extract the option names and values from the pairs and add them to a dictionary
     for pair in option_value_pairs:
