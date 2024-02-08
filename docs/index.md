@@ -33,7 +33,7 @@ Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E
 Use Honegumi with ChatGPT to create non-halucinatory, custom Bayesian optimization scripts. See below for more info.
 ```
 
-LLMs are good at recognizing patterns, but are really bad at suggesting Bayesian optimization scripts from scratch. Since Honegumi is really good at programatically giving valid Bayes opt scripts, you can use Honegumi to get a template and then ask an LLM to adapt it to your use case. The two-minute video below shows how a Honegumi template can be adapted to a cookie taste optimization as a function of flour, sugar, and butter content using GPT-4.
+LLMs are good at recognizing patterns but really bad at suggesting Bayesian optimization scripts from scratch. Since Honegumi is really good at programatically giving valid Bayes opt scripts, you can use Honegumi to get a template and then ask an LLM to adapt it to your use case. The two-minute video below shows how a Honegumi template can be adapted using GPT-4 to a cookie taste optimization as a function of flour, sugar, and butter content.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/rnI2BvGgP9o?si=HGODRbP19MlkC662" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
