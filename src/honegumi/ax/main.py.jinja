@@ -16,12 +16,18 @@ obj1_name = "branin"
 obj2_name = "branin_swapped"
 {%- endif %}
 
-def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if categorical %}, c1{% endif %}):
+def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}):
     y = float(
         (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
         + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x1)
         + 10
     )
+
+    {% if composition_constraint -%}
+    # Contrived way to incorporate x3 into the objective
+    y = y * (1 + 0.1 * x1 * x2 * x3)
+    {%- endif %}
+
     {% if categorical %}
     # add a made-up penalty based on category
     penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
@@ -34,6 +40,10 @@ def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if categorical %
         + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x2)
         + 10
     )
+    {% if composition_constraint -%}
+    # Contrived way to incorporate x3 into the second objective
+    y2 = y2 * (1 - 0.1 * x1 * x2 * x3)
+    {%- endif %}
     {% if categorical %}
     # add a made-up penalty based on category
     penalty_lookup = {"A": 0.0, "B": 2.0, "C": 1.0}
@@ -58,8 +68,23 @@ def branin{% if objective == "multi" %}_moo{% endif %}(x1, x2{% if categorical %
     {% set model_name = model %}
 {%- endif %}
 
+{% if composition_constraint %}
+# Define total for compositional constraint, where x1 + x2 + x3 == total
+total = 10.0
+{% endif %}
+
 {% if existing_data -%} {# categorical inline/repeated because will be clearer to readers #}
 # Define the training data
+{% if composition_constraint %}
+# note that for this training data, the compositional constraint is satisfied
+X_train = pd.DataFrame([
+    {"x1": 1.5, "x2": 2.5, "x3": 6.0{% if categorical %}, "c1": "A"{% endif %}},
+    {"x1": 3.0, "x2": 5.6, "x3": 1.4{% if categorical %}, "c1": "B"{% endif %}},
+    {"x1": 4.0, "x2": 1.0, "x3": 5.0{% if categorical %}, "c1": "C"{% endif %}},
+    {"x1": 2.0, "x2": 8.0, "x3": 0.0{% if categorical %}, "c1": "A"{% endif %}},
+    {"x1": 6.5, "x2": 1.0, "x3": 2.5{% if categorical %}, "c1": "B"{% endif %}}
+])
+{% else %} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
 X_train = pd.DataFrame([
     {"x1": -3.0, "x2": 2.0{% if categorical %}, "c1": "A"{% endif %}},
     {"x1": 0.0, "x2": 7.0{% if categorical %}, "c1": "B"{% endif %}},
@@ -67,27 +92,27 @@ X_train = pd.DataFrame([
     {"x1": 5.0, "x2": 0.0{% if categorical %}, "c1": "A"{% endif %}},
     {"x1": 10.0, "x2": 10.0{% if categorical %}, "c1": "B"{% endif %}}
 ])
+{% endif %}
 
 # Define y_train (normally the values would be supplied directly instead of calculating here)
-y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
-
-{# # Calculate y_train using the objective function (didn't work due to not being able to execute Python code)
-y_train = [
-    {% for _, row in X_train.iterrows() %}
-    {{ objective_function }}(row["x1"], row["x2"]{% if categorical %}, row["c1"]{% endif %}){% if not loop.last %}, {% endif %}
-    {% endfor %}
-] #}
+y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if composition_constraint %}, row["x3"]{% endif %}{% if categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
 
 # Define the number of training examples
 n_train = len(X_train)
 {%- endif %}
+
+{# Logic around the number of iterations #}
+{# A reasonable default for initialization points is 2 * number of parameters #}
+{% set num_init = 4 + 2 * (categorical + composition_constraint) if not dummy else 3 %}
+{% set num_bayes = 15 if not dummy else 2 %}
+{% set num_iter = num_init + num_bayes %}
 
 {% if custom_gen -%}
 gs = GenerationStrategy(
     steps=[
         GenerationStep(
             model=Models.SOBOL,
-            num_trials={{ '3' if dummy else '5' }},
+            num_trials={{ num_init }}, # https://github.com/facebook/Ax/issues/922
             min_trials_observed=3,
             max_parallelism=5,
             model_kwargs={"seed": 999},
@@ -103,15 +128,13 @@ gs = GenerationStrategy(
 )
 {%- endif %}
 
-{% if composition_constraint %}
-total = 10.0
-{% endif %}
-
 ax_client = AxClient({% if custom_gen %}generation_strategy=gs{% endif %})
+{% if composition_constraint -%} # note how lower bound of x1 is now 0.0 instead of -5.0, which is for the sake of illustrating a composition, where negative values wouldn't make sense
+{%- endif %}
 ax_client.create_experiment(
     parameters=[
-        {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, 10.0]{% else %}[-5.0, 10.0]{% endif %}},
-        {"name": "x2", "type": "range", "bounds": [0.0, 10.0]},
+        {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[-5.0, 10.0]{% endif %}},
+        {"name": "x2", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[0.0, 10.0]{% endif %}},
         {% if categorical %}
                 {
                     "name": "c1",
@@ -127,15 +150,20 @@ ax_client.create_experiment(
         obj2_name: ObjectiveProperties(minimize=True{% if custom_threshold %}, threshold=15.0{% endif %}),
 {%- endif %}
     },
-{% if constraint %}
+{% if sum_constraint or composition_constraint or order_constraint or linear_constraint %}
     parameter_constraints=[
-        {% if sum_constraint %}"x1 + x2 <= 15.0", # example of a sum constraint
+        {% if sum_constraint %}
+            {% if composition_constraint %}
+                "x1 + x2 <= 15.0", # example of a sum constraint, which may be redundant/unintended if composition_constraint is also selected
+            {% else %}
+                "x1 + x2 <= 15.0", # example of a sum constraint
+            {% endif %}
         {% endif %}
-        {% if composition_constraint %}f"x1 + x2 <= {total}", # example of a reparameterized compositional constraint, which is a type of sum constraint
+        {% if composition_constraint %}f"x1 + x2 <= {total}", # reparameterized compositional constraint, which is a type of sum constraint
         {% endif %}
         {% if order_constraint %}"x1 <= x2", # example of an order constraint
         {% endif %}
-        {% if linear_constraint %}"1.0*x1 + 0.5*x2 <= 10.0", # example of a linear constraint. Note the lack of space around the asterisks
+        {% if linear_constraint %}"1.0*x1 + 0.5*x2 <= 5.0", # example of a linear constraint. Note the lack of space around the asterisks
         {% endif %}
         ],
 {% endif %}
@@ -144,15 +172,32 @@ ax_client.create_experiment(
 {% if existing_data -%}
 # Add existing data to the AxClient
 for i in range(n_train):
-    ax_client.attach_trial(X_train.iloc[i].to_dict())
+    parameterization = X_train.iloc[i].to_dict()
+
+    {% if composition_constraint %}
+    # remove x3, since it's hidden from search space due to composition constraint
+    parameterization.pop('x3')
+    {% endif %}
+
+    ax_client.attach_trial(parameterization)
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
+{# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
+for _ in range({{ num_iter }}):
+    parameterization, trial_index = ax_client.get_next_trial()
 
-{# 10 because there can be up to 4 parameters which means 8 Sobol + 2 BO, where 2 BO is to accomodate later implementation of batches #}
-for _ in range({{ '10' if dummy else '15' }}):
-    parameters, trial_index = ax_client.get_next_trial()
+    # extract parameters {# TODO: Consider swapping with **parameters (more scalable, but less beginner-friendly) #}
+    x1 = parameterization["x1"]
+    x2 = parameterization["x2"]
+    {% if composition_constraint -%}
+    x3 = total - (x1 + x2) # composition constraint: x1 + x2 + x3 == total
+    {%- endif %}
+    {% if categorical -%}
+    c1 = parameterization["c1"]
+    {%- endif %}
+
     results = {{ objective_function }}(
-        parameters["x1"], parameters["x2"]{% if categorical %}, parameters["c1"]{% endif %}
+        x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}
         )
     ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
@@ -177,3 +222,10 @@ def branin_moo(x1, x2):
     """
     return {obj1_name: branin(x1, x2), obj2_name: -branin(x1, x2)}
 {%- endif %} #}
+
+{# # Calculate y_train using the objective function (didn't work due to not being able to execute Python code)
+y_train = [
+    {% for _, row in X_train.iterrows() %}
+    {{ objective_function }}(row["x1"], row["x2"]{% if categorical %}, row["c1"]{% endif %}){% if not loop.last %}, {% endif %}
+    {% endfor %}
+] #}

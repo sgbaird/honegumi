@@ -1,6 +1,6 @@
 import pytest
 
-from honegumi.core.skeleton import (
+from honegumi.core._honegumi import (
     fib,
     get_rendered_template_stem,
     main,
