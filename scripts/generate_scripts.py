@@ -29,6 +29,7 @@ from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
     OBJECTIVE_OPT_KEY,
     ORDER_CONSTRAINT_KEY,
     SUM_CONSTRAINT_KEY,
+    SYNCHRONY_OPT_KEY,
     TEMPLATE_DIR,
     TEST_TEMPLATE_DIR,
 )
@@ -93,6 +94,11 @@ option_rows = [
     # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # {"name": FIDELITY_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # {"name": TASK_OPT_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    {
+        "name": SYNCHRONY_OPT_KEY,
+        "options": ["single", "batch", "asynchronous"],
+        "hidden": False,
+    },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # noqa E501 # NOTE: AC Microcourses
 ]
 
