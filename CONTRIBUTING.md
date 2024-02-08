@@ -121,6 +121,8 @@ NOTE: If you are committing some of the generated scripts or notebooks on Window
 git config --system core.longpaths true
 ```
 
+If working in GitHub Desktop, you will likely need to follow [these instructions](https://stackoverflow.com/a/74289583/13697228).
+
 ## Project Organization
 
 ```
