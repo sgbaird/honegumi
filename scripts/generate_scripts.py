@@ -97,7 +97,7 @@ option_rows = [
     # {"name": TASK_OPT_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     {
         "name": SYNCHRONY_OPT_KEY,
-        "options": ["single", "batch", "asynchronous"],
+        "options": ["single", "batch"],  # TODO: add "asynchronous"
         "hidden": False,
     },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # noqa E501 # NOTE: AC Microcourses

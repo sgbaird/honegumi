@@ -81,46 +81,46 @@ total = 10.0
 {% if composition_constraint %}
 # note that for this training data, the compositional constraint is satisfied
 {% endif %}
-{% if order %}
+{% if order_constraint %}
 # note that for this training data, the order constraint is satisfied
 {% endif %} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
 {# Set some shorthand variables to make X_train more readable #}
 {% set comp = composition_constraint %}
 {% set cat = categorical %}
-{% set ord = order %}
+{% set ord = order_constraint %}
+{# Note the lack of comma after x2, and the presence of a comma before the x3 #}
 X_train = pd.DataFrame([
     {
         "x1": {% if comp %}7.0{% else %}-3.0{% endif %},
-        "x2": 2.0,
+        "x2": 2.0
         {% if comp %},"x3": 1.0{% endif %}
         {% if cat %},"c1": "A"{% endif %}
     },
     {
         "x1": 0.0,
-        "x2": 6.2,
+        "x2": 6.2
         {% if comp %},"x3": 3.8{% endif %}
         {% if cat %},"c1": "B"{% endif %}
     },
     {
         "x1": {% if ord %}2.1{% else %}5.9{% endif %},
-        "x2": {% if ord %}5.9{% else %}2.0{% endif %},
+        "x2": {% if ord %}5.9{% else %}2.0{% endif %}
         {% if comp %},"x3": 2.0{% endif %}
         {% if cat %},"c1": "C"{% endif %}
     },
     {
         "x1": 1.5,
-        "x2": 2.0,
+        "x2": 2.0
         {% if comp %},"x3": 6.5{% endif %}
         {% if cat %},"c1": "A"{% endif %}
     },
     {
         "x1": 1.0,
-        "x2": 9.0,
+        "x2": 9.0
         {% if comp %},"x3": 0.0{% endif %}
         {% if cat %},"c1": "B"{% endif %}
     }
 ])
-{% endif %}
 
 # Define y_train (normally the values would be supplied directly instead of calculating here)
 y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if composition_constraint %}, row["x3"]{% endif %}{% if categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
@@ -211,12 +211,12 @@ for i in range(n_train):
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 {# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
-{% if batch %}
+{% if synchrony == "batch" %}
 batch_size = 2
 {% endif %}
-{% set indent = "    " if batch else "" %}
+{% set indent = "    " if synchrony == "batch" else "" %}
 for _ in range({{ num_iter }}):
-    {% if not batch %}
+    {% if synchrony == "single" %}
     parameterization, trial_index = ax_client.get_next_trial()
     {% else %}
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size)
