@@ -89,6 +89,7 @@ option_rows = [
     },  # TODO: Add option for compositional linear constraint! # noqa E501 # NOTE: AC Microcourses
     {"name": CATEGORICAL_KEY, "options": [False, True], "hidden": False},
     {"name": CUSTOM_THRESHOLD_KEY, "options": [False, True], "hidden": False},
+    # noise! zero, fixed, variable, inferred
     # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses
     # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
