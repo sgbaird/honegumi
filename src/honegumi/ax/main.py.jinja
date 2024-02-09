@@ -1,6 +1,5 @@
 import numpy as np
 from ax.service.ax_client import AxClient, ObjectiveProperties
-{# from ax.utils.measurement.synthetic_functions import branin #}
 
 {% if custom_gen -%}
 from ax.modelbridge.factory import Models
@@ -81,20 +80,45 @@ total = 10.0
 # Define the training data
 {% if composition_constraint %}
 # note that for this training data, the compositional constraint is satisfied
+{% endif %}
+{% if order %}
+# note that for this training data, the order constraint is satisfied
+{% endif %} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
+{# Set some shorthand variables to make X_train more readable #}
+{% set comp = composition_constraint %}
+{% set cat = categorical %}
+{% set ord = order %}
 X_train = pd.DataFrame([
-    {"x1": 1.5, "x2": 2.5, "x3": 6.0{% if categorical %}, "c1": "A"{% endif %}},
-    {"x1": 3.0, "x2": 5.6, "x3": 1.4{% if categorical %}, "c1": "B"{% endif %}},
-    {"x1": 4.0, "x2": 1.0, "x3": 5.0{% if categorical %}, "c1": "C"{% endif %}},
-    {"x1": 2.0, "x2": 8.0, "x3": 0.0{% if categorical %}, "c1": "A"{% endif %}},
-    {"x1": 6.5, "x2": 1.0, "x3": 2.5{% if categorical %}, "c1": "B"{% endif %}}
-])
-{% else %} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
-X_train = pd.DataFrame([
-    {"x1": -3.0, "x2": 2.0{% if categorical %}, "c1": "A"{% endif %}},
-    {"x1": 0.0, "x2": 7.0{% if categorical %}, "c1": "B"{% endif %}},
-    {"x1": 3.0, "x2": 5.0{% if categorical %}, "c1": "C"{% endif %}},
-    {"x1": 5.0, "x2": 0.0{% if categorical %}, "c1": "A"{% endif %}},
-    {"x1": 10.0, "x2": 10.0{% if categorical %}, "c1": "B"{% endif %}}
+    {
+        "x1": {% if comp %}7.0{% else %}-3.0{% endif %},
+        "x2": 2.0,
+        {% if comp %},"x3": 1.0{% endif %}
+        {% if cat %},"c1": "A"{% endif %}
+    },
+    {
+        "x1": 0.0,
+        "x2": 6.2,
+        {% if comp %},"x3": 3.8{% endif %}
+        {% if cat %},"c1": "B"{% endif %}
+    },
+    {
+        "x1": {% if ord %}2.1{% else %}5.9{% endif %},
+        "x2": {% if ord %}5.9{% else %}2.0{% endif %},
+        {% if comp %},"x3": 2.0{% endif %}
+        {% if cat %},"c1": "C"{% endif %}
+    },
+    {
+        "x1": 1.5,
+        "x2": 2.0,
+        {% if comp %},"x3": 6.5{% endif %}
+        {% if cat %},"c1": "A"{% endif %}
+    },
+    {
+        "x1": 1.0,
+        "x2": 9.0,
+        {% if comp %},"x3": 0.0{% endif %}
+        {% if cat %},"c1": "B"{% endif %}
+    }
 ])
 {% endif %}
 
@@ -187,23 +211,31 @@ for i in range(n_train):
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 {# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
+{% if batch %}
+batch_size = 2
+{% endif %}
+{% set indent = "    " if batch else "" %}
 for _ in range({{ num_iter }}):
+    {% if not batch %}
     parameterization, trial_index = ax_client.get_next_trial()
-
-    # extract parameters {# TODO: Consider swapping with **parameters (more scalable, but less beginner-friendly) #}
-    x1 = parameterization["x1"]
-    x2 = parameterization["x2"]
+    {% else %}
+    parameterizations, optimization_complete = ax_client.get_next_trials(batch_size)
+    for trial_index, parameterization in list(parameterizations.items()):
+    {%- endif %}
+    # extract parameters {# Consider using **parameters instead, but might require explanation and a link to ** docs #}
+    {{ indent }}x1 = parameterization["x1"]
+    {{ indent }}x2 = parameterization["x2"]
     {% if composition_constraint -%}
-    x3 = total - (x1 + x2) # composition constraint: x1 + x2 + x3 == total
+    {{ indent }}x3 = total - (x1 + x2) # composition constraint: x1 + x2 + x3 == total
     {%- endif %}
     {% if categorical -%}
-    c1 = parameterization["c1"]
+    {{ indent }}c1 = parameterization["c1"]
     {%- endif %}
 
-    results = {{ objective_function }}(
-        x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}
-        )
-    ax_client.complete_trial(trial_index=trial_index, raw_data=results)
+    {{ indent }}results = {{ objective_function }}(
+    {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}
+    {{ indent }}    )
+    {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
 {% if objective == "multi" -%}
 pareto_results = ax_client.get_pareto_optimal_parameters()
