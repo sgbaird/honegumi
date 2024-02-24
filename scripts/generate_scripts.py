@@ -9,20 +9,31 @@ import jupytext
 import pandas as pd
 import pytest
 from black import FileMode, format_file_contents
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-from honegumi.ax.utils.constants import (
-    core_template_dir,
-    doc_dir,
-    gen_notebook_dir,
-    gen_script_dir,
-    model_opt_name,
-    objective_opt_name,
-    template_dir,
-    test_template_dir,
-    use_custom_gen_opt_name,
+# import honegumi.ax.utils.constants as constants
+from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
+    CATEGORICAL_KEY,
+    COMPOSITIONAL_CONSTRAINT_KEY,
+    CORE_TEMPLATE_DIR,
+    CUSTOM_GEN_KEY,
+    CUSTOM_THRESHOLD_KEY,
+    DOC_DIR,
+    DUMMY_KEY,
+    EXISTING_DATA_KEY,
+    GEN_NOTEBOOK_DIR,
+    GEN_SCRIPT_DIR,
+    LINEAR_CONSTRAINT_KEY,
+    MODEL_KWARGS_KEY,
+    MODEL_OPT_KEY,
+    OBJECTIVE_OPT_KEY,
+    ORDER_CONSTRAINT_KEY,
+    SUM_CONSTRAINT_KEY,
+    SYNCHRONY_OPT_KEY,
+    TEMPLATE_DIR,
+    TEST_TEMPLATE_DIR,
 )
-from honegumi.core.skeleton import (
+from honegumi.core._honegumi import (
     ResultsCollector,
     get_rendered_template_stem,
     unpack_rendered_template_stem,
@@ -41,16 +52,44 @@ rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
 preamble_key = "preamble"
 
-env = Environment(loader=FileSystemLoader(template_dir))
-core_env = Environment(loader=FileSystemLoader(core_template_dir))
+env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), undefined=StrictUndefined)
+core_env = Environment(
+    loader=FileSystemLoader(CORE_TEMPLATE_DIR), undefined=StrictUndefined
+)
 
 # opts stands for options
 # TODO: make names more accessible and include tooltip text with details
 # REVIEW: consider using only high-level features, not platform-specific details
+# NOTE: Hidden variables are ones that I might want to unhide later
 option_rows = [
-    {"name": objective_opt_name, "options": ["single", "multi"]},
-    {"name": model_opt_name, "options": ["GPEI", "FULLYBAYESIAN"]},
-    {"name": use_custom_gen_opt_name, "options": [False, True]},
+    {"name": OBJECTIVE_OPT_KEY, "options": ["single", "multi"], "hidden": False},
+    {"name": MODEL_OPT_KEY, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
+    {"name": CUSTOM_GEN_KEY, "options": [False, True], "hidden": True},
+    {"name": EXISTING_DATA_KEY, "options": [False, True], "hidden": False},
+    # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
+    # consider collapsing these three constraints into single option # noqa: E501
+    {"name": SUM_CONSTRAINT_KEY, "options": [False], "hidden": False},
+    {"name": ORDER_CONSTRAINT_KEY, "options": [False], "hidden": False},
+    {"name": LINEAR_CONSTRAINT_KEY, "options": [False], "hidden": False},
+    {
+        "name": COMPOSITIONAL_CONSTRAINT_KEY,
+        "options": [False],
+        "hidden": False,
+    },  # noqa E501 # NOTE: AC Microcourses
+    {"name": CATEGORICAL_KEY, "options": [False, True], "hidden": False},
+    {"name": CUSTOM_THRESHOLD_KEY, "options": [False, True], "hidden": False},
+    # noise! zero, fixed, variable, inferred
+    # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501  # NOTE: AC Microcourses
+    # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses
+    # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    # {"name": FIDELITY_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    # {"name": TASK_OPT_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    {
+        "name": SYNCHRONY_OPT_KEY,
+        "options": ["single", "batch"],  # TODO: add "asynchronous"
+        "hidden": False,
+    },
+    # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # noqa E501 # NOTE: AC Microcourses
 ]
 
 # E.g.,
@@ -62,12 +101,37 @@ option_rows = [
 
 option_names = [row["name"] for row in option_rows]
 
+visible_option_names = [row["name"] for row in option_rows if not row["hidden"]]
+visible_option_rows = [row for row in option_rows if not row["hidden"]]
+
+extra_jinja_var_names = [MODEL_KWARGS_KEY, DUMMY_KEY]
+jinja_var_names = option_names + extra_jinja_var_names
+
 # create all combinations of objective_opts and model_opts while retaining keys
 # make it scalable to more option combinations
 all_opts = [
-    dict(zip(option_names, v))
-    for v in product(*[row["options"] for row in option_rows])
+    dict(zip(visible_option_names, v))
+    for v in product(*[row["options"] for row in visible_option_rows])
 ]
+
+for opt in all_opts:
+    # If the key-value pair is not already there, then add it based on
+    # conditions. For example, if use_custom_gen is a hidden variable, and the
+    # model is FULLYBAYESIAN, then use_custom_gen should be True.
+    # Do this for each hidden variable.
+    opt.setdefault(CUSTOM_GEN_KEY, opt[MODEL_OPT_KEY] == "FULLYBAYESIAN")
+
+    opt["model_kwargs"] = (
+        {"num_samples": 256, "warmup_steps": 512}
+        if opt[MODEL_OPT_KEY] == "FULLYBAYESIAN"
+        else {}
+    )  # override later to 16 and 32 later on, but only for test script
+
+    # verify that all variables (hidden and visible) are represented
+    assert all(
+        [opt.get(option_name, None) is not None for option_name in option_names]
+    ), f"option_names {option_names} not in opt {opt}"
+
 # E.g.,
 # [
 #     {"objective": "single", "model": "GPEI", "use_custom_gen": True},
@@ -80,51 +144,132 @@ all_opts = [
 #     {"objective": "multi", "model": "FULLYBAYESIAN", "use_custom_gen": False},
 # ]
 
-# track cases where use_custom_gen_opt_name is False and model_opt_name is FULLYBAYESIAN
-incompatible_configs = [
-    opt
-    for opt in all_opts
-    if opt[use_custom_gen_opt_name] is False and opt[model_opt_name] == "FULLYBAYESIAN"
-]
 
-# create the directory if it doesn't exist
-Path(gen_script_dir).mkdir(parents=True, exist_ok=True)
-Path(gen_notebook_dir).mkdir(parents=True, exist_ok=True)
-Path(test_template_dir).mkdir(parents=True, exist_ok=True)
+def is_incompatible(opt):
+    """
+    Check if the given option is incompatible with other options.
+
+    REVIEW: consider adding a note about why the option is incompatible (could
+    get complicated). A compromise would be to indicate whether it's due to not being
+    implemented, an API incompatibility, or due to being logically inconsistent.
+
+    Parameters
+    ----------
+    opt : dict
+        The option to check for incompatibility.
+
+    Returns
+    -------
+    bool
+        True if the option is incompatible with other options, False otherwise.
+    """
+    use_custom_gen = opt[CUSTOM_GEN_KEY]
+    model_is_fully_bayesian = opt[MODEL_OPT_KEY] == "FULLYBAYESIAN"
+    use_custom_threshold = opt[CUSTOM_THRESHOLD_KEY]
+    objective_is_single = opt[OBJECTIVE_OPT_KEY] == "single"
+
+    checks = [
+        model_is_fully_bayesian and not use_custom_gen,
+        objective_is_single and use_custom_threshold,
+        # add new incompatibility checks here
+    ]
+    return any(checks)
+
+
+# track cases where certain combinations of non-hidden options are invalid
+incompatible_configs = [opt for opt in all_opts if is_incompatible(opt)]
+
+
+directories = [GEN_SCRIPT_DIR, GEN_NOTEBOOK_DIR, TEST_TEMPLATE_DIR]
+
+for directory in directories:
+    # create the directory if it doesn't exist
+    Path(directory).mkdir(parents=True, exist_ok=True)
+
+    # clear out the directory (to avoid confusion/running old scripts)
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
 
 # lookup = {} # could probably be a list of dicts instead, but
 data = all_opts.copy()
+
+first_test_template_path = None
 
 for datum in data:
     # save the rendered template
     rendered_template_stem = get_rendered_template_stem(datum, option_names)
 
-    datum["stem"] = rendered_template_stem
+    # datum["stem"] = rendered_template_stem # REVIEW: I don't think this is used
 
     if datum in incompatible_configs:
         datum[is_compatible_key] = False
-        datum[
-            rendered_key
-        ] = "INVALID: Models.FULLYBAYESIAN requires a custom generation strategy"
+        # REVIEW: consider adding logic that indicates why
+        datum[rendered_key] = (
+            "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
+        )
         datum[preamble_key] = "\n"
         continue
 
     datum[is_compatible_key] = True
 
+    # NOTE: Decided to always keep dummy key false for scripts, let dummy only
+    # affect tests
+    datum[DUMMY_KEY] = False
+
     script_template_name = "main.py.jinja"
     script_template = env.get_template(script_template_name)
 
     gen_script_name = f"{rendered_template_stem}.py"
-    gen_script_path = path.join(gen_script_dir, gen_script_name)
+    gen_script_path = path.join(GEN_SCRIPT_DIR, gen_script_name)
 
-    render_datum = {option_name: datum[option_name] for option_name in option_names}
-    script = script_template.render(render_datum)
+    render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
+    script = script_template.render(render_datum)  # , names=constants
 
     # apply black formatting
     script = format_file_contents(script, fast=False, mode=FileMode())
 
-    # rendered_templates[rendered_template_stem] = rendered_template
-    datum[rendered_key] = script
+    # be mindful of max file component length (255?), regardless of path limits
+    # https://stackoverflow.com/a/61628356/13697228
+    with open(gen_script_path, "w") as f:
+        f.write(script)
+
+    # make sure tests run faster for SAASBO
+    test_render_datum = render_datum.copy()
+    test_render_datum[DUMMY_KEY] = dummy
+    model_kwargs = test_render_datum[MODEL_KWARGS_KEY]
+
+    if "num_samples" in model_kwargs and "warmup_steps" in model_kwargs:
+        model_kwargs["num_samples"] = 16
+        model_kwargs["warmup_steps"] = 32
+
+    test_script = script_template.render(test_render_datum)
+    test_script = format_file_contents(test_script, fast=False, mode=FileMode())
+
+    # indent each line by 4 spaces and prefix def test_script():
+    four_spaces = "    "
+    rendered_test_template = "def test_script():\n" + "\n".join(
+        [four_spaces + line for line in test_script.split("\n")]
+    )
+
+    # append the if __name__ == "__main__": block
+    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
+
+    # save in tests directory with test_ prefix
+    test_template_path = path.join(TEST_TEMPLATE_DIR, f"test_{gen_script_name}")
+    with open(test_template_path, "w") as f:
+        f.write(rendered_test_template)
+
+    # If this is the first iteration of the loop, store the test_template_path
+    # NOTE: this is just to make debugging faster (i.e., skip FULLYBAYESIAN, etc.)
+    if first_test_template_path is None:
+        first_test_template_path = test_template_path
+
+    datum[rendered_key] = script  # for the HTML template
 
     # store GitHub file link
     github_username = "sgbaird"
@@ -137,26 +282,12 @@ for datum in data:
         "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
     )
 
-    notebook_path = path.join(gen_notebook_dir, f"{rendered_template_stem}.ipynb")
+    notebook_path = path.join(GEN_NOTEBOOK_DIR, f"{rendered_template_stem}.ipynb")
     colab_link = urljoin(colab_prefix, notebook_path)
     colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
 
     preamble = f"{colab_badge} {github_badge}"
-    datum[preamble_key] = preamble
-
-    with open(gen_script_path, "w") as f:
-        f.write(script)
-
-    # indent each line by 4 spaces and prefix def test_script():
-    four_spaces = "    "
-    rendered_test_template = "def test_script():\n" + "\n".join(
-        [four_spaces + line for line in script.split("\n")]
-    )
-
-    # save in tests directory with test_ prefix
-    test_template_path = path.join(test_template_dir, f"test_{gen_script_name}")
-    with open(test_template_path, "w") as f:
-        f.write(rendered_test_template)
+    datum[preamble_key] = preamble  # for the HTML template
 
     # create an intermediate file object for gen_script and prepend colab link
     nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
@@ -170,7 +301,8 @@ for datum in data:
 
 # run pytest on all or just one of the test scripts
 collector = ResultsCollector()
-file_filter = test_template_dir if not dummy else test_template_path
+file_filter = TEST_TEMPLATE_DIR if not dummy else first_test_template_path
+# file_filter = TEST_TEMPLATE_DIR
 retcode = pytest.main(["-v", file_filter], plugins=[collector])
 
 for report in collector.reports:
@@ -228,10 +360,11 @@ invalid_configs = merged_df[
 
 # extract the values for each option name
 invalid_configs = [
-    [str(opt[option_name]) for option_name in option_names] for opt in invalid_configs
+    [str(opt[option_name]) for option_name in visible_option_names]
+    for opt in invalid_configs
 ]
 
-# NOTE: `use_custom_gen_opt_name` gets converted to a string from a boolean to
+# NOTE: `custom_gen_opt_name` gets converted to a string from a boolean to
 # simply things on a Python/Jinja/Javascript side (i.e., strings are strings,
 # but boolean syntax can vary).
 
@@ -260,8 +393,8 @@ def generate_lookup_dict(df, option_names, key):
     }
 
 
-script_lookup = generate_lookup_dict(merged_df, option_names, rendered_key)
-preamble_lookup = generate_lookup_dict(merged_df, option_names, preamble_key)
+script_lookup = generate_lookup_dict(merged_df, visible_option_names, rendered_key)
+preamble_lookup = generate_lookup_dict(merged_df, visible_option_names, preamble_key)
 
 
 # Define the path to your HTML template file
@@ -271,7 +404,7 @@ template_path = "honegumi.html.jinja"
 script_template = core_env.get_template(template_path)
 
 # convert boolean values within option_rows to strings
-jinja_option_rows = option_rows.copy()
+jinja_option_rows = [row for row in visible_option_rows]
 for row in jinja_option_rows:
     row["options"] = [str(opt) for opt in row["options"]]
 
@@ -284,241 +417,24 @@ html = script_template.render(
 )
 
 # Write the rendered HTML to a file
-with open(path.join(doc_dir, "honegumi.html"), "w") as f:
+with open(path.join(DOC_DIR, "honegumi.html"), "w") as f:
     f.write(html)
 
 1 + 1
 
-# # %% Code Graveyard
 
-# # import importlib
-# # "imp0rt": importlib.import_module,
-# # https://stackoverflow.com/a/48270196/13697228
+# doesn't work on Windows due to https://stackoverflow.com/a/61628356/13697228
+# try:
+#     with open(gen_script_path, "w") as f:
+#         f.write(script)
 
+# except Exception as e:
+#     # Get the absolute path of the file
+#     abs_gen_script_path = os.path.abspath(gen_script_path)
 
-# # from honegumi.core.utils.constants import objective_opt_name, model_opt_name
+#     # Add the \\?\ prefix to the absolute path to disable string parsing
+#     # by Windows API
+#     abs_gen_script_path = "\\\\?\\" + abs_gen_script_path
 
-# data = {
-#     objective_opt_name: objective,
-#     model_opt_name: model,
-#     # "imp0rt": importlib.import_module,
-#     # https://stackoverflow.com/a/48270196/13697228
-# }
-
-
-# option_names = list(option_rows.keys())
-# all_opts = [dict(zip(option_rows, v)) for v in product(*option_rows.values())]
-
-# # write data to json file
-# with open(path.join("data", "processed", "data.json"), "w") as f:
-#     json.dump(all_opts, f, indent=4)
-
-# # write rendered_templates to json file
-# with open(path.join("data", "processed", "rendered_templates.json"), "w") as f:
-#     json.dump(rendered_templates, f, indent=4)
-
-# {"name": model_opt_name, "options": [Models.GPEI.name, Models.FULLYBAYESIAN.name]},
-
-# invalid_configs = [
-#     opt
-#     for opt in all_opts
-#     if opt[use_custom_gen_opt_name] is False
-#     and opt[model_opt_name] == Models.FULLYBAYESIAN.name
-# ]
-
-
-# reports = collector.reports
-
-# print(report.capstderr)
-# print(report.capstdout)
-
-
-# report.fspath
-
-# if (
-#     datum[use_custom_gen_opt_name] is False
-#     and datum[model_opt_name] == "FULLYBAYESIAN"
-# ):
-
-
-# # Define your variables
-# option_rows = [
-#     {"name": "row1", "options": ["A", "B"]},
-#     {"name": "row2", "options": ["C", "D", "E"]},
-#     {"name": "row3", "options": ["F", "G"]},
-# ]
-# "name" "options" construct might be a bit cleaner than directly as a dictionary
-# see main.html.jinja
-
-# lookup = {
-#     "A,C,F": "ACF",
-#     "A,C,G": "INVALID",
-#     "A,D,F": "ADF",
-#     "A,D,G": "ADG",
-#     "A,E,F": "AEF",
-#     "A,E,G": "AEG",
-#     "B,C,F": "BCF",
-#     "B,C,G": "BCG",
-#     "B,D,F": "INVALID",
-#     "B,D,G": "BDG",
-#     "B,E,F": "INVALID",
-#     "B,E,G": "BEG",
-# }
-
-# incompatible_configs = [["B", "D", "F"], ["B", "E", "F"], ["A", "C", "G"]]
-
-# merged_df = pd.concat(
-#     [data_df, report_df], axis=0, keys=option_names, ignore_index=True
-# )
-# merged_df = data_df.merge(report_df, on=option_names)
-# merged_df = data_df.merge(report_df, how="outer")
-# data_df.join(report_df, on=option_names, how="outer")
-
-# failed_configs = merged_df[merged_df["passed"] == False].to_dict(orient="records")
-
-# # find the match between report_datum and data
-# match = next(
-#     datum for datum in data if datum[rendered_key] == report_datum[rendered_key]
-# )
-
-# remove cases where use_custom_gen_opt_name is False and model_opt_name is
-# FULLYBAYESIAN
-# all_opts = [
-#     opt
-#     for opt in all_opts
-#     if not (
-#         opt[use_custom_gen_opt_name] is False
-#         and opt[model_opt_name] == Models.FULLYBAYESIAN.name
-#     )
-# ]
-
-
-# import logging
-# _logger = logging.getLogger(__name__)
-
-# pytest.main(["-v", test_template_dir])
-
-
-# def generate_lookup_dict(df, option_names, key):
-#     """
-#     Generate a lookup dictionary from a pandas DataFrame.
-
-#     Parameters
-#     ----------
-#     df : pandas.DataFrame
-#         The DataFrame to generate the lookup dictionary from.
-#     option_names : list of str
-#         The names of the columns to use as options for the lookup dictionary.
-#     key : str
-#         The name of the column to use as the key for the lookup dictionary.
-
-#     Returns
-#     -------
-#     dict
-#         A lookup dictionary where the keys are comma-separated strings of the
-#         option values, and the values are the corresponding values from the
-#         key column.
-
-#     Examples
-#     --------
-#     >>> df = pd.DataFrame({'option1': ['a', 'b', 'c'], 'option2': [1, 2, 3],
-#     >>> 'key': ['foo', 'bar', 'baz']}) generate_lookup_dict(df, ['option1',
-#     'option2'], 'key') {'a,1': 'foo', 'b,2': 'bar', 'c,3': 'baz'} """ return {
-#     ",".join([str(opt[option_name]) for option_name in option_names]):
-#     opt[key] for opt in df.to_dict(orient="records") }
-
-
-# # render notebook
-# template_name = "honegumi.ipynb.jinja"
-# nb_template = core_env.get_template(template_name)
-
-# title = f"{rendered_template_stem}.py"
-# installation = "%pip install ax-platform"
-
-# notebook = nb_template.render(
-#     title=title,
-#     installation=installation,
-#     script=script,
-# )
-
-# nb_path = path.join(gen_notebook_dir, f"{rendered_template_stem}.ipynb")
-
-# with open(nb_path, "w") as f:
-#     f.write(notebook)
-
-# honegumi.ipynb.jinja
-# {
-#  "cells": [
-#   {
-#    "cell_type": "markdown",
-#    "metadata": {},
-#    "source": [
-#     "# {{ title }}"
-#    ]
-#   },
-#   {
-#    "cell_type": "code",
-#    "execution_count": null,
-#    "metadata": {},
-#    "outputs": [],
-#    "source": [
-#     "{{ installation }}"
-#    ]
-#   },
-#   {
-#    "cell_type": "code",
-#    "execution_count": null,
-#    "metadata": {},
-#    "outputs": [],
-#    "source": [
-#     "{{ script }}"
-#    ]
-#   }
-#  ],
-#  "metadata": {
-#   "language_info": {
-#    "name": "python"
-#   },
-#   "orig_nbformat": 4
-#  },
-#  "nbformat": 4,
-#  "nbformat_minor": 2
-# }
-
-# gen_script_file = io.StringIO()
-# print(gen_script_file.getvalue())
-# nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
-
-# retcode = pytest.main(["-v", "tests/test_skeleton.py"], plugins=[collector])
-
-
-# nb_text = f"""
-# # %% [markdown]
-# {colab_badge}
-
-# # %%
-# %pip install ax-platform
-
-# # %%
-# {script}
-# """
-
-# preamble = (
-#     preamble.replace("/", "%2F")
-#     .replace(":", "%3A")
-#     .replace("+", "%2B")
-#     .replace("-", "%2D")
-#     .replace("_", "%5F")
-#     .replace(".", "%2E")
-#     .replace("!", "%21")
-#     .replace("~", "%7E")
-# )
-# # replace "<" with "&lt;" to avoid HTML parsing issues within prism.js
-# preamble = preamble.replace("<", "&lt;")
-
-# following wasn't clickable, even though it was copy-pasted from shields. Maybe
-# I misunderstood the "link" property from https://shields.io/badges
-
-# github_badge = f'<img alt="Static Badge"
-# src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey&link=<{github_link}>">'
-# # noqa E501
+#     with open(abs_gen_script_path, "w") as f:
+#         f.write(script)

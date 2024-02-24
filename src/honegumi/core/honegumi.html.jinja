@@ -87,13 +87,13 @@
         </div>
         {% for row in jinja_option_rows %}
         <div class="row">
-            <label style="width: 20ch; pointer-events: none; cursor: default; text-align: left; border: none; border-left: 3px solid #868686;">
+            <label style="width: 28ch; pointer-events: none; cursor: default; text-align: left; border: none; border-left: 3px solid #868686;">
                 {{row.name}}:
             </label>
             {% for option in row.options %}
-            <input type="radio" id="{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
+            <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
                 option==row.options[0] %} checked{% endif %} onclick="updateText()">
-            <label for="{{ option }}" style="flex-basis: {{ 100 / row.options|length }}%">{{ option }}</label>
+            <label for="{{ row.name }}-{{ option }}" style="flex-basis: {{ 100 / row.options|length }}%">{{ option }}</label>
             {% endfor %}
         </div>
         {% endfor %}
@@ -101,7 +101,7 @@
             <p id="preamble"></p>
         </div>
         <div class="row">
-        <pre class="language-python" style="width: 88ch; overflow: auto; font-size: 12px;">
+        <pre class="language-python" style="width: 96ch; overflow: auto; font-size: 12px;">
             <code id="text" style="border: none;"></code>
         </pre>
         </div>
@@ -129,7 +129,7 @@
             document.getElementById("text").innerHTML = "\n" + rendered;
             var currentConfig = Array.from(rows, function (row) { return row.value; });
 
-            // Generate all possible configurations that deviate by zero or one option from the current configuration
+            // Generate all possible configurations that deviate exactly by one option from the current configuration
             var possibleDeviatingConfigs = [];
             for (var i = 0; i < optionRows.length; i++) {
                 var options = optionRows[i]['options'];
@@ -137,7 +137,10 @@
                     var option = options[j];
                     var deviation = currentConfig.slice();
                     deviation[i] = option;
-                    possibleDeviatingConfigs.push(deviation);
+                    // Skip the configuration if it's the same as the current configuration
+                    if (JSON.stringify(deviation) !== JSON.stringify(currentConfig)) {
+                        possibleDeviatingConfigs.push(deviation);
+                    }
                 }
             }
             // Remove duplicates
@@ -159,9 +162,10 @@
             }
             // Track the one option that was the deviation for each deviating config
             var deviatingOptions = deviatingConfigs.map(function (config) {
-                return config.filter(function (value, index) {
+                var deviatingIndex = config.findIndex(function (value, index) {
                     return value !== currentConfig[index];
-                })[0];
+                });
+                return optionRows[deviatingIndex]['name'] + '-' + config[deviatingIndex];
             });
 
             // Check if the current configuration is invalid
@@ -173,7 +177,10 @@
 
             // If the current configuration is invalid, add all selected options to the list of deviatingOptions
             if (isInvalid) {
-                deviatingOptions = deviatingOptions.concat(currentConfig);
+                var currentConfigWithName = currentConfig.map(function (value, index) {
+                    return optionRows[index]['name'] + '-' + value;
+                });
+                deviatingOptions = deviatingOptions.concat(currentConfigWithName);
             }
 
             // Logging (OK to comment out)

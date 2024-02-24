@@ -4,12 +4,12 @@ channels:
   - conda-forge
   # - pytorch
 dependencies:
-  - python >=3.6,<3.11
+  - python >=3.6,<3.12
   - pip
   - ipython
   - ipywidgets
   - pip:
-     - -e .  # install git checkout of honegumi in editable mode
+     - -e .[ax,dev]  # install git checkout of honegumi in editable mode
      # add here only pip-packages that are not available in conda/conda-forge! E.g.:
      # - icecream
 
@@ -20,6 +20,6 @@ dependencies:
   - tox
   # - pre_commit # causes issues with conda! (e.g., pre-commit autoupdate)
   # - nbdime
-  - nbstripout
+  # - nbstripout
   - sphinx
   - recommonmark
