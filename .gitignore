@@ -50,6 +50,7 @@ MANIFEST
 
 # Per-project virtualenvs
 .venv*/
+venv/*
 .conda*/
 .python-version
 reports/~$honegumi-logo.pptx
