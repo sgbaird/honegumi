@@ -53,6 +53,7 @@ jobs:
   test:
     needs: prepare
     strategy:
+      fail-fast: false
       matrix:
         python:
         - "3.8"  # oldest Python supported by PSF
