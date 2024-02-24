@@ -48,17 +48,6 @@ dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
 if dummy:
     print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
 
-# REVIEW: requires some refactoring to get these options into the template, and
-# only for FULLYBAYESIAN. Would speed up testing, but perhaps not worth the complexity
-# focus on other tasks. EDIT: model_kwargs is now a template parameter
-
-# if dummy:
-#     num_samples = 16  # 8 was too low
-#     warmup_steps = 32  # 16 was too low
-# else:
-#     num_samples = 256
-#     warmup_steps = 512
-
 rendered_key = "rendered_template"
 is_compatible_key = "is_compatible"
 preamble_key = "preamble"
@@ -79,14 +68,14 @@ option_rows = [
     {"name": EXISTING_DATA_KEY, "options": [False, True], "hidden": False},
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     # consider collapsing these three constraints into single option # noqa: E501
-    {"name": SUM_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
-    {"name": ORDER_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
-    {"name": LINEAR_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
+    {"name": SUM_CONSTRAINT_KEY, "options": [False], "hidden": False},
+    {"name": ORDER_CONSTRAINT_KEY, "options": [False], "hidden": False},
+    {"name": LINEAR_CONSTRAINT_KEY, "options": [False], "hidden": False},
     {
         "name": COMPOSITIONAL_CONSTRAINT_KEY,
-        "options": [False, True],
+        "options": [False],
         "hidden": False,
-    },  # TODO: Add option for compositional linear constraint! # noqa E501 # NOTE: AC Microcourses
+    },  # noqa E501 # NOTE: AC Microcourses
     {"name": CATEGORICAL_KEY, "options": [False, True], "hidden": False},
     {"name": CUSTOM_THRESHOLD_KEY, "options": [False, True], "hidden": False},
     # noise! zero, fixed, variable, inferred
