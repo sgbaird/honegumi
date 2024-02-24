@@ -27,7 +27,7 @@ repos:
 
 # If you want to avoid flake8 errors due to unused vars or imports:
 - repo: https://github.com/PyCQA/autoflake
-  rev: v2.2.1
+  rev: v2.3.0
   hooks:
   - id: autoflake
     args: [
@@ -42,14 +42,14 @@ repos:
   - id: isort
 
 - repo: https://github.com/psf/black
-  rev: 24.1.1
+  rev: 24.2.0
   hooks:
   - id: black
     exclude: ^tests/generated_scripts/
     language_version: python3
 
 - repo: https://github.com/psf/black
-  rev: 24.1.1
+  rev: 24.2.0
   hooks:
   - id: black
     exclude: ^(?!tests/generated_scripts/).* # any string that does not start with tests/generated_scripts/
