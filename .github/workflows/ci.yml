@@ -73,6 +73,8 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: pip install pytest-xdist
       - name: Retrieve pre-built distribution files
         uses: actions/download-artifact@v3
         with: {name: python-distribution-files, path: dist/}
@@ -80,7 +82,7 @@ jobs:
         run: >-
           pipx run --python '${{ steps.setup-python.outputs.python-path }}'
           tox --installpkg '${{ needs.prepare.outputs.wheel-distribution }}'
-          -- -rFEx --durations 10 --color yes  # pytest args
+          -- -rFEx --durations 10 --color yes -n auto  # pytest args
   #     - name: Generate coverage report
   #       run: pipx run coverage lcov -o coverage.lcov
   #     - name: Upload partial coverage report
