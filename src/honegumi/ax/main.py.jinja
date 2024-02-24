@@ -91,8 +91,8 @@ total = 10.0
 {# Note the lack of comma after x2, and the presence of a comma before the x3 #}
 X_train = pd.DataFrame([
     {
-        "x1": {% if comp %}7.0{% else %}-3.0{% endif %},
-        "x2": 2.0
+        "x1": {% if comp %}4.0{% else %}-3.0{% endif %},
+        "x2": 5.0
         {% if comp %},"x3": 1.0{% endif %}
         {% if cat %},"c1": "A"{% endif %}
     },

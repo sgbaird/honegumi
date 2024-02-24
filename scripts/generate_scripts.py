@@ -72,7 +72,7 @@ option_rows = [
     {"name": LINEAR_CONSTRAINT_KEY, "options": [False], "hidden": False},
     {
         "name": COMPOSITIONAL_CONSTRAINT_KEY,
-        "options": [False],
+        "options": [False, True],
         "hidden": False,
     },  # noqa E501 # NOTE: AC Microcourses
     {"name": CATEGORICAL_KEY, "options": [False, True], "hidden": False},
