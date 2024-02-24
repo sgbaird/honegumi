@@ -11,7 +11,7 @@ import pytest
 from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-# import honegumi.ax.utils.constants as constants 
+# import honegumi.ax.utils.constants as constants
 from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
     CATEGORICAL_KEY,
     COMPOSITIONAL_CONSTRAINT_KEY,
