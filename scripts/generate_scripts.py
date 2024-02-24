@@ -11,7 +11,6 @@ import pytest
 from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
-# import honegumi.ax.utils.constants as constants
 from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
     CATEGORICAL_KEY,
     COMPOSITIONAL_CONSTRAINT_KEY,
@@ -68,7 +67,7 @@ option_rows = [
     {"name": EXISTING_DATA_KEY, "options": [False, True], "hidden": False},
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     # consider collapsing these three constraints into single option # noqa: E501
-    {"name": SUM_CONSTRAINT_KEY, "options": [False], "hidden": False},
+    {"name": SUM_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
     {"name": ORDER_CONSTRAINT_KEY, "options": [False], "hidden": False},
     {"name": LINEAR_CONSTRAINT_KEY, "options": [False], "hidden": False},
     {
