@@ -69,7 +69,7 @@ option_rows = [
     # consider collapsing these three constraints into single option # noqa: E501
     {"name": SUM_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
     {"name": ORDER_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
-    {"name": LINEAR_CONSTRAINT_KEY, "options": [False], "hidden": False},
+    {"name": LINEAR_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
     {
         "name": COMPOSITIONAL_CONSTRAINT_KEY,
         "options": [False, True],
