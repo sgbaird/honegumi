@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Interactive Grid Example</title>
+    <link rel="stylesheet" href="_static/prism/prism.css">
+    <link rel="stylesheet" href="honegumi_style.css">
+</head>
+
+<body onload="updateText()">
+    <script src="honegumi_script.js"></script>
+    <form>
+        <div class="title-block">
+            <div class="row align-items-center">
+                <img src="_static/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                <h2 style="margin-bottom: 0;">Honegumi</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <label class="row-label">objective:</label>
+
+            <input type="radio" id="objective-single" name="objective" value="single" checked onclick="updateText()">
+            <label class="row-option" for="objective-single">single</label>
+
+            <input type="radio" id="objective-multi" name="objective" value="multi" onclick="updateText()">
+            <label class="row-option" for="objective-multi">multi</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose between single and multi-objective optimization based 
+            on your project needs. Single objective optimization targets one primary 
+            goal (e.g. maximize the strength of a material), while multi-objective 
+            optimization considers several objectives simultaneously (e.g. maximize the 
+            strength of a material while minimizing synthesis cost). Select the option 
+            that best aligns with your optimization goals and problem complexity."
+            >&#9432;
+            </span>
+        </div>
+
+        <div class="row">
+            <label class="row-label">model:</label>
+
+            <input type="radio" id="model-GPEI" name="model" value="GPEI" checked onclick="updateText()">
+            <label class="row-option" for="model-GPEI">GPEI</label>
+
+            <input type="radio" id="model-FULLYBAYESIAN" name="model" value="FULLYBAYESIAN" onclick="updateText()">
+            <label class="row-option" for="model-FULLYBAYESIAN">FULLYBAYESIAN</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose between frequentist and fully bayesian implementations 
+            of the gaussian process (GP) surrogate model. The frequentist GP model 
+            offers efficiency and speed, while the fully bayesian option models the GP 
+            parameters as random variables through MCMC estimation, providing a deeper 
+            exploration of uncertainty. The fully bayesian treatment has historically 
+            provided better closed loop Bayesian optimization performance, but comes at 
+            the cost of higher computational demand. Consider your computational resources 
+            and the complexity of your optimization task when making your selection."
+            >&#9432;
+            </span>
+        </div>
+
+        <div class="row">
+            <label class="row-label">existing_data:</label>
+
+            <input type="radio" id="existing_data-False" name="existing_data" value="False" checked onclick="updateText()">
+            <label class="row-option" for="existing_data-False">False</label>
+
+            <input type="radio" id="existing_data-True" name="existing_data" value="True" onclick="updateText()">
+            <label class="row-option" for="existing_data-True">True</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to fit the surrogate model to previous data 
+            before starting the optimization process. Including historical data may 
+            give your model a better starting place and potentially speed up 
+            convergence. Conversely, excluding existing data means starting the 
+            optimization from scratch, which might be preferred in scenarios where 
+            historical data could introduce bias or noise into the optimization 
+            process. Consider the relevance and reliability of your existing data when 
+            making your selection."
+            >&#9432;
+            </span>
+        </div>
+
+        <div class="row">
+            <label class="row-label">sum_constraint:</label>
+
+            <input type="radio" id="sum_constraint-False" name="sum_constraint" value="False" checked onclick="updateText()">
+            <label class="row-option" for="sum_constraint-False">False</label>
+
+            <input type="radio" id="sum_constraint-True" name="sum_constraint" value="True" onclick="updateText()">
+            <label class="row-option" for="sum_constraint-True">True</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to apply a sum constraint over two or more 
+            optimization variables (e.g. ensuring total allocation remains within 
+            available budget). This constraint focusses generated optimization trials 
+            on feasible candidates at the cost of flexibility. Consider whether such a 
+            constraint reflects the reality of variable interactions when selecting 
+            this option."
+            >&#9432;
+            </span>
+
+        </div>
+
+        <div class="row">
+            <label class="row-label">order_constraint:</label>
+
+            <input type="radio" id="order_constraint-False" name="order_constraint" value="False" checked onclick="updateText()">
+            <label class="row-option" for="order_constraint-False">False</label>
+
+            <input type="radio" id="order_constraint-True" name="order_constraint" value="True" onclick="updateText()">
+            <label class="row-option" for="order_constraint-True">True</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to implement an order constraint over two or 
+            more optimization variables (e.g. ensuring certain tasks precede others). 
+            This constraint focusses generated optimization trials on variable 
+            combinations that follow a specific order. Excluding the constraint offers 
+            flexibility in variable arrangements but may neglect important task 
+            sequencing or value inequality considerations. Consider whether such a 
+            constraint reflects the reality of variable interactions when selecting 
+            this option."
+            >&#9432;
+            </span>
+
+        </div>
+
+        <div class="row">
+            <label class="row-label">linear_constraint:</label>
+
+            <input type="radio" id="linear_constraint-False" name="linear_constraint" value="False" checked onclick="updateText()">
+            <label class="row-option" for="linear_constraint-False">False</label>
+
+            <input type="radio" id="linear_constraint-True" name="linear_constraint" value="True" onclick="updateText()">
+            <label class="row-option" for="linear_constraint-True">True</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to implement a linear constraint over two or 
+            more optimization variables such that the linear combination of parameter 
+            values adheres to an inequality (e.g. 0.2\*x-bias + 0.5*y-bias <= 0.1). 
+            This constraint focusses generated optimization trials on variable 
+            combinations that follow an enforce rule at the cost of flexibility. 
+            Consider whether such a constraint reflects the reality of variable 
+            interactions when selecting this option."
+            >&#9432;
+            </span>
+
+        </div>
+
+        <div class="row">
+            <label class="row-label">composition_constraint:</label>
+
+            <input type="radio" id="composition_constraint-False" name="composition_constraint" value="False" checked onclick="updateText()">
+            <label class="row-option" for="composition_constraint-False">False</label>
+
+            <input type="radio" id="composition_constraint-True" name="composition_constraint" value="True" onclick="updateText()">
+            <label class="row-option" for="composition_constraint-True">True</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to include a composition constraint over two 
+            or more optimization variables such that their sum does not exceed a 
+            specified total (e.g. ensuring the mole fractions of elements in a 
+            composition sum to one). This constraint is particularly relevant to 
+            fabrication-related tasks where the quantities of components must sum to a 
+            total. Consider whether such a constraint reflects the reality of variable 
+            interactions when selecting this option."
+            >&#9432;
+            </span>
+
+        </div>
+
+        <div class="row">
+            <label class="row-label">categorical:</label>
+
+            <input type="radio" id="categorical-False" name="categorical" value="False" checked onclick="updateText()">
+            <label class="row-option" for="categorical-False">False</label>
+
+            <input type="radio" id="categorical-True" name="categorical" value="True" onclick="updateText()">
+            <label class="row-option" for="categorical-True">True</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to include a categorical variable in the 
+            optimization process (e.g. dark or milk chocolate chips in a cookie 
+            recipe). Including categorical variables allows choice parameters and 
+            their interaction with continuous variables to be optimized. Note that 
+            adding categorical variables can create discontinuities in the search space 
+            that are difficult to optimize over. Consider the value of adding 
+            categorical variables to the optimization task when selecting this option."
+            >&#9432;
+            </span>
+
+        </div>
+
+        <div class="row">
+            <label class="row-label">custom_threshold:</label>
+
+            <input type="radio" id="custom_threshold-False" name="custom_threshold" value="False" checked onclick="updateText()">
+            <label class="row-option" for="custom_threshold-False">False</label>
+
+            <input type="radio" id="custom_threshold-True" name="custom_threshold" value="True" onclick="updateText()">
+            <label class="row-option" for="custom_threshold-True">True</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to apply custom thresholds to objectives in a 
+            multi-objective optimization problem (e.g. a minimum acceptable strength 
+            requirement for a material). Setting a threshold on an objective guides the 
+            optimization algorithm to prioritize solutions that meet or exceed these 
+            criteria. Excluding thresholds enables greater exploration of the design 
+            space, but may produce sub-optimal solutions. Consider whether threshold 
+            values reflect the reality or expectations of your optimization task when 
+            selection this option."
+            >&#9432;
+            </span>
+
+        </div>
+
+        <div class="row">
+            <label class="row-label">synchrony:</label>
+
+            <input type="radio" id="synchrony-single" name="synchrony" value="single" checked onclick="updateText()">
+            <label class="row-option" for="synchrony-single">single</label>
+
+            <input type="radio" id="synchrony-batch" name="synchrony" value="batch" onclick="updateText()">
+            <label class="row-option" for="synchrony-batch">batch</label>
+
+            <span
+            class="tooltip" 
+            data-tooltip="Choose whether to perform single or batch evaluations for 
+            your Bayesian optimization campaign. Single evaluations analyze one 
+            candidate solution at a time, offering precise control and adaptability 
+            after each trial at the expense of more compute time. Batch evaluations, 
+            however, process several solutions in parallel, significantly reducing the 
+            number of optimization cycles but potentially diluting the specificity of 
+            adjustments. Batch evaluation is helpful in scenarios where it is 
+            advantageous to test several solutions simultaneously. Consider the nature 
+            of your evaluation tool when selecting between the two options."
+            >&#9432;
+            </span>
+
+        </div>
+
+        <div class="row align-items-end">
+            <p id="preamble"></p>
+        </div>
+        <div class="row">
+        <pre class="language-python" style="width: 96ch; overflow: auto; font-size: 12px;">
+            <code id="text" style="border: none;"></code>
+        </pre>
+        </div>
+
+    </form>
+    <script>
+        function updateText() {
+            var rows = document.querySelectorAll('input[type="radio"]:checked');
+            // Remove strikethrough formatting from all labels except for the selected radio button's label
+            // While not strictly necessary, it prevents a possible "disappear/appear" effect
+            var labels = document.querySelectorAll('label');
+            labels.forEach(function (label) {
+                if (label.htmlFor !== rows.id) {
+                    label.innerHTML = label.textContent;
+                }
+            });
+            var key = Array.from(rows, function (row) { return row.value; }).join(',');
+            var rendered = scriptLookup[key];
+            var preamble = preambleLookup[key];
+
+            // Update the GitHub link
+            document.getElementById("preamble").innerHTML = preamble
+            document.getElementById("text").innerHTML = "\n" + rendered;
+            var currentConfig = Array.from(rows, function (row) { return row.value; });
+
+            // Generate all possible configurations that deviate exactly by one option from the current configuration
+            var possibleDeviatingConfigs = [];
+            for (var i = 0; i < optionRows.length; i++) {
+                var options = optionRows[i]['options'];
+                for (var j = 0; j < options.length; j++) {
+                    var option = options[j];
+                    var deviation = currentConfig.slice();
+                    deviation[i] = option;
+                    // Skip the configuration if it's the same as the current configuration
+                    if (JSON.stringify(deviation) !== JSON.stringify(currentConfig)) {
+                        possibleDeviatingConfigs.push(deviation);
+                    }
+                }
+            }
+            // Remove duplicates
+            possibleDeviatingConfigs = possibleDeviatingConfigs.filter(function (config, index) {
+                return possibleDeviatingConfigs.indexOf(config) === index;
+            });
+
+            // Find the invalid configurations that match the deviating configurations
+            var deviatingConfigs = [];
+            for (var i = 0; i < invalidConfigs.length; i++) {
+                var config = invalidConfigs[i];
+                if (possibleDeviatingConfigs.some(function (deviation) {
+                    return deviation.every(function (value, index) {
+                        return value === config[index];
+                    });
+                })) {
+                    deviatingConfigs.push(config);
+                }
+            }
+            // Track the one option that was the deviation for each deviating config
+            var deviatingOptions = deviatingConfigs.map(function (config) {
+                var deviatingIndex = config.findIndex(function (value, index) {
+                    return value !== currentConfig[index];
+                });
+                return optionRows[deviatingIndex]['name'] + '-' + config[deviatingIndex];
+            });
+
+            // Check if the current configuration is invalid
+            var isInvalid = invalidConfigs.some(function (config) {
+                return config.every(function (value, index) {
+                    return value === currentConfig[index];
+                });
+            });
+
+            // If the current configuration is invalid, add all selected options to the list of deviatingOptions
+            if (isInvalid) {
+                var currentConfigWithName = currentConfig.map(function (value, index) {
+                    return optionRows[index]['name'] + '-' + value;
+                });
+                deviatingOptions = deviatingOptions.concat(currentConfigWithName);
+            }
+
+            // Logging (OK to comment out)
+            console.group('Current Config');
+            console.table(currentConfig);
+            console.group('Deviations');
+            console.group('Possible Deviating Configs');
+            console.table(possibleDeviatingConfigs);
+            console.groupEnd();
+            console.group('Deviating Configs');
+            console.table(deviatingConfigs);
+            console.groupEnd();
+            console.group('Deviating Options');
+            console.table(deviatingOptions);
+            console.groupEnd();
+            console.groupEnd();
+
+            // Add strikethrough for each deviating option
+            deviatingOptions.forEach(function (option) {
+                var label = document.querySelector('label[for="' + option + '"]');
+                if (label) {
+                    label.innerHTML = '<s>' + label.innerHTML + '</s>';
+                }
+            });
+            Prism.highlightAll();
+        }
+    </script>
+    <script src="_static/prism/prism.js"></script>
+</body>
+
+</html>
+
+<!-- // Generate all possible configurations that deviate by zero or one option from the current configuration
+// start with current config
+var possibleDeviatingConfigs = [currentConfig.slice()]; -->
