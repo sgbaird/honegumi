@@ -281,8 +281,12 @@ for datum in data:
         "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
     )
 
-    notebook_path = path.join(GEN_NOTEBOOK_DIR, f"{rendered_template_stem}.ipynb")
-    colab_link = urljoin(colab_prefix, notebook_path)
+    notebook_fname = f"{rendered_template_stem}.ipynb"
+    notebook_path = path.join(GEN_NOTEBOOK_DIR, notebook_fname)
+    # HACK: issue with + encoding becoming %20 instead of %2B due to use of \\
+    # instead of / Alternative is using:
+    # `encoded_notebook_fname = quote(notebook_fname)`
+    colab_link = urljoin(colab_prefix, notebook_path).replace("\\", "/")
     colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
 
     preamble = f"{colab_badge} {github_badge}"
