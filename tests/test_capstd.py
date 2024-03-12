@@ -1,6 +1,8 @@
 def test_simple():
-    from ax.service.ax_client import AxClient
+    from ax.service.ax_client import AxClient, ObjectiveProperties
     from ax.utils.measurement.synthetic_functions import branin
+
+    obj1_name = "branin"
 
     ax_client = AxClient()
     ax_client.create_experiment(
@@ -8,8 +10,9 @@ def test_simple():
             {"name": "x1", "type": "range", "bounds": [-5.0, 10.0]},
             {"name": "x2", "type": "range", "bounds": [0.0, 10.0]},
         ],
-        objective_name="branin",
-        minimize=True,
+        objectives={
+            obj1_name: ObjectiveProperties(minimize=True),
+        },
     )
 
     for _ in range(15):
