@@ -5,6 +5,7 @@ from os import path
 from pathlib import Path
 from urllib.parse import urljoin
 
+import json
 import jupytext
 import pandas as pd
 import pytest
@@ -56,27 +57,70 @@ core_env = Environment(
     loader=FileSystemLoader(CORE_TEMPLATE_DIR), undefined=StrictUndefined
 )
 
+tooltips = json.load(open("scripts/resources/tooltips.json", "r"))
+
 # opts stands for options
 # TODO: make names more accessible and include tooltip text with details
 # REVIEW: consider using only high-level features, not platform-specific details
 # NOTE: Hidden variables are ones that I might want to unhide later
 option_rows = [
-    {"name": OBJECTIVE_OPT_KEY, "options": ["single", "multi"], "hidden": False},
-    {"name": MODEL_OPT_KEY, "options": ["GPEI", "FULLYBAYESIAN"], "hidden": False},
+    {
+        "name": OBJECTIVE_OPT_KEY,
+        "options": ["single", "multi"],
+        "tooltip": tooltips["objective"],
+        "hidden": False,
+    },
+    {
+        "name": MODEL_OPT_KEY,
+        "options": ["GPEI", "FULLYBAYESIAN"],
+        "tooltip": tooltips["model"],
+        "hidden": False,
+    },
     {"name": CUSTOM_GEN_KEY, "options": [False, True], "hidden": True},
-    {"name": EXISTING_DATA_KEY, "options": [False, True], "hidden": False},
+    {
+        "name": EXISTING_DATA_KEY,
+        "options": [False, True],
+        "tooltip": tooltips["existing_data"],
+        "hidden": False,
+    },
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     # consider collapsing these three constraints into single option # noqa: E501
-    {"name": SUM_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
-    {"name": ORDER_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
-    {"name": LINEAR_CONSTRAINT_KEY, "options": [False, True], "hidden": False},
+    {
+        "name": SUM_CONSTRAINT_KEY,
+        "options": [False, True],
+        "tooltip": tooltips["sum_constraint"],
+        "hidden": False,
+    },
+    {
+        "name": ORDER_CONSTRAINT_KEY,
+        "options": [False, True],
+        "tooltip": tooltips["order_constraint"],
+        "hidden": False,
+    },
+    {
+        "name": LINEAR_CONSTRAINT_KEY,
+        "options": [False, True],
+        "tooltip": tooltips["linear_constraint"],
+        "hidden": False,
+    },
     {
         "name": COMPOSITIONAL_CONSTRAINT_KEY,
         "options": [False, True],
+        "tooltip": tooltips["composition_constraint"],
         "hidden": False,
     },  # noqa E501 # NOTE: AC Microcourses
-    {"name": CATEGORICAL_KEY, "options": [False, True], "hidden": False},
-    {"name": CUSTOM_THRESHOLD_KEY, "options": [False, True], "hidden": False},
+    {
+        "name": CATEGORICAL_KEY,
+        "options": [False, True],
+        "tooltip": tooltips["categorical"],
+        "hidden": False,
+    },
+    {
+        "name": CUSTOM_THRESHOLD_KEY,
+        "options": [False, True],
+        "tooltip": tooltips["custom_threshold"],
+        "hidden": False,
+    },
     # noise! zero, fixed, variable, inferred
     # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses
@@ -86,6 +130,7 @@ option_rows = [
     {
         "name": SYNCHRONY_OPT_KEY,
         "options": ["single", "batch"],  # TODO: add "asynchronous"
+        "tooltip": tooltips["synchrony"],
         "hidden": False,
     },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # noqa E501 # NOTE: AC Microcourses

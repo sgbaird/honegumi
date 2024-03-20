@@ -64,16 +64,16 @@ input[type="radio"]:checked+label {
     left: 40px;
     top: -10%;
     text-align: left;
-    width: 200px;
+    width: 300px;
     color: #FFF;
-    background: #1F2742;
+    background: #2C2C2C;
     padding: 10px;
     display: none;
 }
 
 .tooltip:before {
     content: "";
-    background: #1F2742;
+    background: #2C2C2C;
     transform: rotate(45deg);
     width: 10px;
     height: 10px;

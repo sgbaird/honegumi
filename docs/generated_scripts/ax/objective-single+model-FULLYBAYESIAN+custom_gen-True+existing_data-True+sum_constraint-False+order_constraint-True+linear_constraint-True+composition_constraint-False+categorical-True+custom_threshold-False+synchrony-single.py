@@ -1,8 +1,10 @@
 import numpy as np
-import pandas as pd
+from ax.service.ax_client import AxClient, ObjectiveProperties
+
 from ax.modelbridge.factory import Models
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
-from ax.service.ax_client import AxClient, ObjectiveProperties
+
+import pandas as pd
 
 obj1_name = "branin"
 
