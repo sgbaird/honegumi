@@ -1,11 +1,11 @@
 import io
+import json
 import os
 from itertools import product
 from os import path
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin
 
-import json
 import jupytext
 import pandas as pd
 import pytest
@@ -133,7 +133,8 @@ option_rows = [
         "tooltip": tooltips["synchrony"],
         "hidden": False,
     },
-    # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # noqa E501 # NOTE: AC Microcourses
+    # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
+    # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
 ]
 
 # E.g.,
@@ -326,8 +327,13 @@ for datum in data:
         "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
     )
 
-    notebook_path = path.join(GEN_NOTEBOOK_DIR, f"{rendered_template_stem}.ipynb")
-    colab_link = urljoin(colab_prefix, notebook_path)
+    notebook_fname = f"{rendered_template_stem}.ipynb"
+    notebook_path = path.join(GEN_NOTEBOOK_DIR, notebook_fname)
+    # HACK: issue with + encoding becoming %20 instead of %2B due to use of \\,
+    # and maybe other issues (hence both quote fn and replace line)
+    encoded_notebook_fname = quote(notebook_fname)
+    encoded_notebook_path = path.join(GEN_NOTEBOOK_DIR, encoded_notebook_fname)
+    colab_link = urljoin(colab_prefix, encoded_notebook_path).replace("\\", "/")
     colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
 
     preamble = f"{colab_badge} {github_badge}"
