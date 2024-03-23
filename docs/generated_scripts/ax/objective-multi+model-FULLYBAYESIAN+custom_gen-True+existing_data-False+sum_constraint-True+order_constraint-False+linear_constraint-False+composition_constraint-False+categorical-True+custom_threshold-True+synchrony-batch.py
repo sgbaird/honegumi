@@ -1,9 +1,7 @@
 import numpy as np
-from ax.service.ax_client import AxClient, ObjectiveProperties
-
 from ax.modelbridge.factory import Models
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
-
+from ax.service.ax_client import AxClient, ObjectiveProperties
 
 obj1_name = "branin"
 obj2_name = "branin_swapped"

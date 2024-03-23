@@ -1,7 +1,6 @@
 import numpy as np
 from ax.service.ax_client import AxClient, ObjectiveProperties
 
-
 obj1_name = "branin"
 
 
