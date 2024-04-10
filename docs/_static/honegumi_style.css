@@ -46,7 +46,7 @@ input[type="radio"]:checked+label {
     background-color: #b1b1b1;
 }
 
-.tooltip {
+.tooltip-icon {
     display: inline-block;
     position: relative;
     cursor: pointer;
@@ -56,36 +56,48 @@ input[type="radio"]:checked+label {
     margin: 0px 5px;
     text-align: center;
 }
-  
-.tooltip:after {
-    content: attr(data-tooltip);
-    display: block;
+
+.tooltip-text {
     position: absolute;
-    left: 40px;
-    top: -10%;
-    text-align: left;
+    display: none;
+    margin-left: 40px;
+    padding: 10px ;
     width: 300px;
+    top: -3%;
+    text-align: left;
     color: #FFF;
     background: #2C2C2C;
-    padding: 10px;
-    display: none;
-}
+  }
 
-.tooltip:before {
-    content: "";
-    background: #2C2C2C;
-    transform: rotate(45deg);
-    width: 10px;
-    height: 10px;
-    top: 25%;
-    left: 40px;
-    position: absolute;
-    margin-left: -5px;
-    display: none;
-    z-index: 2;
-}
-
-.tooltip:hover:after,
-.tooltip:hover:before {
+.tooltip-text.active {
     display: block;
+}
+  
+.tooltip-icon:hover .tooltip-text,
+.tooltip-text:hover{
+    display: block;
+}
+
+/* An invisible arrow that prevents hover deactivation*/
+.tooltip-text.arrow:before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 5px;
+    border-top: 10px solid transparent;
+    border-right: 20px solid #2C2C2C00;
+    border-left: none;
+    border-bottom: 10px solid transparent;
+}
+
+/* The black arrow the user sees */
+.tooltip-text.arrow:after {
+    content: "";
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    border-top: 8px solid transparent;
+    border-right: 8px solid #2C2C2C;
+    border-left: none;
+    border-bottom: 8px solid transparent;
 }
