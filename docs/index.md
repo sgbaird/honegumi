@@ -43,12 +43,16 @@ LLMs are good at recognizing patterns but really bad at suggesting Bayesian opti
 :maxdepth: 2
 
 Overview <readme>
+
+GitHub Source <https://github.com/sgbaird/honegumi>
+
+Development
+-----------
 Contributions & Help <contributing>
 License <license>
 Authors <authors>
 Changelog <changelog>
 Module Reference <api/modules>
-GitHub Source <https://github.com/sgbaird/honegumi>
 ```
 
 ## Indices and tables
