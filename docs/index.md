@@ -1,7 +1,6 @@
 ![honegumi-logo](https://github.com/sgbaird/honegumi/raw/main/reports/figures/honegumi-logo.png)
 
-```{note} 🚧 This tool is under active development.
-We are [looking for contributors](https://honegumi.readthedocs.io/en/latest/contributing.html), so please let us know if you're interested! See [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2). If you like this tool, please consider [starring it on GitHub](https://github.com/sgbaird/honegumi).
+```{note} 🚧 While fully functional, this tool is actively being developed. We are [looking for contributors](https://honegumi.readthedocs.io/en/latest/contributing.html), so please let us know if you're interested! See [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2). If you like this tool, please consider [starring it on GitHub](https://github.com/sgbaird/honegumi).
 ```
 
 <a class="github-button" href="https://github.com/sgbaird/honegumi"
@@ -19,7 +18,34 @@ aria-label="Issue sgbaird/honegumi on GitHub">Issue</a>
 
 <!-- data-color-scheme="no-preference: light; light: light; dark: dark;"  -->
 
-Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), which means _skeletal framework_ in Japanese, is a package for interactively creating API tutorials with a focus on optimization packages such as Meta's Ax Platform. You can interact with Honegumi "in the flesh" using the interactive grid below. Select one option per row and watch the template dynamically appear. Click the "Open in Colab" badge to open a self-contained Google Colab notebook corresponding to the selected template. Click "Open in GitHub" to view the notebook source directly.
+Real-world chemistry and materials science optimization tasks are complex! Here are some example features of these kinds of tasks:
+
+| Topic           | Description |
+| --------------- | ----------- |
+| Noise           | Repeat measurements are stochastic |
+| Multi-fidelity  | Some measurements are higher quality but much more costly |
+| Multi-objective | Almost always, tasks have multiple properties that are important |
+| High-dimensional| Like finding the proverbial "needle-in-a-haystack", the search spaces are enormous |
+| Constraints     | Not all combinations of parameters are valid (i.e., constraints) |
+| Mixed-variable  | Often there is a mixture of numerical and categorical variables |
+
+<!-- Maybe alloy discovery slide as a figure? -->
+
+However, applications of state-of-the-art algorithms to these materials science tasks have been limited. Advanced implementations are still challenging, even for veteran materials informatics practitioners. In addition to combining multiple algorithms, there are other logistical issues, such as using existing data, embedding physical descriptors, and modifying search spaces. To address these challenges, we present *Honegumi*, an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).
+
+```{tip}
+Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), a Japanese word meaning *skeletal framework* is technically pronounced "ho-nay-goo-mee", but you can also refer to this tool as "honey gummy" to make it easy to remember 😉
+```
+
+<!-- *Honegumi* is an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).  -->
+
+Similar to [PyTorch's installation docs](https://pytorch.org/get-started/locally/), users interactively toggle the options to generate the desired code output. These scripts are unit-tested, and invalid configurations are crossed out. This means you can expect the scripts to run without throwing errors. Honegumi is *not* a wrapper for optimization packages; instead, think of it as an interactive tutorial generator. Honegumi is the first Bayesian optimization template generator of its kind, and we envision that this tool will reduce the barrier to entry for applying advanced Bayesian optimization to real-world materials science tasks. It also [pairs well with LLMs](#a-perfect-pairing-with-llms)!
+
+<!-- Meta's [Adaptive Experimentation (Ax) platform](https://ax.dev/) is one of the few optimization platforms capable of handling these challenges without oversimplification. While Ax and its backbone, [BoTorch](https://botorch.org/), have gained traction in chemistry and materials science,  -->
+
+<!-- Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), which means _skeletal framework_ in Japanese, is a package for interactively creating API tutorials with a focus on optimization packages such as Meta's Ax Platform.  -->
+
+Interact with Honegumi using the grid below. Select one option per row and watch the template dynamically appear. Click the <img src="https://colab.research.google.com/assets/colab-badge.svg" height=10> badge to open a self-contained Google Colab notebook corresponding to the selected script. Click the <img src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey" height=10> badge to view the notebook source directly. For example, if you want a script that optimizes multiple objectives simultaneously (multi-objective) as a function of many parameters (high-dimensional), you would select `multi` from the `objective` option row and `FULLYBAYESIAN` from the `model` row. Hover your mouse over the 🛈 icon for each row to learn more about which options may be more suited to your task.
 
 ```{raw} html
 :file: honegumi.html
@@ -42,18 +68,12 @@ LLMs are good at recognizing patterns but really bad at suggesting Bayesian opti
 ```{toctree}
 :maxdepth: 2
 
-Overview <readme>
-
-GitHub Source <https://github.com/sgbaird/honegumi>
-
-Development
------------
-Contributions & Help <contributing>
-License <license>
-Authors <authors>
-Changelog <changelog>
-Module Reference <api/modules>
+🔰 Tutorials <tutorials>
+🧑‍💻 Development <development>
+🌐 GitHub Source <https://github.com/sgbaird/honegumi>
 ```
+
+<!-- Overview <readme> -->
 
 ## Indices and tables
 
