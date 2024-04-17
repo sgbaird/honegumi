@@ -34,7 +34,7 @@ Real-world chemistry and materials science optimization tasks are complex! Here 
 However, applications of state-of-the-art algorithms to these materials science tasks have been limited. Advanced implementations are still challenging, even for veteran materials informatics practitioners. In addition to combining multiple algorithms, there are other logistical issues, such as using existing data, embedding physical descriptors, and modifying search spaces. To address these challenges, we present *Honegumi*, an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).
 
 ```{tip}
-Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), a Japanese word meaning *skeletal framework* is technically pronounced "ho-nay-goo-mee", but you can also refer to this tool as "honey gummy" to make it easy to remember 😉
+Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), a Japanese word meaning *skeletal framework*, is technically pronounced "ho-nay-goo-mee", but you can also refer to this tool as "honey gummy" to make it easy to remember 😉
 ```
 
 <!-- *Honegumi* is an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).  -->
