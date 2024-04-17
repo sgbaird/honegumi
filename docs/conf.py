@@ -45,7 +45,10 @@ except FileNotFoundError:
 try:
     import sphinx
 
-    cmd_line = f"sphinx-apidoc --implicit-namespaces -f -o {output_dir} {module_dir}"
+    # https://stackoverflow.com/questions/71343831/sphinx-ignores-py-file-starting-with-a-in-filename
+    cmd_line = (
+        f"sphinx-apidoc --implicit-namespaces --private -f -o {output_dir} {module_dir}"
+    )
 
     args = cmd_line.split(" ")
     if tuple(sphinx.__version__.split(".")) >= ("1", "7"):
