@@ -46,7 +46,7 @@
         // ];
     </script>
 
-    <form>
+    <form onsubmit="return false;">
         <div class="title-block">
             <div class="row align-items-center">
                 <img src="_static/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
@@ -218,9 +218,12 @@
             <p id="preamble"></p>
         </div>
         <div class="row">
-        <pre class="language-python" style="width: 96ch; overflow: auto; font-size: 12px;">
-            <code id="text" style="border: none;"></code>
-        </pre>
+        <div class="highlight highlight-python notranslate">
+            <pre class="language-python" style="width: 102ch; overflow: auto; font-size: 12px;">
+                <code id="text" style="border: none;"></code>
+            </pre>
+            <button id="copyButton">Copy</button>
+        </div>
         </div>
 
     </form>
