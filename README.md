@@ -17,9 +17,9 @@
 
 ![honegumi-logo](reports/figures/honegumi-logo.png)
 
-> Honegumi (骨組み, pronounced "ho neh goo mee"), which means "skeletal framework" in Japanese, is a package for
+> Honegumi ("ho-nay-goo-mee"), which means "skeletal framework" in Japanese, is a package for
 > interactively creating API tutorials with a focus on optimization packages such as Meta's Ax
-> Platform. We are [looking for contributors](https://github.com/sgbaird/honegumi/blob/main/CONTRIBUTING.md)!
+> Platform
 
 <!-- > Unlock the power of advanced optimization in materials science with Honegumi (骨組み,
 > pronounced "ho-neh-goo-mee"), our interactive "skeleton code" generator. -->
