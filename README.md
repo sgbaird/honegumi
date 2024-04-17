@@ -26,6 +26,8 @@
 
 <!-- TODO: refactor this paragraph to emphasize general API tutorial creation, and then focus in on materials science as one example that I'll be focusing on here -->
 
+# Honegumi
+
 Real-world materials science optimization tasks are complex! To cite a few examples:
 
 | Topic           | Description |
