@@ -45,7 +45,9 @@ Similar to [PyTorch's installation docs](https://pytorch.org/get-started/locally
 
 <!-- Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), which means _skeletal framework_ in Japanese, is a package for interactively creating API tutorials with a focus on optimization packages such as Meta's Ax Platform.  -->
 
-Interact with Honegumi using the grid below. Select one option per row and watch the template dynamically appear. Click the <img src="https://colab.research.google.com/assets/colab-badge.svg" height=10> badge to open a self-contained Google Colab notebook corresponding to the selected script. Click the <img src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey" height=10> badge to view the notebook source directly. For example, if you want a script that optimizes multiple objectives simultaneously (multi-objective) as a function of many parameters (high-dimensional), you would select `multi` from the `objective` option row and `FULLYBAYESIAN` from the `model` row. Hover your mouse over the 🛈 icon for each row to learn more about which options may be more suited to your task.
+<!-- https://myst-parser.readthedocs.io/en/latest/syntax/images_and_figures.html -->
+
+Interact with Honegumi using the grid below. Select one option per row and watch the template dynamically appear. Click the corresponding ![colab](https://colab.research.google.com/assets/colab-badge.svg) badge to open a self-contained Google Colab notebook corresponding to the selected script. Click the corresponding ![github](https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey) badge to view the notebook source directly. For example, if you want a script that optimizes multiple objectives simultaneously (multi-objective) as a function of many parameters (high-dimensional), you would select `multi` from the `objective` option row and `FULLYBAYESIAN` from the `model` row. Hover your mouse over the 🛈 icon for each row to learn more about which options may be more suited to your task.
 
 ```{raw} html
 :file: honegumi.html
