@@ -1,3 +1,4 @@
 # Contributors
 
-* sgbaird [sterling.baird@utah.edu](mailto:sterling.baird@utah.edu)
+* Sterling Baird ([@sgbaird](https://github.com/sgbaird)) [sterling.baird@utoronto.ca](mailto:sterling.baird@utoronto.ca)
+* Andrew Falkowski ([@AndrewFalkowski](https://github.com/AndrewFalkowski))

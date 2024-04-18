@@ -45,7 +45,10 @@ except FileNotFoundError:
 try:
     import sphinx
 
-    cmd_line = f"sphinx-apidoc --implicit-namespaces -f -o {output_dir} {module_dir}"
+    # https://stackoverflow.com/questions/71343831/sphinx-ignores-py-file-starting-with-a-in-filename
+    cmd_line = (
+        f"sphinx-apidoc --implicit-namespaces --private -f -o {output_dir} {module_dir}"
+    )
 
     args = cmd_line.split(" ")
     if tuple(sphinx.__version__.split(".")) >= ("1", "7"):
@@ -75,6 +78,8 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
+    "sphinx_copybutton",
+    "nbsphinx",
     # "sphinx_rtd_dark_mode", # Honegumi table looks strange with dark mode due to custom html
 ]
 
@@ -142,7 +147,13 @@ release = version
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    ".venv",
+    "generated_notebooks/ax",
+]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
