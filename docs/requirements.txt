@@ -4,6 +4,7 @@ click
 Jinja2
 jupytext
 myst-parser[linkify]
+nbsphinx
 numpy
 pandas
 pytest
