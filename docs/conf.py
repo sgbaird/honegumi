@@ -79,6 +79,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
     "sphinx_copybutton",
+    "nbsphinx",
     # "sphinx_rtd_dark_mode", # Honegumi table looks strange with dark mode due to custom html
 ]
 
@@ -146,7 +147,13 @@ release = version
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    ".venv",
+    "generated_notebooks/ax",
+]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None

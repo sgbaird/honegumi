@@ -7,7 +7,7 @@ Optimization theory is usually presented within the framework of maximizing or m
 
 As the name implies, single-objective bayesian optimization aims to maximize or minimize a singular property of interest. It's the go-to method when you have both a clear goal and metric of success. For example, you many wish to optimize the ratio of constituents in a material to maximize its strength as measured by a flexural test. Under the single-objective framework, a probabilistic model is trained to predict the property of interest as a function of one or more inputs. At each optimization iteration, the model is used to predict a set of one or more optimal inputs. These are then evaluated (computationally or experimentally) and the results are integrated back into the model. As more data is observed, the model will become more accurate and return increasingly better input parameter predictions. Determining the best set of inputs is then a matter of selecting the set of inputs that return the best property value. The figure below shows a single-objective optimization trace where the best value observed at a given optimization iteration is tracked by the blue line.
 
-SOBO.jpg
+![](SOBO.jpg)
 
 ## Multi-Objective Optimization
 
@@ -17,11 +17,11 @@ When optimization preferences are known, a common approach is to combine several
 
 Objective preferences may not be clearly defined, and researchers are often interested in learning the tradeoffs between the objectives so as to make an informed decision. Returning to the material optimization example, a researcher might be interested in determining the relative cost of an increase in material strength. In other words, we would like to know the boundary of the cost vs. strength compromise. This boundary is referred to as the *Pareto Front* and is defined by a set of non-dominated solutions - each of which cannot be improved in one objective without making another worse. Finding boundary of optimal trade-offs provides a holistic view of the solution space and allows researchers to make informed decisions based on their constraints and priorities. As such, many multi-objective optimization schemes aim to identify a set of Pareto optimal solutions as quickly as possible. The figure below shows a hypothetical Pareto front for our materials optimization example. The points along the blue, dashed line represent points of maximum tradeoff between our two objectives.
 
-MOBO.jpg
+![](MOBO.jpg)
 
 These Pareto optimal solutions are identified by optimizing a metric referred to as the hypervolume. The hyper volume is defined by the volume (or area in 2D) of the objective space that is dominated by a set of Pareto optimal solutions relative to a reference point. By expanding the Pareto front,  the measured hypervolume also expands, providing a convenient singular metric of the diversity and performance of a set of solutions. The goal of the multi-objective optimization campaign is then to identify points that will increase the size of the hypervolume, which will necessarily produce points that maximize objective tradeoffs. The figure below provides a visualization of a hypervolume in a multi-objective design space. The dashed square represents a computed improvement in the hypervolume if a predicted point was observed. This is the method by which the Pareto front is iteratively expanded.
 
-HVI.jpg
+![](HVI.jpg)
 
 
 ## Which Approach is Right for Your Problem?
