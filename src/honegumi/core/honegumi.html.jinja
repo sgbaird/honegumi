@@ -61,11 +61,14 @@
                 option==row.options[0] %} checked{% endif %} onclick="updateText()">
             <label class="row-option" for="{{ row.name }}-{{ option }}">{{ option }}</label>
             {% endfor %}
-            <span
+            <div class="tooltip-icon">&#9432;
+                <span class="tooltip-text arrow">{{row.tooltip}}</span>
+            </div>
+            <!-- <span
             class="tooltip"
             data-tooltip="{{row.tooltip}}"
             >&#9432;
-            </span>
+            </span> -->
         </div>
         {% endfor %}
         <div class="row align-items-end">
