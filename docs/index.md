@@ -17,7 +17,7 @@ aria-label="Issue sgbaird/honegumi on GitHub">Issue</a>
 
 <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/IVaWl2tL06c?si=cFZxU3R2W9jOycLb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
-> Honegumi ("ho-nay-goo-mee"), which means "skeletal framework" in Japanese, is a package for interactively creating minimal working examples of advanced Bayesian optimization.
+> Honegumi ("ho-nay-goo-mee"), which means "skeletal framework" in Japanese, is a package for interactively creating minimal working examples for advanced Bayesian optimization topics.
 
 ```{tip}
 If you're new to Bayesian optimization, watch [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c?si=BsT8duYZ1i8Sa38B)
