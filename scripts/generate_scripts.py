@@ -132,7 +132,7 @@ option_rows = [
     # ⭐ {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐ {"name": FIDELITY_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # {"name": TASK_OPT_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    # ⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
+    # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
     {
         "name": SYNCHRONY_OPT_KEY,
         "options": ["single", "batch"],  # TODO: add "asynchronous"
@@ -173,7 +173,7 @@ for opt in all_opts:
     opt.setdefault(CUSTOM_GEN_KEY, opt[MODEL_OPT_KEY] == "FULLYBAYESIAN")
 
     opt["model_kwargs"] = (
-        {"num_samples": 256, "warmup_steps": 512}
+        {"num_samples": 1024, "warmup_steps": 1024}
         if opt[MODEL_OPT_KEY] == "FULLYBAYESIAN"
         else {}
     )  # override later to 16 and 32 later on, but only for test script
