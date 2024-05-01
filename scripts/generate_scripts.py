@@ -72,8 +72,13 @@ option_rows = [
     },
     {
         "name": MODEL_OPT_KEY,
-        "options": ["GPEI", "FULLYBAYESIAN"],
-        "tooltip": tooltips["model"],
+        "options": [
+            "GPEI",
+            "FULLYBAYESIAN",
+        ],  # Change to "Default" and "Fully Bayesian" # noqa E501
+        "tooltip": tooltips[
+            "model"
+        ],  # in tooltip, clarify when GP+qNEI vs. qNEHVI is chosen, and how Fully Bayesian means SAASBO # noqa E501
         "hidden": False,
     },
     {"name": CUSTOM_GEN_KEY, "options": [False, True], "hidden": True},
@@ -122,11 +127,12 @@ option_rows = [
         "hidden": False,
     },
     # noise! zero, fixed, variable, inferred
-    # {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # noqa E501  # NOTE: AC Microcourses
-    # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses
-    # {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    # {"name": FIDELITY_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
+    # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses (probably leave out, and just include as a tutorial with predefined candidates)
+    # ⭐ {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    # ⭐ {"name": FIDELITY_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # {"name": TASK_OPT_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    # ⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
     {
         "name": SYNCHRONY_OPT_KEY,
         "options": ["single", "batch"],  # TODO: add "asynchronous"
