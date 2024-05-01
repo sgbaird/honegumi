@@ -220,7 +220,7 @@ html_static_path = ["_static"]
 nbsphinx_thumbnails = {
     "tutorials/sobo-tutorial": "_static/sobo-tutorial-thumbnail.jpg",
     "tutorials/mobo-tutorial": "_static/mobo-tutorial-thumbnail.jpg",
-    "tutorials/sobo-vs-mobo/sobo-vs-mobo": "_static/sobo-vs-mobo-thumbnail.jpg",
+    "tutorials/sobo-vs-mobo/sobo-vs-mobo": "_static/sobo-vs-mobo-thumbnail.png",
     "tutorials/freq-vs-bayes/freq-vs-bayes": "_static/freq-vs-bayes-thumbnail.jpg",
 }
 
