@@ -220,6 +220,8 @@ html_static_path = ["_static"]
 nbsphinx_thumbnails = {
     "tutorials/sobo-tutorial": "_static/sobo-tutorial-thumbnail.jpg",
     "tutorials/mobo-tutorial": "_static/mobo-tutorial-thumbnail.jpg",
+    "concepts/sobo-vs-mobo": "_static/sobo-vs-mobo-thumbnail.jpg",
+    "concepts/freq-vs-bayes": "_static/freq-vs-bayes-thumbnail.jpg",
 }
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
