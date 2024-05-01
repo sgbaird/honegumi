@@ -73,8 +73,8 @@ option_rows = [
     {
         "name": MODEL_OPT_KEY,
         "options": [
-            "GPEI",
-            "FULLYBAYESIAN",
+            "Default",  # e.g., GPEI
+            "Fully Bayesian",  # e.g., FULLYBAYESIAN
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "tooltip": tooltips[
             "model"
