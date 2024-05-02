@@ -63,7 +63,7 @@ gs = GenerationStrategy(
             model=Models.FULLYBAYESIAN,
             num_trials=-1,
             max_parallelism=3,
-            model_kwargs={"num_samples": 256, "warmup_steps": 512},
+            model_kwargs={"num_samples": 1024, "warmup_steps": 1024},
         ),
     ]
 )

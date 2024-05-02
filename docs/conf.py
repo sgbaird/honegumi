@@ -217,6 +217,13 @@ html_favicon = "_static/logo.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+nbsphinx_thumbnails = {
+    "tutorials/sobo-tutorial": "_static/sobo-tutorial-thumbnail.jpg",
+    "tutorials/mobo-tutorial": "_static/mobo-tutorial-thumbnail.jpg",
+    "tutorials/sobo-vs-mobo/sobo-vs-mobo": "_static/sobo-vs-mobo-thumbnail.png",
+    "tutorials/freq-vs-bayes/freq-vs-bayes": "_static/freq-vs-bayes-thumbnail.jpg",
+}
+
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
 # html_last_updated_fmt = '%b %d, %Y'
