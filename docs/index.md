@@ -66,7 +66,7 @@ Interact with Honegumi using the grid below. Select one option per row and watch
 ## A Perfect Pairing with LLMs
 
 ```{tip}
-Use Honegumi with ChatGPT to create non-halucinatory, custom Bayesian optimization scripts. See below for more info.
+Use Honegumi with ChatGPT to create non-halucinatory, custom Bayesian optimization scripts. See an [example ChatGPT transcript](https://chat.openai.com/share/f1169938-f891-4060-8034-b137e82cd5af) and the two-minute video below.
 ```
 
 LLMs are good at recognizing patterns but really bad at suggesting Bayesian optimization scripts from scratch. Since Honegumi is really good at programatically giving valid Bayes opt scripts, you can use Honegumi to get a template and then ask an LLM to adapt it to your use case. The two-minute video below shows how a Honegumi template can be adapted using an LLM (in our case, ChatGPT Plus) to a cookie taste optimization as a function of flour, sugar, and butter content.
