@@ -3,6 +3,7 @@
 ```{nbgallery}
 :maxdepth: 1
 
-tutorials/sobo-vs-mobo/sobo-vs-mobo.md
-tutorials/freq-vs-bayes/freq-vs-bayes.md
+curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.md
+curriculum/concepts/freq-vs-bayes/freq-vs-bayes.md
+curriculum/concepts/batch/SingleVsBatch_concept.md
 ```
