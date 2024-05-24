@@ -4,6 +4,7 @@ import os
 from itertools import product
 from os import path
 from pathlib import Path
+from typing import List
 from urllib.parse import quote, urljoin
 
 import jupytext
@@ -21,6 +22,7 @@ from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
     DOC_DIR,
     DUMMY_KEY,
     EXISTING_DATA_KEY,
+    FIDELITY_OPT_KEY,
     GEN_NOTEBOOK_DIR,
     GEN_SCRIPT_DIR,
     LINEAR_CONSTRAINT_KEY,
@@ -35,6 +37,7 @@ from honegumi.ax.utils.constants import (  # USE_CONSTRAINTS_NAME,
 )
 from honegumi.core._honegumi import (
     ResultsCollector,
+    create_and_clear_dir,
     get_rendered_template_stem,
     unpack_rendered_template_stem,
 )
@@ -126,12 +129,16 @@ option_rows = [
         "tooltip": tooltips["custom_threshold"],
         "hidden": False,
     },
-    # noise! zero, fixed, variable, inferred
+    # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses (probably leave out, and just include as a tutorial with predefined candidates)
     # ⭐ {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    # ⭐ {"name": FIDELITY_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    # {"name": TASK_OPT_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    {
+        "name": FIDELITY_OPT_KEY,
+        "options": ["single", "multi"],
+        "hidden": False,
+    },  # noqa E501 # NOTE: AC Microcourses
+    # {"name": TASK_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
     {
         "name": SYNCHRONY_OPT_KEY,
@@ -158,12 +165,56 @@ visible_option_rows = [row for row in option_rows if not row["hidden"]]
 extra_jinja_var_names = [MODEL_KWARGS_KEY, DUMMY_KEY]
 jinja_var_names = option_names + extra_jinja_var_names
 
-# create all combinations of objective_opts and model_opts while retaining keys
-# make it scalable to more option combinations
-all_opts = [
-    dict(zip(visible_option_names, v))
-    for v in product(*[row["options"] for row in visible_option_rows])
-]
+
+def gen_combs_with_keys(
+    visible_option_names: List[str], visible_option_rows: List[dict]
+):
+    """
+    Generate a list of dictionaries, each representing a combination of options.
+    Each dictionary uses option names as keys and the corresponding option from
+    each combination as values.
+
+    Parameters
+    ----------
+    visible_option_names : list of str
+        A list of option names. These will be used as the keys in the output
+        dictionaries.
+    visible_option_rows : list of dict
+        A list of dictionaries, each containing an 'options' key associated with
+        a list of options. The 'options' from each dictionary are combined to
+        form the output dictionaries.
+
+    Returns
+    -------
+    list of dict
+        A list of dictionaries, each representing a combination of options. Each
+        dictionary uses option names as keys and the corresponding option from
+        each combination as values.
+
+    Examples
+    --------
+    >>> visible_option_names = ['color', 'size']
+    >>> visible_option_rows = [
+    ...     {"options": ["red", "blue"]},
+    ...     {"options": ["small", "large"]},
+    ... ]
+    >>> gen_combs_with_keys(visible_option_names, visible_option_rows)
+    [
+        {"color": "red", "size": "small"},
+        {"color": "red", "size": "large"},
+        {"color": "blue", "size": "small"},
+        {"color": "blue", "size": "large"},
+    ]
+    """
+    all_opts = [
+        dict(zip(visible_option_names, v))
+        for v in product(*[row["options"] for row in visible_option_rows])
+    ]
+
+    return all_opts
+
+
+all_opts = gen_combs_with_keys(visible_option_names, visible_option_rows)
 
 for opt in all_opts:
     # If the key-value pair is not already there, then add it based on
@@ -233,18 +284,8 @@ incompatible_configs = [opt for opt in all_opts if is_incompatible(opt)]
 
 directories = [GEN_SCRIPT_DIR, GEN_NOTEBOOK_DIR, TEST_TEMPLATE_DIR]
 
-for directory in directories:
-    # create the directory if it doesn't exist
-    Path(directory).mkdir(parents=True, exist_ok=True)
 
-    # clear out the directory (to avoid confusion/running old scripts)
-    for file in os.listdir(directory):
-        file_path = os.path.join(directory, file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        except Exception as e:
-            print(e)
+[create_and_clear_dir(directory) for directory in directories]
 
 # lookup = {} # could probably be a list of dicts instead, but
 data = all_opts.copy()

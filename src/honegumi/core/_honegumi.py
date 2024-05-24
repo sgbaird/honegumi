@@ -41,8 +41,10 @@ References:
 
 import argparse
 import logging
+import os
 import sys
 import time
+from pathlib import Path
 from typing import List
 
 import _pytest
@@ -259,6 +261,20 @@ class ResultsCollector:
         self.num_skipped = len(self.skipped)
 
         self.total_duration = time.time() - terminalreporter._sessionstarttime
+
+
+def create_and_clear_dir(directory):
+    # create the directory if it doesn't exist
+    Path(directory).mkdir(parents=True, exist_ok=True)
+
+    # clear out the directory (to avoid confusion/running old scripts)
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
 
 
 def fib(n):
