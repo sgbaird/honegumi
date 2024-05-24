@@ -1,3 +1,8 @@
+# incompatible with inequality constraints for the moment:
+# https://github.com/facebook/Ax/issues/1743
+
+# only single fidelity parameter supported in Ax for the moment:
+# https://github.com/facebook/Ax/issues/1211
 from time import time
 
 import numpy as np

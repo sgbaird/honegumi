@@ -26,3 +26,7 @@ GEN_SCRIPT_DIR = path.join("docs", "generated_scripts", "ax")
 GEN_NOTEBOOK_DIR = path.join("docs", "generated_notebooks", "ax")
 TEST_TEMPLATE_DIR = path.join("tests", "generated_scripts", "ax")
 DOC_DIR = "docs"
+
+RENDERED_KEY = "rendered_template"
+IS_COMPATIBLE_KEY = "is_compatible"
+PREAMBLE_KEY = "preamble"
