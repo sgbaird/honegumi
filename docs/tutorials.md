@@ -3,6 +3,7 @@
 ```{nbgallery}
 :maxdepth: 1
 
-tutorials/sobo-tutorial.ipynb
-tutorials/mobo-tutorial.ipynb
+curriculum/tutorials/sobo/sobo-tutorial.ipynb
+curriculum/tutorials/mobo/mobo-tutorial.ipynb
+curriculum/tutorials/batch/Batch_BO_tutorial.ipynb
 ```

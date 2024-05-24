@@ -218,10 +218,12 @@ html_favicon = "_static/logo.ico"
 html_static_path = ["_static"]
 
 nbsphinx_thumbnails = {
-    "tutorials/sobo-tutorial": "_static/sobo-tutorial-thumbnail.jpg",
-    "tutorials/mobo-tutorial": "_static/mobo-tutorial-thumbnail.jpg",
-    "tutorials/sobo-vs-mobo/sobo-vs-mobo": "_static/sobo-vs-mobo-thumbnail.png",
-    "tutorials/freq-vs-bayes/freq-vs-bayes": "_static/freq-vs-bayes-thumbnail.jpg",
+    "curriculum/tutorials/sobo/sobo-tutorial": "_static/thumbnails/sobo-tutorial-thumbnail.jpg",
+    "curriculum/tutorials/mobo/mobo-tutorial": "_static/thumbnails/mobo-tutorial-thumbnail.jpg",
+    "curriculum/tutorials/batch/Batch_BO_tutorial": "_static/thumbnails/batch_tutorial_thumbnail.png",
+    "curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo": "_static/thumbnails/SOBOMOBO_concept_thumbnail.png",
+    "curriculum/concepts/freq-vs-bayes/freq-vs-bayes": "_static/thumbnails/FullyBayesian_concept_thumbnail.png",
+    "curriculum/concepts/batch/SingleVsBatch_concept": "_static/thumbnails/BatchBO_concept_thumbnail.png",
 }
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
