@@ -493,7 +493,7 @@ def add_model_specific_keys(option_names, opt):
         "model_kwargs": {},
     }
     """
-    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == "FULLYBAYESIAN")
+    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
 
     # increased from the default in Ax tutorials for quality/robustness
     opt["model_kwargs"] = (

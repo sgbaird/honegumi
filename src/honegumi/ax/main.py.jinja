@@ -64,11 +64,19 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" 
     {% set objective_function = objective_function + "_moo" %}
 {%- endif %}
 
+{# List of expected models #}
+{% set expected_models = ["Fully Bayesian", "Default"] %}
+
+{# Check if model is in the list of expected models #}
+{% if model not in expected_models %}
+    {{ 0/0 }}
+{% endif %}
+
 {# add MOO to FULLYBAYESIAN if multi-objective #}
-{% if model == "FULLYBAYESIAN" and objective == "multi" -%}
-    {% set model_name = model + "MOO" %}
+{% if model == "Fully Bayesian" and objective == "multi" -%}
+    {% set model_name = "FULLYBAYESIANMOO" %}
 {% else %}
-    {% set model_name = model %}
+    {% set model_name = "GPEI" %}
 {%- endif %}
 
 {% if composition_constraint %}

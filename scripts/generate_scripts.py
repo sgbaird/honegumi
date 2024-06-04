@@ -28,6 +28,7 @@ from honegumi.core._honegumi import (
 # see https://github.com/facebook/Ax/issues/1781
 
 dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
+skip_tests = os.getenv("SKIP_TESTS", "False").lower() == "true"
 
 if dummy:
     print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
@@ -53,7 +54,7 @@ option_rows = [
         "name": cst.MODEL_OPT_KEY,
         "options": [
             "Default",  # e.g., GPEI
-            "Fully Bayesian",  # e.g., FULLYBAYESIAN
+            cst.FULLYBAYESIAN_KEY,  # e.g., FULLYBAYESIAN
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "hidden": False,
     },
@@ -116,7 +117,7 @@ option_rows = [
 ]
 
 for row in option_rows:
-    if "tooltip" in row and row["name"] in tooltips:
+    if row["name"] in tooltips:
         row["tooltip"] = tooltips[row["name"]]
 
 # NOTE: 'model' tooltip can use some clarification once
@@ -197,7 +198,7 @@ def create_notebook(datum, gen_script_path, script):
     return notebook, notebook_path
 
 
-def get_test_script(script_template, render_datum, dummy=True):
+def generate_test(script_template, render_datum, dummy=True):
     test_render_datum = render_datum.copy()
     test_render_datum[cst.DUMMY_KEY] = dummy
     model_kwargs = test_render_datum[cst.MODEL_KWARGS_KEY]
@@ -221,7 +222,7 @@ def get_test_script(script_template, render_datum, dummy=True):
     return rendered_test_template
 
 
-def get_script(jinja_var_names, datum, script_template):
+def generate_script(jinja_var_names, datum, script_template):
     render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
     script = script_template.render(render_datum)
 
@@ -247,7 +248,7 @@ for datum in data:
     script_template_name = "main.py.jinja"
     script_template = env.get_template(script_template_name)
 
-    script, render_datum = get_script(jinja_var_names, datum, script_template)
+    script, render_datum = generate_script(jinja_var_names, datum, script_template)
 
     datum[cst.RENDERED_KEY] = script  # for the HTML template
 
@@ -261,7 +262,7 @@ for datum in data:
 
     # make sure tests run faster for SAASBO
 
-    rendered_test_template = get_test_script(script_template, render_datum, dummy=dummy)
+    rendered_test_template = generate_test(script_template, render_datum, dummy=dummy)
 
     # save in tests directory with test_ prefix
     test_template_path = path.join(cst.TEST_TEMPLATE_DIR, f"test_{gen_script_name}")
@@ -276,59 +277,68 @@ for datum in data:
 
     notebook, notebook_path = create_notebook(datum, gen_script_path, script)
 
-
-# run pytest on all or just one of the test scripts
-collector = ResultsCollector()
-file_filter = cst.TEST_TEMPLATE_DIR if not dummy else first_test_template_path
-# file_filter = TEST_TEMPLATE_DIR
-retcode = pytest.main(["-v", file_filter], plugins=[collector])
-
-for report in collector.reports:
-    print("id:", report.nodeid, "outcome:", report.outcome)  # etc
-
-print("exit code:", collector.exitcode)
-print(
-    "passed:",
-    collector.num_passed,
-    "failed:",
-    collector.num_failed,
-    "xfailed:",
-    collector.num_xfailed,
-    "skipped:",
-    collector.num_skipped,
-)
-print("total duration:", collector.total_duration)
-
-report_data = []
-
-for report in collector.reports:
-    # grab the needed info from the report
-    report_info = {
-        "stderr": report.capstderr,
-        "stdout": report.capstdout,
-        "caplog": report.caplog,
-        "passed": report.passed,
-        "duration": report.duration,
-        "nodeid": report.nodeid,
-        "fspath": report.fspath,
-    }
-
-    # extract the stem and remove the `_test` prefix
-    stem = Path(report.fspath).stem
-    assert stem.startswith("test_"), f"stem {stem} does not start with `test_`"
-    stem = stem[5:]
-
-    # unpack the stem into a dictionary
-    unpacked_stem = unpack_rendered_template_stem(stem)
-    report_datum = {**unpacked_stem, **report_info}
-    report_data.append(report_datum)
-
-report_df = pd.DataFrame(report_data)
 data_df = pd.DataFrame(data)
+
+if not skip_tests:
+    print("Running tests...")
+
+    # run pytest on all or just one of the test scripts
+    collector = ResultsCollector()
+    file_filter = cst.TEST_TEMPLATE_DIR if not dummy else first_test_template_path
+    # file_filter = TEST_TEMPLATE_DIR
+    retcode = pytest.main(["-v", file_filter], plugins=[collector])
+
+    for report in collector.reports:
+        print("id:", report.nodeid, "outcome:", report.outcome)  # etc
+
+    print("exit code:", collector.exitcode)
+    print(
+        "passed:",
+        collector.num_passed,
+        "failed:",
+        collector.num_failed,
+        "xfailed:",
+        collector.num_xfailed,
+        "skipped:",
+        collector.num_skipped,
+    )
+    print("total duration:", collector.total_duration)
+
+    report_data = []
+
+    for report in collector.reports:
+        # grab the needed info from the report
+        report_info = {
+            "stderr": report.capstderr,
+            "stdout": report.capstdout,
+            "caplog": report.caplog,
+            "passed": report.passed,
+            "duration": report.duration,
+            "nodeid": report.nodeid,
+            "fspath": report.fspath,
+        }
+
+        # extract the stem and remove the `_test` prefix
+        stem = Path(report.fspath).stem
+        assert stem.startswith("test_"), f"stem {stem} does not start with `test_`"
+        stem = stem[5:]
+
+        # unpack the stem into a dictionary
+        unpacked_stem = unpack_rendered_template_stem(stem)
+        report_datum = {**unpacked_stem, **report_info}
+        report_data.append(report_datum)
+
+    report_df = pd.DataFrame(report_data)
+else:
+    report_df = None
 
 # concatenate the two dataframes to merge the columns based on option_names
 # (i.e., the keys)
-merged_df = pd.merge(data_df, report_df, on=option_names, how="outer")
+if report_df is not None:
+    merged_df = pd.merge(data_df, report_df, on=option_names, how="outer")
+else:
+    merged_df = data_df.copy()
+    merged_df["passed"] = True
 
 # find the configs that either failed or were incompatible
 
