@@ -33,6 +33,9 @@ skip_tests = os.getenv("SKIP_TESTS", "False").lower() == "true"
 if dummy:
     print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
 
+if skip_tests:
+    print("SKIPPING TESTS")
+
 env = Environment(loader=FileSystemLoader(cst.TEMPLATE_DIR), undefined=StrictUndefined)
 core_env = Environment(
     loader=FileSystemLoader(cst.CORE_TEMPLATE_DIR), undefined=StrictUndefined
