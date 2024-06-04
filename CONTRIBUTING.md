@@ -129,6 +129,13 @@ In its current form (as of 2024-06-04), Honegumi generates *many* files. This ca
 git status -- :!docs/generated_scripts :!docs/generated_notebooks :!tests/generated_scripts
 ```
 
+To only commit non-generated files, you can add all files and reset the generated ones.
+
+```bash
+git add .
+git reset docs/generated_scripts docs/generated_notebooks tests/generated_scripts
+```
+
 ## Project Organization
 
 ```
