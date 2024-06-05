@@ -20,9 +20,15 @@ SYNCHRONY_OPT_KEY = "synchrony"  # single, batch, asynchronous
 DUMMY_KEY = "dummy"
 MODEL_KWARGS_KEY = "model_kwargs"
 
+FULLYBAYESIAN_KEY = "Fully Bayesian"
+
 TEMPLATE_DIR = path.join("src", "honegumi", "ax")
 CORE_TEMPLATE_DIR = path.join("src", "honegumi", "core")
 GEN_SCRIPT_DIR = path.join("docs", "generated_scripts", "ax")
 GEN_NOTEBOOK_DIR = path.join("docs", "generated_notebooks", "ax")
 TEST_TEMPLATE_DIR = path.join("tests", "generated_scripts", "ax")
 DOC_DIR = "docs"
+
+RENDERED_KEY = "rendered_template"
+IS_COMPATIBLE_KEY = "is_compatible"
+PREAMBLE_KEY = "preamble"

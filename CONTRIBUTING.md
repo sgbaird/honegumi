@@ -123,6 +123,19 @@ git config --system core.longpaths true
 
 If working in GitHub Desktop, you will likely need to follow [these instructions](https://stackoverflow.com/a/74289583/13697228).
 
+In its current form (as of 2024-06-04), Honegumi generates *many* files. This can become unwieldy when working with git, and you may find the command line interface of git to be less frustrating. For example, you can use the following to check for changes in the non-generated files.
+
+```bash
+git status -- :!docs/generated_scripts :!docs/generated_notebooks :!tests/generated_scripts
+```
+
+To only commit non-generated files, you can add all files and reset the generated ones.
+
+```bash
+git add .
+git reset docs/generated_scripts docs/generated_notebooks tests/generated_scripts
+```
+
 ## Project Organization
 
 ```
