@@ -36,9 +36,15 @@ if dummy:
 if skip_tests:
     print("SKIPPING TESTS")
 
-env = Environment(loader=FileSystemLoader(cst.TEMPLATE_DIR), undefined=StrictUndefined)
+env = Environment(
+    loader=FileSystemLoader(cst.TEMPLATE_DIR),
+    undefined=StrictUndefined,
+    keep_trailing_newline=True,
+)
 core_env = Environment(
-    loader=FileSystemLoader(cst.CORE_TEMPLATE_DIR), undefined=StrictUndefined
+    loader=FileSystemLoader(cst.CORE_TEMPLATE_DIR),
+    undefined=StrictUndefined,
+    keep_trailing_newline=True,
 )
 
 tooltips = json.load(open("scripts/resources/tooltips.json"))
