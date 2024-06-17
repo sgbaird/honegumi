@@ -18,13 +18,13 @@ repos:
   - id: mixed-line-ending
     args: ['--fix=auto']  # replace 'auto' with 'lf' to enforce Linux/Mac line endings or 'crlf' for Windows
 
-# If you want to automatically "modernize" your Python code:
-- repo: https://github.com/asottile/pyupgrade
-  rev: v3.9.0
-  hooks:
-  - id: pyupgrade
-    args: ['--py37-plus']
-    exclude: ^tests/generated_scripts/
+# # If you want to automatically "modernize" your Python code:
+# - repo: https://github.com/asottile/pyupgrade
+#   rev: v3.9.0
+#   hooks:
+#   - id: pyupgrade
+#     args: ['--py37-plus']
+#     exclude: ^tests/generated_scripts/
 
 # # If you want to avoid flake8 errors due to unused vars or imports:
 # Failing due to
