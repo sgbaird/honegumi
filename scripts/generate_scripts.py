@@ -58,6 +58,7 @@ option_rows = [
         "name": cst.OBJECTIVE_OPT_KEY,
         "options": ["single", "multi"],
         "hidden": False,
+        "disable": False,
     },
     {
         "name": cst.MODEL_OPT_KEY,
@@ -66,12 +67,18 @@ option_rows = [
             cst.FULLYBAYESIAN_KEY,  # e.g., FULLYBAYESIAN
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "hidden": False,
+        "disable": False,
     },
-    {"name": cst.CUSTOM_GEN_KEY, "options": [False, True], "hidden": True},
+    {
+        "name": cst.CUSTOM_GEN_KEY,
+        "options": [False, True],
+        "hidden": True,
+    },
     {
         "name": cst.EXISTING_DATA_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": False,
     },
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     # consider collapsing these three constraints into single option # noqa: E501
@@ -79,31 +86,37 @@ option_rows = [
         "name": cst.SUM_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.ORDER_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.LINEAR_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },  # noqa E501 # NOTE: AC Microcourses
     {
         "name": cst.CATEGORICAL_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.CUSTOM_THRESHOLD_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
@@ -113,6 +126,7 @@ option_rows = [
         "name": cst.FIDELITY_OPT_KEY,
         "options": ["single", "multi"],
         "hidden": False,
+        "disable": True,
     },  # noqa E501 # NOTE: AC Microcourses
     # {"name": TASK_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
@@ -120,10 +134,21 @@ option_rows = [
         "name": cst.SYNCHRONY_OPT_KEY,
         "options": ["single", "batch"],  # TODO: add "asynchronous"
         "hidden": False,
+        "disable": True,
     },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
     # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
 ]
+
+# remove the options where disable is True, and print disabled options
+disabled_option_rows = [row for row in option_rows if row["disable"]]
+option_rows = [row for row in option_rows if not row["disable"]]
+disabled_option_names = [row["name"] for row in disabled_option_rows]
+
+if disabled_option_rows:
+    print("The following options have been disabled:")
+    for row in disabled_option_rows:
+        print(row["name"])
 
 for row in option_rows:
     if row["name"] in tooltips:
