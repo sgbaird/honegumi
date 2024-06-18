@@ -73,6 +73,7 @@ option_rows = [
         "name": cst.CUSTOM_GEN_KEY,
         "options": [False, True],
         "hidden": True,
+        "disable": False,
     },
     {
         "name": cst.EXISTING_DATA_KEY,
@@ -116,7 +117,7 @@ option_rows = [
         "name": cst.CUSTOM_THRESHOLD_KEY,
         "options": [False, True],
         "hidden": False,
-        "disable": True,
+        "disable": False,
     },
     # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
@@ -140,15 +141,20 @@ option_rows = [
     # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
 ]
 
-# remove the options where disable is True, and print disabled options
-disabled_option_rows = [row for row in option_rows if row["disable"]]
-option_rows = [row for row in option_rows if not row["disable"]]
-disabled_option_names = [row["name"] for row in disabled_option_rows]
+# remove the options where disable is True, and print disabled options (keep
+# track of disabled option names and default values)
+disabled_option_defaults = [
+    {row["name"]: row["options"][0]} for row in option_rows if row["disable"]
+]
+disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
 
-if disabled_option_rows:
+option_rows = [row for row in option_rows if not row["disable"]]
+
+if disabled_option_defaults:
     print("The following options have been disabled:")
-    for row in disabled_option_rows:
-        print(row["name"])
+    for default in disabled_option_defaults:
+        print(f"Disabled option and default: {default}")
+
 
 for row in option_rows:
     if row["name"] in tooltips:
@@ -170,13 +176,17 @@ visible_option_names = [row["name"] for row in option_rows if not row["hidden"]]
 visible_option_rows = [row for row in option_rows if not row["hidden"]]
 
 extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, cst.DUMMY_KEY]
-jinja_var_names = option_names + extra_jinja_var_names
+jinja_var_names = option_names + extra_jinja_var_names + disabled_option_names
 
 
 all_opts = gen_combs_with_keys(visible_option_names, visible_option_rows)
 
 
 for opt in all_opts:
+    # set the default values for the disabled options
+    for default in disabled_option_defaults:
+        opt.update(default)
+
     # in-place operation
     add_model_specific_keys(option_names, opt)
 
