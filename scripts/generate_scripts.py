@@ -36,9 +36,15 @@ if dummy:
 if skip_tests:
     print("SKIPPING TESTS")
 
-env = Environment(loader=FileSystemLoader(cst.TEMPLATE_DIR), undefined=StrictUndefined)
+env = Environment(
+    loader=FileSystemLoader(cst.TEMPLATE_DIR),
+    undefined=StrictUndefined,
+    keep_trailing_newline=True,
+)
 core_env = Environment(
-    loader=FileSystemLoader(cst.CORE_TEMPLATE_DIR), undefined=StrictUndefined
+    loader=FileSystemLoader(cst.CORE_TEMPLATE_DIR),
+    undefined=StrictUndefined,
+    keep_trailing_newline=True,
 )
 
 tooltips = json.load(open("scripts/resources/tooltips.json"))
@@ -52,6 +58,7 @@ option_rows = [
         "name": cst.OBJECTIVE_OPT_KEY,
         "options": ["single", "multi"],
         "hidden": False,
+        "disable": False,
     },
     {
         "name": cst.MODEL_OPT_KEY,
@@ -60,12 +67,19 @@ option_rows = [
             cst.FULLYBAYESIAN_KEY,  # e.g., FULLYBAYESIAN
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "hidden": False,
+        "disable": False,
     },
-    {"name": cst.CUSTOM_GEN_KEY, "options": [False, True], "hidden": True},
+    {
+        "name": cst.CUSTOM_GEN_KEY,
+        "options": [False, True],
+        "hidden": True,
+        "disable": False,
+    },
     {
         "name": cst.EXISTING_DATA_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": False,
     },
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     # consider collapsing these three constraints into single option # noqa: E501
@@ -73,31 +87,37 @@ option_rows = [
         "name": cst.SUM_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.ORDER_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.LINEAR_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },  # noqa E501 # NOTE: AC Microcourses
     {
         "name": cst.CATEGORICAL_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": True,
     },
     {
         "name": cst.CUSTOM_THRESHOLD_KEY,
         "options": [False, True],
         "hidden": False,
+        "disable": False,
     },
     # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
@@ -107,6 +127,7 @@ option_rows = [
         "name": cst.FIDELITY_OPT_KEY,
         "options": ["single", "multi"],
         "hidden": False,
+        "disable": True,
     },  # noqa E501 # NOTE: AC Microcourses
     # {"name": TASK_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
@@ -114,10 +135,26 @@ option_rows = [
         "name": cst.SYNCHRONY_OPT_KEY,
         "options": ["single", "batch"],  # TODO: add "asynchronous"
         "hidden": False,
+        "disable": True,
     },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
     # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
 ]
+
+# remove the options where disable is True, and print disabled options (keep
+# track of disabled option names and default values)
+disabled_option_defaults = [
+    {row["name"]: row["options"][0]} for row in option_rows if row["disable"]
+]
+disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
+
+option_rows = [row for row in option_rows if not row["disable"]]
+
+if disabled_option_defaults:
+    print("The following options have been disabled:")
+    for default in disabled_option_defaults:
+        print(f"Disabled option and default: {default}")
+
 
 for row in option_rows:
     if row["name"] in tooltips:
@@ -139,13 +176,19 @@ visible_option_names = [row["name"] for row in option_rows if not row["hidden"]]
 visible_option_rows = [row for row in option_rows if not row["hidden"]]
 
 extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, cst.DUMMY_KEY]
-jinja_var_names = option_names + extra_jinja_var_names
+jinja_var_names = option_names + extra_jinja_var_names + disabled_option_names
+
+jinja_option_rows = [row for row in visible_option_rows]
 
 
 all_opts = gen_combs_with_keys(visible_option_names, visible_option_rows)
 
 
 for opt in all_opts:
+    # set the default values for the disabled options
+    for default in disabled_option_defaults:
+        opt.update(default)
+
     # in-place operation
     add_model_specific_keys(option_names, opt)
 
@@ -368,7 +411,6 @@ template_path = "honegumi.html.jinja"
 script_template = core_env.get_template(template_path)
 
 # convert boolean values within option_rows to strings
-jinja_option_rows = [row for row in visible_option_rows]
 for row in jinja_option_rows:
     row["options"] = [str(opt) for opt in row["options"]]
 
