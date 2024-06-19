@@ -103,11 +103,11 @@ option_rows = [
     # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses (probably leave out, and just include as a tutorial with predefined candidates)
     # ⭐ {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    {
-        "name": cst.FIDELITY_OPT_KEY,
-        "options": ["single", "multi"],
-        "hidden": False,
-    },  # noqa E501 # NOTE: AC Microcourses
+    # ⭐ {
+    #     "name": cst.FIDELITY_OPT_KEY,
+    #     "options": ["single", "multi"],
+    #     "hidden": False,
+    # },  # noqa E501 # NOTE: AC Microcourses
     # {"name": TASK_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
     {
