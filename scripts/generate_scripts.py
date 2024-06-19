@@ -178,6 +178,8 @@ visible_option_rows = [row for row in option_rows if not row["hidden"]]
 extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, cst.DUMMY_KEY]
 jinja_var_names = option_names + extra_jinja_var_names + disabled_option_names
 
+jinja_option_rows = [row for row in visible_option_rows]
+
 
 all_opts = gen_combs_with_keys(visible_option_names, visible_option_rows)
 
@@ -409,7 +411,6 @@ template_path = "honegumi.html.jinja"
 script_template = core_env.get_template(template_path)
 
 # convert boolean values within option_rows to strings
-jinja_option_rows = [row for row in visible_option_rows]
 for row in jinja_option_rows:
     row["options"] = [str(opt) for opt in row["options"]]
 
