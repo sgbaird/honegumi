@@ -498,7 +498,7 @@ def add_model_specific_keys(option_names, opt):
     # increased from the default in Ax tutorials for quality/robustness
     opt["model_kwargs"] = (
         {"num_samples": 1024, "warmup_steps": 1024}
-        if opt[cst.MODEL_OPT_KEY] == "FULLYBAYESIAN"
+        if opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
         else {}
     )  # override later to 16 and 32 later on, but only for test script
 
@@ -528,7 +528,7 @@ def is_incompatible(opt):
         True if any incompatibility is found among the options, False otherwise.
     """
     use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
-    model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == "FULLYBAYESIAN"
+    model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
     use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
     objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
 
