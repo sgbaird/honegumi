@@ -27,10 +27,10 @@ gs = GenerationStrategy(
             model_gen_kwargs={},
         ),
         GenerationStep(
-            model=Models.GPEI,
+            model=Models.FULLYBAYESIAN,
             num_trials=-1,
             max_parallelism=3,
-            model_kwargs={},
+            model_kwargs={"num_samples": 1024, "warmup_steps": 1024},
         ),
     ]
 )

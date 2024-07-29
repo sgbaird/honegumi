@@ -38,7 +38,7 @@ gs = GenerationStrategy(
             model=Models.FULLYBAYESIANMOO,
             num_trials=-1,
             max_parallelism=3,
-            model_kwargs={},
+            model_kwargs={"num_samples": 1024, "warmup_steps": 1024},
         ),
     ]
 )

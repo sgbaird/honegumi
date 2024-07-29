@@ -37,7 +37,7 @@ def test_script():
                 model=Models.FULLYBAYESIANMOO,
                 num_trials=-1,
                 max_parallelism=3,
-                model_kwargs={},
+                model_kwargs={"num_samples": 16, "warmup_steps": 32},
             ),
         ]
     )
