@@ -1,24 +1,26 @@
-import io
 import json
 import os
 from os import path
 from pathlib import Path
-from urllib.parse import quote, urljoin
 
-import jupytext
 import pandas as pd
 import pytest
-from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 import honegumi.ax.utils.constants as cst
+from honegumi.ax._ax import (
+    add_model_specific_keys,
+    is_incompatible_ax,
+    model_kwargs_test_override,
+)
 from honegumi.core._honegumi import (
     ResultsCollector,
-    add_model_specific_keys,
     create_and_clear_dir,
+    create_notebook,
     gen_combs_with_keys,
     generate_lookup_dict,
-    is_incompatible,
+    generate_script,
+    generate_test,
     prep_datum_for_render,
     unpack_rendered_template_stem,
 )
@@ -194,7 +196,7 @@ for opt in all_opts:
 
 
 # track cases where certain combinations of non-hidden options are invalid
-incompatible_configs = [opt for opt in all_opts if is_incompatible(opt)]
+incompatible_configs = [opt for opt in all_opts if is_incompatible_ax(opt)]
 
 
 directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
@@ -202,86 +204,16 @@ directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
 
 [create_and_clear_dir(directory) for directory in directories]
 
-# lookup = {} # could probably be a list of dicts instead, but
+# lookup = {} # could probably be a list of dicts instead
 data = all_opts.copy()
 
 first_test_template_path = None
 
 
-def create_notebook(datum, gen_script_path, script):
-    github_username = "sgbaird"
-    github_prefix = f"https://github.com/{github_username}/honegumi/tree/main/"
-    github_link = urljoin(github_prefix, gen_script_path)
-
-    github_badge = f'<a href="{github_link}"><img alt="Open in GitHub" src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey"></a>'  # noqa E501
-
-    colab_prefix = (
-        "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
-    )
-
-    notebook_fname = f"{datum['stem']}.ipynb"
-    notebook_path = path.join(cst.GEN_NOTEBOOK_DIR, notebook_fname)
-    # HACK: issue with + encoding becoming %20 instead of %2B due to use of \\,
-    # and maybe other issues (hence both quote fn and replace line)
-    encoded_notebook_fname = quote(notebook_fname)
-    encoded_notebook_path = path.join(cst.GEN_NOTEBOOK_DIR, encoded_notebook_fname)
-    colab_link = urljoin(colab_prefix, encoded_notebook_path).replace("\\", "/")
-    colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
-
-    preamble = f"{colab_badge} {github_badge}"
-    datum[cst.PREAMBLE_KEY] = preamble  # for the HTML template
-
-    # create an intermediate file object for gen_script and prepend colab link
-    nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
-    gen_script_file = io.StringIO(nb_text)
-
-    # generate the notebook
-    notebook = jupytext.read(gen_script_file, fmt="py:percent")
-
-    with open(notebook_path, "w") as f:
-        jupytext.write(notebook, f, fmt="notebook")
-
-    return notebook, notebook_path
-
-
-def generate_test(script_template, render_datum, dummy=True):
-    test_render_datum = render_datum.copy()
-    test_render_datum[cst.DUMMY_KEY] = dummy
-    model_kwargs = test_render_datum[cst.MODEL_KWARGS_KEY]
-
-    if "num_samples" in model_kwargs and "warmup_steps" in model_kwargs:
-        model_kwargs["num_samples"] = 16
-        model_kwargs["warmup_steps"] = 32
-
-    test_script = script_template.render(test_render_datum)
-    test_script = format_file_contents(test_script, fast=False, mode=FileMode())
-
-    # indent each line by 4 spaces and prefix def test_script():
-    four_spaces = "    "
-    rendered_test_template = "def test_script():\n" + "\n".join(
-        [four_spaces + line for line in test_script.split("\n")]
-    )
-
-    # append the if __name__ == "__main__": block
-    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
-
-    return rendered_test_template
-
-
-def generate_script(jinja_var_names, datum, script_template):
-    render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
-    script = script_template.render(render_datum)
-
-    # apply black formatting
-    script = format_file_contents(script, fast=False, mode=FileMode())
-
-    return script, render_datum
-
-
 for datum in data:
     # save the rendered template
 
-    prep_datum_for_render(option_names, datum)
+    prep_datum_for_render(option_names, datum, is_incompatible_fn=is_incompatible_ax)
 
     if not datum[cst.IS_COMPATIBLE_KEY]:
         datum[cst.RENDERED_KEY] = (
@@ -308,7 +240,12 @@ for datum in data:
 
     # make sure tests run faster for SAASBO
 
-    rendered_test_template = generate_test(script_template, render_datum, dummy=dummy)
+    rendered_test_template = generate_test(
+        script_template,
+        render_datum,
+        dummy=dummy,
+        render_datum_override_fn=model_kwargs_test_override,
+    )
 
     # save in tests directory with test_ prefix
     test_template_path = path.join(cst.TEST_TEMPLATE_DIR, f"test_{gen_script_name}")

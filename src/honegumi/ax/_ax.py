@@ -20,11 +20,10 @@ References:
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
 
-import argparse
 import logging
-import sys
 
-from honegumi.core import __version__
+import honegumi.ax.utils.constants as cst
+from honegumi.core import __version__  # noqa: F401
 
 # from jinja2 import Environment, FileSystemLoader
 
@@ -43,7 +42,8 @@ _logger = logging.getLogger(__name__)
 
 
 def fib(n):
-    """Fibonacci example function
+    """Fibonacci example function (not actually used in honegumi, just from
+    pyscaffold template)
 
     Args:
       n (int): integer
@@ -58,112 +58,123 @@ def fib(n):
     return a
 
 
-# # Create an environment with the template directory
-# template_dir = "."
-# env = Environment(loader=FileSystemLoader(template_dir))
-
-# # Load the template file
-# template_name = "randint.py.jinja"
-# template = env.get_template(template_name)
-
-# # Define the data to be rendered
-# data = {
-#     "min_value": 1,
-#     "max_value": 10,
-# }
-
-# # print the rendered template
-# print(template.render(data))
-
-
-# ---- CLI ----
-# The functions defined in this section are wrappers around the main Python
-# API allowing them to be called directly from the terminal as a CLI
-# executable/script.
-
-
-def parse_args(args):
-    """Parse command line parameters
-
-    Args:
-      args (List[str]): command line parameters as list of strings
-          (for example  ``["--help"]``).
-
-    Returns:
-      :obj:`argparse.Namespace`: command line parameters namespace
+def is_incompatible_ax(opt):
     """
-    parser = argparse.ArgumentParser(description="Just a Fibonacci demonstration")
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"honegumi {__version__}",
-    )
-    parser.add_argument(dest="n", help="n-th Fibonacci number", type=int, metavar="INT")
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        dest="loglevel",
-        help="set loglevel to INFO",
-        action="store_const",
-        const=logging.INFO,
-    )
-    parser.add_argument(
-        "-vv",
-        "--very-verbose",
-        dest="loglevel",
-        help="set loglevel to DEBUG",
-        action="store_const",
-        const=logging.DEBUG,
-    )
-    return parser.parse_args(args)
+    Check if the given option dictionary contains incompatible options.
 
+    An option is considered incompatible if it cannot be used together with
+    another option. For example, if the model is fully Bayesian, it cannot use
+    the custom generator (`use_custom_gen`). Similarly, if the objective is
+    single, it cannot use the custom threshold (`use_custom_threshold`).
 
-def setup_logging(loglevel):
-    """Setup basic logging
+    Parameters
+    ----------
+    opt : dict
+        The option dictionary to check for incompatibility.
 
-    Args:
-      loglevel (int): minimum loglevel for emitting messages
+    Returns
+    -------
+    bool
+        True if any incompatibility is found among the options, False otherwise.
     """
-    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
-    logging.basicConfig(
-        level=loglevel, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
+    model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+    use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
+    objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
+
+    checks = [
+        model_is_fully_bayesian and not use_custom_gen,
+        objective_is_single and use_custom_threshold,
+        # add new incompatibility checks here
+    ]
+    return any(checks)
 
 
-def main(args):
-    """Wrapper allowing :func:`fib` to be called with string arguments in a CLI fashion
+def add_model_specific_keys(option_names, opt):
+    """Add model-specific keys to the options dictionary (in-place).
 
-    Instead of returning the value from :func:`fib`, it prints the result to the
-    ``stdout`` in a nicely formatted message.
+    This function adds model-specific keys to the options dictionary `opt`. For
+    example, if use_custom_gen is a hidden variable, and the model is
+    FULLYBAYESIAN, then use_custom_gen should be True.
 
-    Args:
-      args (List[str]): command line parameters as list of strings
-          (for example  ``["--verbose", "42"]``).
+    It also sets the value of the key `model_kwargs` based on the value of
+    `MODEL_OPT_KEY` in `opt`.
+
+    Parameters
+    ----------
+    option_names : list
+        A list of option names.
+    opt : dict
+        The options dictionary.
+
+    Examples
+    --------
+    The following example is demonstrative, the range of cases may be expanded
+    later.
+
+    >>> option_names = [
+    ...     "objective",
+    ...     "model",
+    ...     "custom_gen",
+    ...     "existing_data",
+    ...     "sum_constraint",
+    ...     "order_constraint",
+    ...     "linear_constraint",
+    ...     "composition_constraint",
+    ...     "categorical",
+    ...     "custom_threshold",
+    ...     "fidelity",
+    ...     "synchrony",
+    ... ]
+    >>> opt = {
+    ...     "objective": "single",
+    ...     "model": "Default",
+    ...     "existing_data": False,
+    ...     "sum_constraint": False,
+    ...     "order_constraint": False,
+    ...     "linear_constraint": False,
+    ...     "composition_constraint": False,
+    ...     "categorical": False,
+    ...     "custom_threshold": False,
+    ...     "fidelity": "single",
+    ...     "synchrony": "single",
+    ... }
+
+    >>> add_model_specific_keys(option_names, opt)
+    {
+        "objective": "single",
+        "model": "Default",
+        "existing_data": False,
+        "sum_constraint": False,
+        "order_constraint": False,
+        "linear_constraint": False,
+        "composition_constraint": False,
+        "categorical": False,
+        "custom_threshold": False,
+        "fidelity": "single",
+        "synchrony": "single",
+        "custom_gen": False,
+        "model_kwargs": {},
+    }
     """
-    args = parse_args(args)
-    setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
-    print(f"The {args.n}-th Fibonacci number is {fib(args.n)}")
-    _logger.info("Script ends here")
+    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
+
+    # increased from the default in Ax tutorials for quality/robustness
+    opt["model_kwargs"] = (
+        {"num_samples": 1024, "warmup_steps": 1024}
+        if opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+        else {}
+    )  # override later to 16 and 32 later on, but only for test script
+
+    # verify that all variables (hidden and visible) are represented
+    assert all(
+        [opt.get(option_name, None) is not None for option_name in option_names]
+    ), f"option_names {option_names} not in opt {opt}"
 
 
-def run():
-    """Calls :func:`main` passing the CLI arguments extracted from :obj:`sys.argv`
-
-    This function can be used as entry point to create console scripts with setuptools.
-    """
-    main(sys.argv[1:])
-
-
-if __name__ == "__main__":
-    # ^  This is a guard statement that will prevent the following code from
-    #    being executed in the case someone imports this file instead of
-    #    executing it as a script.
-    #    https://docs.python.org/3/library/__main__.html
-
-    # After installing your project with pip, users can also run your Python
-    # modules as scripts via the ``-m`` flag, as defined in PEP 338::
-    #
-    #     python -m honegumi.ax.skeleton 42
-    #
-    run()
+def model_kwargs_test_override(render_datum):
+    model_kwargs = render_datum[cst.MODEL_KWARGS_KEY]
+    if "num_samples" in model_kwargs and "warmup_steps" in model_kwargs:
+        model_kwargs["num_samples"] = 16
+        model_kwargs["warmup_steps"] = 32
+    return render_datum

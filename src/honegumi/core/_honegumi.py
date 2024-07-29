@@ -7,16 +7,21 @@ References:
 """
 
 import argparse
+import io
 import logging
 import os
 import sys
 import time
 from itertools import product
+from os import path
 from pathlib import Path
 from typing import List
+from urllib.parse import quote, urljoin
 
 import _pytest
+import jupytext
 import pytest
+from black import FileMode, format_file_contents
 
 import honegumi.ax.utils.constants as cst
 from honegumi.core import __version__
@@ -317,6 +322,113 @@ def generate_lookup_dict(df, option_names, key):
     }
 
 
+def prep_datum_for_render(option_names, datum, is_incompatible_fn=None):
+    """
+    Checks the compatibility of the given options and updates the datum
+    dictionary with the rendered template stem and compatibility status.
+
+    Parameters
+    ----------
+    option_names : list
+        The full list of option names in order to generate the filename stem.
+    datum : dict
+        The dictionary of option key-value pairs.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> check_compatibility_and_update(['option1', 'option2'], {'option1': 'value1', 'option2': 'value2'}) # noqa: E501
+    OUTPUT
+
+    Notes
+    -----
+    This function will always set the 'dummy' key in the 'datum' dictionary to
+    False.
+    """
+    rendered_template_stem = get_rendered_template_stem(datum, option_names)
+
+    datum["stem"] = rendered_template_stem
+
+    datum[cst.IS_COMPATIBLE_KEY] = not is_incompatible_fn(datum)
+
+    # NOTE: Decided to always keep dummy key false for scripts, let dummy only
+    # affect tests
+    datum[cst.DUMMY_KEY] = False
+
+
+def create_notebook(datum, gen_script_path, script, cst=cst):
+    github_username = "sgbaird"
+    github_prefix = f"https://github.com/{github_username}/honegumi/tree/main/"
+    github_link = urljoin(github_prefix, gen_script_path)
+
+    github_badge = f'<a href="{github_link}"><img alt="Open in GitHub" src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey"></a>'  # noqa E501
+
+    colab_prefix = (
+        "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
+    )
+
+    notebook_fname = f"{datum['stem']}.ipynb"
+    notebook_path = path.join(cst.GEN_NOTEBOOK_DIR, notebook_fname)
+    # HACK: issue with + encoding becoming %20 instead of %2B due to use of \\,
+    # and maybe other issues (hence both quote fn and replace line)
+    encoded_notebook_fname = quote(notebook_fname)
+    encoded_notebook_path = path.join(cst.GEN_NOTEBOOK_DIR, encoded_notebook_fname)
+    colab_link = urljoin(colab_prefix, encoded_notebook_path).replace("\\", "/")
+    colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
+
+    preamble = f"{colab_badge} {github_badge}"
+    datum[cst.PREAMBLE_KEY] = preamble  # for the HTML template
+
+    # create an intermediate file object for gen_script and prepend colab link
+    nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
+    gen_script_file = io.StringIO(nb_text)
+
+    # generate the notebook
+    notebook = jupytext.read(gen_script_file, fmt="py:percent")
+
+    with open(notebook_path, "w") as f:
+        jupytext.write(notebook, f, fmt="notebook")
+
+    return notebook, notebook_path
+
+
+def generate_script(jinja_var_names, datum, script_template):
+    render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
+    script = script_template.render(render_datum)
+
+    # apply black formatting
+    script = format_file_contents(script, fast=False, mode=FileMode())
+
+    return script, render_datum
+
+
+def generate_test(
+    script_template, render_datum, dummy=True, render_datum_override_fn=None, cst=cst
+):
+    test_render_datum = render_datum.copy()
+    test_render_datum[cst.DUMMY_KEY] = dummy
+
+    if render_datum_override_fn is not None:
+        test_render_datum = render_datum_override_fn(test_render_datum)
+
+    test_script = script_template.render(test_render_datum)
+    test_script = format_file_contents(test_script, fast=False, mode=FileMode())
+
+    # indent each line by 4 spaces and prefix def test_script():
+    four_spaces = "    "
+    rendered_test_template = "def test_script():\n" + "\n".join(
+        [four_spaces + line for line in test_script.split("\n")]
+    )
+
+    # append the if __name__ == "__main__": block
+    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
+
+    return rendered_test_template
+
+
 # ---- CLI ----
 # The functions defined in this section are wrappers around the main Python
 # API allowing them to be called directly from the terminal as a CLI
@@ -424,157 +536,6 @@ if __name__ == "__main__":
     #     python -m honegumi.core.skeleton 42
     #
     run()
-
-
-def add_model_specific_keys(option_names, opt):
-    """Add model-specific keys to the options dictionary (in-place).
-
-    This function adds model-specific keys to the options dictionary `opt`. For
-    example, if use_custom_gen is a hidden variable, and the model is
-    FULLYBAYESIAN, then use_custom_gen should be True.
-
-    It also sets the value of the key `model_kwargs` based on the value of
-    `MODEL_OPT_KEY` in `opt`.
-
-    Parameters
-    ----------
-    option_names : list
-        A list of option names.
-    opt : dict
-        The options dictionary.
-
-    Examples
-    --------
-    The following example is demonstrative, the range of cases may be expanded
-    later.
-
-    >>> option_names = [
-    ...     "objective",
-    ...     "model",
-    ...     "custom_gen",
-    ...     "existing_data",
-    ...     "sum_constraint",
-    ...     "order_constraint",
-    ...     "linear_constraint",
-    ...     "composition_constraint",
-    ...     "categorical",
-    ...     "custom_threshold",
-    ...     "fidelity",
-    ...     "synchrony",
-    ... ]
-    >>> opt = {
-    ...     "objective": "single",
-    ...     "model": "Default",
-    ...     "existing_data": False,
-    ...     "sum_constraint": False,
-    ...     "order_constraint": False,
-    ...     "linear_constraint": False,
-    ...     "composition_constraint": False,
-    ...     "categorical": False,
-    ...     "custom_threshold": False,
-    ...     "fidelity": "single",
-    ...     "synchrony": "single",
-    ... }
-
-    >>> add_model_specific_keys(option_names, opt)
-    {
-        "objective": "single",
-        "model": "Default",
-        "existing_data": False,
-        "sum_constraint": False,
-        "order_constraint": False,
-        "linear_constraint": False,
-        "composition_constraint": False,
-        "categorical": False,
-        "custom_threshold": False,
-        "fidelity": "single",
-        "synchrony": "single",
-        "custom_gen": False,
-        "model_kwargs": {},
-    }
-    """
-    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
-
-    # increased from the default in Ax tutorials for quality/robustness
-    opt["model_kwargs"] = (
-        {"num_samples": 1024, "warmup_steps": 1024}
-        if opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
-        else {}
-    )  # override later to 16 and 32 later on, but only for test script
-
-    # verify that all variables (hidden and visible) are represented
-    assert all(
-        [opt.get(option_name, None) is not None for option_name in option_names]
-    ), f"option_names {option_names} not in opt {opt}"
-
-
-def is_incompatible(opt):
-    """
-    Check if the given option dictionary contains incompatible options.
-
-    An option is considered incompatible if it cannot be used together with
-    another option. For example, if the model is fully Bayesian, it cannot use
-    the custom generator (`use_custom_gen`). Similarly, if the objective is
-    single, it cannot use the custom threshold (`use_custom_threshold`).
-
-    Parameters
-    ----------
-    opt : dict
-        The option dictionary to check for incompatibility.
-
-    Returns
-    -------
-    bool
-        True if any incompatibility is found among the options, False otherwise.
-    """
-    use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
-    model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
-    use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
-    objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
-
-    checks = [
-        model_is_fully_bayesian and not use_custom_gen,
-        objective_is_single and use_custom_threshold,
-        # add new incompatibility checks here
-    ]
-    return any(checks)
-
-
-def prep_datum_for_render(option_names, datum):
-    """
-    Checks the compatibility of the given options and updates the datum
-    dictionary with the rendered template stem and compatibility status.
-
-    Parameters
-    ----------
-    option_names : list
-        The full list of option names in order to generate the filename stem.
-    datum : dict
-        The dictionary of option key-value pairs.
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    >>> check_compatibility_and_update(['option1', 'option2'], {'option1': 'value1', 'option2': 'value2'}) # noqa: E501
-    OUTPUT
-
-    Notes
-    -----
-    This function will always set the 'dummy' key in the 'datum' dictionary to
-    False.
-    """
-    rendered_template_stem = get_rendered_template_stem(datum, option_names)
-
-    datum["stem"] = rendered_template_stem
-
-    datum[cst.IS_COMPATIBLE_KEY] = not is_incompatible(datum)
-
-    # NOTE: Decided to always keep dummy key false for scripts, let dummy only
-    # affect tests
-    datum[cst.DUMMY_KEY] = False
 
 
 # %% Code Graveyard
