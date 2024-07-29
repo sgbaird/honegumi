@@ -220,7 +220,7 @@ html_static_path = ["_static"]
 nbsphinx_thumbnails = {
     "curriculum/tutorials/sobo/sobo-tutorial": "_static/thumbnails/sobo-tutorial-thumbnail.jpg",
     "curriculum/tutorials/mobo/mobo-tutorial": "_static/thumbnails/mobo-tutorial-thumbnail.jpg",
-    "curriculum/tutorials/batch/Batch_BO_tutorial": "_static/thumbnails/batch_tutorial_thumbnail.png",
+    "curriculum/tutorials/batch/batch-bo-tutorial": "_static/thumbnails/batch_tutorial_thumbnail.png",
     "curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo": "_static/thumbnails/SOBOMOBO_concept_thumbnail.png",
     "curriculum/concepts/freq-vs-bayes/freq-vs-bayes": "_static/thumbnails/FullyBayesian_concept_thumbnail.png",
     "curriculum/concepts/batch/single-vs-batch": "_static/thumbnails/BatchBO_concept_thumbnail.png",
