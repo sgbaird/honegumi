@@ -20,6 +20,7 @@ References:
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
 
+import json
 import logging
 
 import honegumi.ax.utils.constants as cst
@@ -178,3 +179,103 @@ def model_kwargs_test_override(render_datum):
         model_kwargs["num_samples"] = 16
         model_kwargs["warmup_steps"] = 32
     return render_datum
+
+
+# NOTE: 'model' tooltip can use some clarification once
+# https://github.com/facebook/Ax/issues/2411 is resolved
+tooltips = json.load(open("scripts/resources/tooltips.json"))
+
+
+# opts stands for options
+# TODO: make names more accessible and include tooltip text with details
+# REVIEW: consider using only high-level features, not platform-specific details
+# NOTE: Hidden variables are ones that I might want to unhide later
+option_rows = [
+    {
+        "name": cst.OBJECTIVE_OPT_KEY,
+        "options": ["single", "multi"],
+        "hidden": False,
+        "disable": False,
+    },
+    {
+        "name": cst.MODEL_OPT_KEY,
+        "options": [
+            "Default",  # e.g., GPEI
+            cst.FULLYBAYESIAN_KEY,  # e.g., FULLYBAYESIAN
+        ],  # Change to "Default" and "Fully Bayesian" # noqa E501
+        "hidden": False,
+        "disable": False,
+    },
+    {
+        "name": cst.CUSTOM_GEN_KEY,
+        "options": [False, True],
+        "hidden": True,
+        "disable": False,
+    },
+    {
+        "name": cst.EXISTING_DATA_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": False,
+    },
+    # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
+    # consider collapsing these three constraints into single option # noqa: E501
+    {
+        "name": cst.SUM_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+    },
+    {
+        "name": cst.ORDER_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+    },
+    {
+        "name": cst.LINEAR_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+    },
+    {
+        "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+    },  # noqa E501 # NOTE: AC Microcourses
+    {
+        "name": cst.CATEGORICAL_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+    },
+    {
+        "name": cst.CUSTOM_THRESHOLD_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": False,
+    },
+    # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
+    # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses (probably leave out, and just include as a tutorial with predefined candidates)
+    # ⭐ {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    {
+        "name": cst.FIDELITY_OPT_KEY,
+        "options": ["single", "multi"],
+        "hidden": False,
+        "disable": True,
+    },  # noqa E501 # NOTE: AC Microcourses
+    # {"name": TASK_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
+    # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
+    {
+        "name": cst.SYNCHRONY_OPT_KEY,
+        "options": ["single", "batch"],  # TODO: add "asynchronous"
+        "hidden": False,
+        "disable": True,
+    },
+    # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
+    # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
+]
+
+extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, cst.DUMMY_KEY]

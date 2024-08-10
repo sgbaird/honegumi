@@ -1,4 +1,3 @@
-import json
 import os
 from os import path
 from pathlib import Path
@@ -10,8 +9,11 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 import honegumi.ax.utils.constants as cst
 from honegumi.ax._ax import (
     add_model_specific_keys,
+    extra_jinja_var_names,
     is_incompatible_ax,
     model_kwargs_test_override,
+    option_rows,
+    tooltips,
 )
 from honegumi.core._honegumi import (
     ResultsCollector,
@@ -49,100 +51,6 @@ core_env = Environment(
     keep_trailing_newline=True,
 )
 
-tooltips = json.load(open("scripts/resources/tooltips.json"))
-
-# opts stands for options
-# TODO: make names more accessible and include tooltip text with details
-# REVIEW: consider using only high-level features, not platform-specific details
-# NOTE: Hidden variables are ones that I might want to unhide later
-option_rows = [
-    {
-        "name": cst.OBJECTIVE_OPT_KEY,
-        "options": ["single", "multi"],
-        "hidden": False,
-        "disable": False,
-    },
-    {
-        "name": cst.MODEL_OPT_KEY,
-        "options": [
-            "Default",  # e.g., GPEI
-            cst.FULLYBAYESIAN_KEY,  # e.g., FULLYBAYESIAN
-        ],  # Change to "Default" and "Fully Bayesian" # noqa E501
-        "hidden": False,
-        "disable": False,
-    },
-    {
-        "name": cst.CUSTOM_GEN_KEY,
-        "options": [False, True],
-        "hidden": True,
-        "disable": False,
-    },
-    {
-        "name": cst.EXISTING_DATA_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-    },
-    # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
-    # consider collapsing these three constraints into single option # noqa: E501
-    {
-        "name": cst.SUM_CONSTRAINT_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": True,
-    },
-    {
-        "name": cst.ORDER_CONSTRAINT_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": True,
-    },
-    {
-        "name": cst.LINEAR_CONSTRAINT_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": True,
-    },
-    {
-        "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": True,
-    },  # noqa E501 # NOTE: AC Microcourses
-    {
-        "name": cst.CATEGORICAL_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": True,
-    },
-    {
-        "name": cst.CUSTOM_THRESHOLD_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-    },
-    # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
-    # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses (probably leave out, and just include as a tutorial with predefined candidates)
-    # ⭐ {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    {
-        "name": cst.FIDELITY_OPT_KEY,
-        "options": ["single", "multi"],
-        "hidden": False,
-        "disable": True,
-    },  # noqa E501 # NOTE: AC Microcourses
-    # {"name": TASK_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
-    {
-        "name": cst.SYNCHRONY_OPT_KEY,
-        "options": ["single", "batch"],  # TODO: add "asynchronous"
-        "hidden": False,
-        "disable": True,
-    },
-    # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
-    # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
-]
-
 # remove the options where disable is True, and print disabled options (keep
 # track of disabled option names and default values)
 disabled_option_defaults = [
@@ -162,9 +70,6 @@ for row in option_rows:
     if row["name"] in tooltips:
         row["tooltip"] = tooltips[row["name"]]
 
-# NOTE: 'model' tooltip can use some clarification once
-# https://github.com/facebook/Ax/issues/2411 is resolved
-
 # E.g.,
 # {
 #     "objective": ["single", "multi"],
@@ -177,7 +82,6 @@ option_names = [row["name"] for row in option_rows]
 visible_option_names = [row["name"] for row in option_rows if not row["hidden"]]
 visible_option_rows = [row for row in option_rows if not row["hidden"]]
 
-extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, cst.DUMMY_KEY]
 jinja_var_names = option_names + extra_jinja_var_names + disabled_option_names
 
 jinja_option_rows = [row for row in visible_option_rows]
@@ -193,10 +97,6 @@ for opt in all_opts:
 
     # in-place operation
     add_model_specific_keys(option_names, opt)
-
-
-# track cases where certain combinations of non-hidden options are invalid
-incompatible_configs = [opt for opt in all_opts if is_incompatible_ax(opt)]
 
 
 directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
@@ -381,3 +281,6 @@ with open(path.join(cst.DOC_DIR, "honegumi.html"), "w") as f:
 
 #     with open(abs_gen_script_path, "w") as f:
 #         f.write(script)
+
+# # track cases where certain combinations of non-hidden options are invalid
+# incompatible_configs = [opt for opt in all_opts if is_incompatible_ax(opt)]
