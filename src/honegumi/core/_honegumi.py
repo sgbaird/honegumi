@@ -409,13 +409,17 @@ class Honegumi:
 
 
 def generate_test(
-    script_template, render_datum, dummy=True, render_datum_override_fn=None, cst=cst
+    script_template,
+    render_datum,
+    dummy=True,
+    model_kwargs_test_override_fn=None,
+    cst=cst,
 ):
     test_render_datum = render_datum.copy()
     test_render_datum[cst.DUMMY_KEY] = dummy
 
-    if render_datum_override_fn is not None:
-        test_render_datum = render_datum_override_fn(test_render_datum)
+    if model_kwargs_test_override_fn is not None:
+        test_render_datum = model_kwargs_test_override_fn(test_render_datum)
 
     test_script = script_template.render(test_render_datum)
     test_script = format_file_contents(test_script, fast=False, mode=FileMode())

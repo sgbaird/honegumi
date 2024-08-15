@@ -23,7 +23,6 @@ from honegumi.core._honegumi import (
     gen_combs_with_keys,
     generate_lookup_dict,
     generate_test,
-    honegumi,
     prep_datum_for_render,
     unpack_rendered_template_stem,
 )
@@ -120,7 +119,7 @@ class Honegumi:
         [create_and_clear_dir(directory) for directory in directories]
 
     def generate(self, selections):
-        if is_incompatible(selections):
+        if self.is_incompatible_fn(selections):
             return "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
 
         script = self.template.render(selections)
@@ -176,7 +175,8 @@ for selections in data:
     script_template_name = "main.py.jinja"
     template = hg.env.get_template(script_template_name)
 
-    script = honegumi(template, selections)
+    # script = honegumi(template, selections)
+    script = hg.generate(selections)
 
     selections[cst.RENDERED_KEY] = script  # for the HTML template
 
@@ -196,7 +196,7 @@ for selections in data:
             template,
             render_datum,
             dummy=hg.dummy,
-            render_datum_override_fn=model_kwargs_test_override,
+            model_kwargs_test_override_fn=model_kwargs_test_override,
         )
 
         # save in tests directory with test_ prefix
