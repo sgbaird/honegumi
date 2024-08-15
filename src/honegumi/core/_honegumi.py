@@ -395,14 +395,17 @@ def create_notebook(datum, gen_script_path, script, cst=cst):
     return notebook, notebook_path
 
 
-def generate_script(jinja_var_names, datum, script_template):
-    render_datum = {var_name: datum[var_name] for var_name in jinja_var_names}
-    script = script_template.render(render_datum)
+def honegumi(template, selections):
+    script = template.render(selections)
 
     # apply black formatting
     script = format_file_contents(script, fast=False, mode=FileMode())
 
-    return script, render_datum
+    return script
+
+
+class Honegumi:
+    pass
 
 
 def generate_test(

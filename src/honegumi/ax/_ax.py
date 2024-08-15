@@ -42,24 +42,7 @@ _logger = logging.getLogger(__name__)
 # when using this Python module as a library.
 
 
-def fib(n):
-    """Fibonacci example function (not actually used in honegumi, just from
-    pyscaffold template)
-
-    Args:
-      n (int): integer
-
-    Returns:
-      int: n-th Fibonacci number
-    """
-    assert n > 0
-    a, b = 1, 1
-    for _i in range(n - 1):
-        a, b = b, a + b
-    return a
-
-
-def is_incompatible_ax(opt):
+def is_incompatible(opt):
     """
     Check if the given option dictionary contains incompatible options.
 

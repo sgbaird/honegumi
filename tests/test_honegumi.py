@@ -1,7 +1,6 @@
-import pytest
-
+from honegumi.ax.utils import constants as cst
 from honegumi.core._honegumi import (
-    fib,
+    Honegumi,
     get_rendered_template_stem,
     main,
     unpack_rendered_template_stem,
@@ -12,13 +11,9 @@ __copyright__ = "sgbaird"
 __license__ = "MIT"
 
 
-def test_fib():
-    """API Tests"""
-    assert fib(1) == 1
-    assert fib(2) == 1
-    assert fib(7) == 13
-    with pytest.raises(AssertionError):
-        fib(-10)
+def test_honegumi():
+    hg = Honegumi()
+    hg.generate(**{cst.OBJECTIVE_OPT_KEY: "multi", cst.EXISTING_DATA_KEY: True})
 
 
 def test_get_rendered_template_stem():
