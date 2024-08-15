@@ -9,6 +9,7 @@ repos:
     args: ['--maxkb=10000']
   - id: check-ast
   - id: check-json
+    exclude: ^\.devcontainer/devcontainer\.json$
   - id: check-merge-conflict
   - id: check-xml
   - id: check-yaml
