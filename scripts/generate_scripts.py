@@ -13,6 +13,7 @@ from honegumi.ax._ax import (
 )
 from honegumi.core._honegumi import (
     Honegumi,
+    create_and_clear_dir,
     create_notebook,
     gen_combs_with_keys,
     generate_lookup_dict,
@@ -28,17 +29,28 @@ hg = Honegumi(
     model_kwargs_test_override_fn=model_kwargs_test_override,
 )
 
+# removing directories should happen outside of the class
+directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
+[create_and_clear_dir(directory) for directory in directories]
+
 all_opts = gen_combs_with_keys(hg.visible_option_names, hg.visible_option_rows)
 
 data = all_opts.copy()
 
 for selections in data:
-    script = hg.generate(selections)
+    options_model = hg.OptionsModel(**selections)
+    script, selections = hg.generate(options_model, return_selections=True)
 
     # for the HTML template
     selections[core_cst.RENDERED_KEY] = script
 
-    selections["stem"] = get_rendered_template_stem(selections, hg.option_names)
+    if hg.is_incompatible_fn(selections):
+        # newline for "INVALID" message formatting
+        selections[core_cst.PREAMBLE_KEY] = "\n"
+    else:
+        selections[core_cst.PREAMBLE_KEY] = ""
+
+    selections["stem"] = get_rendered_template_stem(selections, hg.visible_option_names)
 
     gen_script_name = f"{selections['stem']}.py"
     gen_script_path = path.join(cst.GEN_SCRIPT_DIR, gen_script_name)
@@ -47,7 +59,9 @@ for selections in data:
     # # https://stackoverflow.com/a/61628356/13697228
 
     if not selections[core_cst.IS_COMPATIBLE_KEY]:
-        selections["stem"] = get_rendered_template_stem(selections, hg.option_names)
+        selections["stem"] = get_rendered_template_stem(
+            selections, hg.visible_option_names
+        )
         gen_script_name = f"{selections['stem']}.py"
         gen_script_path = path.join(hg.cst.GEN_SCRIPT_DIR, gen_script_name)
 

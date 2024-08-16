@@ -405,11 +405,7 @@ class Honegumi:
 
         self.jinja_option_rows = [row for row in self.visible_option_rows]
 
-        directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
-
-        [create_and_clear_dir(directory) for directory in directories]
-
-    def generate(self, options_model: BaseModel) -> str:
+    def generate(self, options_model: BaseModel, return_selections=False) -> str:
         # You can check if selections is an instance of the expected type
         if not isinstance(options_model, self.OptionsModel):
             warnings.warn(f"Expected {self.OptionsModel}, got {type(options_model)}")
@@ -423,16 +419,6 @@ class Honegumi:
 
         # in-place operation
         self.add_model_specific_keys_fn(self.option_names, selections)
-
-        # Check the compatibility of the given options and update the selections
-        # dictionary with the rendered template stem and compatibility status
-        selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
-
-        if selections[core_cst.IS_COMPATIBLE_KEY]:
-            selections[core_cst.PREAMBLE_KEY] = ""
-        else:
-            # newline for "INVALID" message formatting
-            selections[core_cst.PREAMBLE_KEY] = "\n"
 
         # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
         selections[core_cst.DUMMY_KEY] = False
@@ -448,6 +434,9 @@ class Honegumi:
 
         # apply black formatting
         script = format_file_contents(script, fast=False, mode=FileMode())
+
+        if return_selections:
+            return script, selections
 
         return script
 
