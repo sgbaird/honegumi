@@ -8,8 +8,10 @@ dependencies:
   - pip
   - ipython
   - ipywidgets
+  - numpy
   - pip:
-     - -e .[ax,dev]  # install git checkout of honegumi in editable mode
+     - -e .[dev]  # install git checkout of honegumi in editable mode
+     - ax-platform # since not explicitly required within src
      # add here only pip-packages that are not available in conda/conda-forge! E.g.:
      # - icecream
 
