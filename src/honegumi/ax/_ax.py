@@ -24,6 +24,7 @@ import json
 import logging
 
 import honegumi.ax.utils.constants as cst
+import honegumi.core.utils.constants  # noqa: F401
 from honegumi.core import __version__  # noqa: F401
 
 # from jinja2 import Environment, FileSystemLoader
@@ -157,6 +158,7 @@ def add_model_specific_keys(option_names, opt):
 
 
 def model_kwargs_test_override(render_datum):
+    """make sure tests run faster for SAASBO"""
     model_kwargs = render_datum[cst.MODEL_KWARGS_KEY]
     if "num_samples" in model_kwargs and "warmup_steps" in model_kwargs:
         model_kwargs["num_samples"] = 16
@@ -261,4 +263,4 @@ option_rows = [
     # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
 ]
 
-extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, cst.DUMMY_KEY]
+extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, honegumi.core.utils.constants.DUMMY_KEY]

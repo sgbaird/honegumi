@@ -11,19 +11,26 @@ import io
 import logging
 import os
 import sys
-import time
 from itertools import product
 from os import path
 from pathlib import Path
 from typing import List
 from urllib.parse import quote, urljoin
 
-import _pytest
 import jupytext
-import pytest
 from black import FileMode, format_file_contents
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 import honegumi.ax.utils.constants as cst
+import honegumi.core.utils.constants as core_cst
+from honegumi.ax._ax import (
+    add_model_specific_keys,
+    extra_jinja_var_names,
+    is_incompatible,
+    model_kwargs_test_override,
+    option_rows,
+    tooltips,
+)
 from honegumi.core import __version__
 
 __author__ = "sgbaird"
@@ -111,124 +118,6 @@ def unpack_rendered_template_stem(rendered_template_stem):
         options[option_name] = option_value
 
     return options
-
-
-class ResultsCollector:
-    """A class for collecting and summarizing results of pytest test runs.
-
-    https://stackoverflow.com/a/72278485/13697228
-
-    Attributes
-    ----------
-    reports : List[pytest.TestReport]
-        A list of test reports generated during the test run.
-    collected : int
-        The number of test items collected for the test run.
-    exitcode : int
-        The exit code of the test run.
-    passed : List[pytest.TestReport]
-        A list of test reports for tests that passed.
-    failed : List[pytest.TestReport]
-        A list of test reports for tests that failed.
-    xfailed : List[pytest.TestReport]
-        A list of test reports for tests that were expected to fail but passed.
-    skipped : List[pytest.TestReport]
-        A list of test reports for tests that were skipped.
-    total_duration : float
-        The total duration of the test run in seconds.
-
-    Examples
-    --------
-    >>> collector = ResultsCollector()
-    >>> # run pytest tests
-    >>> collector.total_duration
-    10.123456789
-    """
-
-    def __init__(self) -> None:
-        self.reports: List[pytest.TestReport] = []
-        self.collected: int = 0
-        self.exitcode: int = 0
-        self.passed: List[pytest.TestReport] = []
-        self.failed: List[pytest.TestReport] = []
-        self.xfailed: List[pytest.TestReport] = []
-        self.skipped: List[pytest.TestReport] = []
-        self.total_duration: float = 0
-
-    @pytest.hookimpl(hookwrapper=True)
-    def pytest_runtest_makereport(
-        self, item: pytest.Item, call: pytest.CallInfo
-    ) -> None:
-        """A pytest hook for collecting test reports.
-
-        Parameters
-        ----------
-        item : pytest.Item
-            The test item being run.
-        call : pytest.CallInfo
-            The result of running the test item.
-
-        Examples
-        --------
-        >>> item = ...
-        >>> call = ...
-        >>> collector = ResultsCollector()
-        >>> collector.pytest_runtest_makereport(item, call)
-        """
-
-        outcome = yield
-        report = outcome.get_result()
-        if report.when == "call":
-            self.reports.append(report)
-
-    def pytest_collection_modifyitems(self, items: List[pytest.Item]) -> None:
-        """A pytest hook for modifying collected test items.
-
-        Parameters
-        ----------
-        items : List[pytest.Item]
-            A list of pytest.Item objects representing the collected test items.
-
-        Examples
-        --------
-        >>> items = ...
-        >>> collector = ResultsCollector()
-        >>> collector.pytest_collection_modifyitems(items)
-        """
-
-        self.collected = len(items)
-
-    def pytest_terminal_summary(
-        self, terminalreporter: _pytest.terminal.TerminalReporter, exitstatus: int
-    ) -> None:
-        """A pytest hook for summarizing test results.
-
-        Parameters
-        ----------
-        terminalreporter : pytest.terminal.TerminalReporter
-            The terminal reporter object used to report test results.
-        exitstatus : int
-            The exit status code of the test run.
-
-        Examples
-        --------
-        >>> terminalreporter = ...
-        >>> exitstatus = ...
-        >>> collector = ResultsCollector()
-        >>> collector.pytest_terminal_summary(terminalreporter, exitstatus)
-        """
-
-        self.exitcode = exitstatus
-        self.passed = terminalreporter.stats.get("passed", [])
-        self.failed = terminalreporter.stats.get("failed", [])
-        self.xfailed = terminalreporter.stats.get("xfailed", [])
-        self.skipped = terminalreporter.stats.get("skipped", [])
-        self.num_passed = len(self.passed)
-        self.num_failed = len(self.failed)
-        self.num_xfailed = len(self.xfailed)
-        self.num_skipped = len(self.skipped)
-
-        self.total_duration = time.time() - terminalreporter._sessionstarttime
 
 
 def create_and_clear_dir(directory):
@@ -322,43 +211,6 @@ def generate_lookup_dict(df, option_names, key):
     }
 
 
-def prep_datum_for_render(option_names, datum, is_incompatible_fn=None):
-    """
-    Checks the compatibility of the given options and updates the datum
-    dictionary with the rendered template stem and compatibility status.
-
-    Parameters
-    ----------
-    option_names : list
-        The full list of option names in order to generate the filename stem.
-    datum : dict
-        The dictionary of option key-value pairs.
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    >>> check_compatibility_and_update(['option1', 'option2'], {'option1': 'value1', 'option2': 'value2'}) # noqa: E501
-    OUTPUT
-
-    Notes
-    -----
-    This function will always set the 'dummy' key in the 'datum' dictionary to
-    False.
-    """
-    rendered_template_stem = get_rendered_template_stem(datum, option_names)
-
-    datum["stem"] = rendered_template_stem
-
-    datum[cst.IS_COMPATIBLE_KEY] = not is_incompatible_fn(datum)
-
-    # NOTE: Decided to always keep dummy key false for scripts, let dummy only
-    # affect tests
-    datum[cst.DUMMY_KEY] = False
-
-
 def create_notebook(datum, gen_script_path, script, cst=cst):
     github_username = "sgbaird"
     github_prefix = f"https://github.com/{github_username}/honegumi/tree/main/"
@@ -380,7 +232,7 @@ def create_notebook(datum, gen_script_path, script, cst=cst):
     colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
 
     preamble = f"{colab_badge} {github_badge}"
-    datum[cst.PREAMBLE_KEY] = preamble  # for the HTML template
+    datum[core_cst.PREAMBLE_KEY] = preamble  # for the HTML template
 
     # create an intermediate file object for gen_script and prepend colab link
     nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
@@ -395,28 +247,14 @@ def create_notebook(datum, gen_script_path, script, cst=cst):
     return notebook, notebook_path
 
 
-def honegumi(template, selections):
-    script = template.render(selections)
-
-    # apply black formatting
-    script = format_file_contents(script, fast=False, mode=FileMode())
-
-    return script
-
-
-class Honegumi:
-    pass
-
-
 def generate_test(
     script_template,
     render_datum,
     dummy=True,
     model_kwargs_test_override_fn=None,
-    cst=cst,
 ):
     test_render_datum = render_datum.copy()
-    test_render_datum[cst.DUMMY_KEY] = dummy
+    test_render_datum[core_cst.DUMMY_KEY] = dummy
 
     if model_kwargs_test_override_fn is not None:
         test_render_datum = model_kwargs_test_override_fn(test_render_datum)
@@ -543,6 +381,138 @@ if __name__ == "__main__":
     #     python -m honegumi.core.skeleton 42
     #
     run()
+
+
+# NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
+# i.e., hard-code the model names instead of accessing them programatically
+# see https://github.com/facebook/Ax/issues/1781
+
+
+class Honegumi:
+    def __init__(
+        self,
+        cst,
+        option_rows=option_rows,
+        tooltips=tooltips,
+        script_template_name="main.py.jinja",
+        is_incompatible_fn=is_incompatible,
+        add_model_specific_keys_fn=add_model_specific_keys,
+        model_kwargs_test_override_fn=model_kwargs_test_override,
+        dummy=None,
+        skip_tests=None,
+    ):
+        self.cst = cst
+
+        self.is_incompatible_fn = is_incompatible_fn
+        self.add_model_specific_keys_fn = add_model_specific_keys_fn
+        self.model_kwargs_test_override_fn = model_kwargs_test_override_fn
+
+        if dummy is None:
+            dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
+
+        if skip_tests is None:
+            skip_tests = os.getenv("SKIP_TESTS", "False").lower() == "true"
+
+        self.dummy = dummy
+        self.skip_tests = skip_tests
+
+        if dummy:
+            print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
+
+        if skip_tests:
+            print("SKIPPING TESTS")
+
+        self.env = Environment(
+            loader=FileSystemLoader(cst.TEMPLATE_DIR),
+            undefined=StrictUndefined,
+            keep_trailing_newline=True,
+        )
+
+        self.template = self.env.get_template(script_template_name)
+
+        self.core_env = Environment(
+            loader=FileSystemLoader(core_cst.CORE_TEMPLATE_DIR),
+            undefined=StrictUndefined,
+            keep_trailing_newline=True,
+        )
+
+        # remove the options where disable is True, and print disabled options (keep
+        # track of disabled option names and default values)
+        self.disabled_option_defaults = [
+            {row["name"]: row["options"][0]} for row in option_rows if row["disable"]
+        ]
+        disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
+
+        option_rows = [row for row in option_rows if not row["disable"]]
+
+        # E.g.,
+        # {
+        #     "objective": ["single", "multi"],
+        #     "model": ["GPEI", "FULLYBAYESIAN"],
+        #     "use_custom_gen": [True, False],
+        # }
+
+        if self.disabled_option_defaults:
+            print("The following options have been disabled:")
+            for default in self.disabled_option_defaults:
+                print(f"Disabled option and default: {default}")
+
+        for row in option_rows:
+            if row["name"] in tooltips:
+                row["tooltip"] = tooltips[row["name"]]
+
+        self.option_names = [row["name"] for row in option_rows]
+
+        self.visible_option_names = [
+            row["name"] for row in option_rows if not row["hidden"]
+        ]
+        self.visible_option_rows = [row for row in option_rows if not row["hidden"]]
+
+        self.jinja_var_names = (
+            self.option_names + extra_jinja_var_names + disabled_option_names
+        )
+
+        self.jinja_option_rows = [row for row in self.visible_option_rows]
+
+        directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
+
+        [create_and_clear_dir(directory) for directory in directories]
+
+    def generate(self, selections):
+
+        # set the default values for the disabled options
+        for default in self.disabled_option_defaults:
+            selections.update(default)
+
+        # in-place operation
+        self.add_model_specific_keys_fn(self.option_names, selections)
+
+        # Check the compatibility of the given options and update the selections
+        # dictionary with the rendered template stem and compatibility status
+        selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
+
+        if selections[core_cst.IS_COMPATIBLE_KEY]:
+            selections[core_cst.PREAMBLE_KEY] = ""
+        else:
+            # newline for "INVALID" message formatting
+            selections[core_cst.PREAMBLE_KEY] = "\n"
+
+        # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
+        selections[core_cst.DUMMY_KEY] = False
+
+        if self.is_incompatible_fn(selections):
+            return "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
+
+        selections = {
+            var_name: selections[var_name] for var_name in self.jinja_var_names
+        }
+
+        script = self.template.render(selections)
+
+        # apply black formatting
+        script = format_file_contents(script, fast=False, mode=FileMode())
+
+        return script
 
 
 # %% Code Graveyard
