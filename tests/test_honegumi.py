@@ -14,6 +14,26 @@ __license__ = "MIT"
 def test_honegumi():
     hg = Honegumi()
     hg.generate(**{cst.OBJECTIVE_OPT_KEY: "multi", cst.EXISTING_DATA_KEY: True})
+    # hg.generate(objective="multi", existing_data=True)
+
+
+def test_pydantic():
+    from honegumi.ax._ax import option_rows
+
+    hg = Honegumi(cst, option_rows)
+    GenerateOptions = hg.OptionsModel
+    selections = GenerateOptions(
+        objective="multi", model="Default", custom_gen=False, existing_data=True
+    )
+    result = hg.generate(selections)
+    print(result)
+
+    print(selections.model_fields["objective"].json_schema_extra["hidden"])
+    print(selections.model_fields["objective"].json_schema_extra["disable"])
+
+    # print(list(selections.model_fields.values())[0].json_schema_extra["hidden"])
+
+    1 + 1
 
 
 def test_get_rendered_template_stem():
@@ -148,4 +168,5 @@ def test_main(capsys):
 
 if __name__ == "__main__":
     """Execute the test suite"""
+    test_pydantic()
     test_unpack_rendered_template_stem()

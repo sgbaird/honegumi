@@ -11,15 +11,17 @@ import io
 import logging
 import os
 import sys
+import warnings
 from itertools import product
 from os import path
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
 from urllib.parse import quote, urljoin
 
 import jupytext
 from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from pydantic import BaseModel, Field, create_model
 
 import honegumi.ax.utils.constants as cst
 import honegumi.core.utils.constants as core_cst
@@ -274,6 +276,182 @@ def generate_test(
     return rendered_test_template
 
 
+# NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
+# i.e., hard-code the model names instead of accessing them programatically
+# see https://github.com/facebook/Ax/issues/1781
+
+# also, this would make ax an explicit dependency, so perhaps better not to do so.
+
+
+def create_options_model(option_rows: List[Dict[str, Any]]) -> BaseModel:
+    fields = {}
+
+    for row in option_rows:
+        name = row["name"]
+        options = row["options"]
+        hidden = row["hidden"]
+        disable = row["disable"]
+
+        # Handle different types of options (e.g., bool, str)
+        if all(isinstance(opt, bool) for opt in options):
+            field_type = bool
+        elif all(isinstance(opt, str) for opt in options):
+            field_type = str
+        else:
+            field_type = Any  # Fallback for mixed types
+
+        # Handle field default and other metadata
+        default_value = options[0]  # Default to the first option in the list
+        fields[name] = (
+            field_type,
+            Field(
+                default=default_value,
+                description=name,
+                json_schema_extra={"hidden": hidden, "disable": disable},
+            ),
+        )
+
+    # Create a Pydantic model dynamically
+    model = create_model("GenerateOptions", **fields)
+    return model
+
+
+class Honegumi:
+    def __init__(
+        self,
+        cst,
+        option_rows: List[Dict[str, Any]] = option_rows,
+        tooltips=tooltips,
+        script_template_name="main.py.jinja",
+        is_incompatible_fn=is_incompatible,
+        add_model_specific_keys_fn=add_model_specific_keys,
+        model_kwargs_test_override_fn=model_kwargs_test_override,
+        dummy=None,
+        skip_tests=None,
+    ):
+        self.cst = cst
+
+        self.is_incompatible_fn = is_incompatible_fn
+        self.add_model_specific_keys_fn = add_model_specific_keys_fn
+        self.model_kwargs_test_override_fn = model_kwargs_test_override_fn
+
+        # Generate the Pydantic options model dynamically
+        self.OptionsModel = create_options_model(option_rows)
+
+        if dummy is None:
+            dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
+
+        if skip_tests is None:
+            skip_tests = os.getenv("SKIP_TESTS", "False").lower() == "true"
+
+        self.dummy = dummy
+        self.skip_tests = skip_tests
+
+        if dummy:
+            print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
+
+        if skip_tests:
+            print("SKIPPING TESTS")
+
+        self.env = Environment(
+            loader=FileSystemLoader(cst.TEMPLATE_DIR),
+            undefined=StrictUndefined,
+            keep_trailing_newline=True,
+        )
+
+        self.template = self.env.get_template(script_template_name)
+
+        self.core_env = Environment(
+            loader=FileSystemLoader(core_cst.CORE_TEMPLATE_DIR),
+            undefined=StrictUndefined,
+            keep_trailing_newline=True,
+        )
+
+        # remove the options where disable is True, and print disabled options (keep
+        # track of disabled option names and default values)
+        self.disabled_option_defaults = [
+            {row["name"]: row["options"][0]} for row in option_rows if row["disable"]
+        ]
+        disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
+
+        option_rows = [row for row in option_rows if not row["disable"]]
+
+        # E.g.,
+        # {
+        #     "objective": ["single", "multi"],
+        #     "model": ["GPEI", "FULLYBAYESIAN"],
+        #     "use_custom_gen": [True, False],
+        # }
+
+        if self.disabled_option_defaults:
+            print("The following options have been disabled:")
+            for default in self.disabled_option_defaults:
+                print(f"Disabled option and default: {default}")
+
+        for row in option_rows:
+            if row["name"] in tooltips:
+                row["tooltip"] = tooltips[row["name"]]
+
+        self.option_names = [row["name"] for row in option_rows]
+
+        self.visible_option_names = [
+            row["name"] for row in option_rows if not row["hidden"]
+        ]
+        self.visible_option_rows = [row for row in option_rows if not row["hidden"]]
+
+        self.jinja_var_names = (
+            self.option_names + extra_jinja_var_names + disabled_option_names
+        )
+
+        self.jinja_option_rows = [row for row in self.visible_option_rows]
+
+        directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
+
+        [create_and_clear_dir(directory) for directory in directories]
+
+    def generate(self, options_model: BaseModel) -> str:
+        # You can check if selections is an instance of the expected type
+        if not isinstance(options_model, self.OptionsModel):
+            warnings.warn(f"Expected {self.OptionsModel}, got {type(options_model)}")
+
+        # Convert validated selections to a dict
+        selections = options_model.model_dump()
+
+        # set the default values for the disabled options
+        for default in self.disabled_option_defaults:
+            selections.update(default)
+
+        # in-place operation
+        self.add_model_specific_keys_fn(self.option_names, selections)
+
+        # Check the compatibility of the given options and update the selections
+        # dictionary with the rendered template stem and compatibility status
+        selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
+
+        if selections[core_cst.IS_COMPATIBLE_KEY]:
+            selections[core_cst.PREAMBLE_KEY] = ""
+        else:
+            # newline for "INVALID" message formatting
+            selections[core_cst.PREAMBLE_KEY] = "\n"
+
+        # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
+        selections[core_cst.DUMMY_KEY] = False
+
+        if self.is_incompatible_fn(selections):
+            return "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
+
+        selections = {
+            var_name: selections[var_name] for var_name in self.jinja_var_names
+        }
+
+        script = self.template.render(selections)
+
+        # apply black formatting
+        script = format_file_contents(script, fast=False, mode=FileMode())
+
+        return script
+
+
 # ---- CLI ----
 # The functions defined in this section are wrappers around the main Python
 # API allowing them to be called directly from the terminal as a CLI
@@ -381,138 +559,6 @@ if __name__ == "__main__":
     #     python -m honegumi.core.skeleton 42
     #
     run()
-
-
-# NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
-# i.e., hard-code the model names instead of accessing them programatically
-# see https://github.com/facebook/Ax/issues/1781
-
-
-class Honegumi:
-    def __init__(
-        self,
-        cst,
-        option_rows=option_rows,
-        tooltips=tooltips,
-        script_template_name="main.py.jinja",
-        is_incompatible_fn=is_incompatible,
-        add_model_specific_keys_fn=add_model_specific_keys,
-        model_kwargs_test_override_fn=model_kwargs_test_override,
-        dummy=None,
-        skip_tests=None,
-    ):
-        self.cst = cst
-
-        self.is_incompatible_fn = is_incompatible_fn
-        self.add_model_specific_keys_fn = add_model_specific_keys_fn
-        self.model_kwargs_test_override_fn = model_kwargs_test_override_fn
-
-        if dummy is None:
-            dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
-
-        if skip_tests is None:
-            skip_tests = os.getenv("SKIP_TESTS", "False").lower() == "true"
-
-        self.dummy = dummy
-        self.skip_tests = skip_tests
-
-        if dummy:
-            print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
-
-        if skip_tests:
-            print("SKIPPING TESTS")
-
-        self.env = Environment(
-            loader=FileSystemLoader(cst.TEMPLATE_DIR),
-            undefined=StrictUndefined,
-            keep_trailing_newline=True,
-        )
-
-        self.template = self.env.get_template(script_template_name)
-
-        self.core_env = Environment(
-            loader=FileSystemLoader(core_cst.CORE_TEMPLATE_DIR),
-            undefined=StrictUndefined,
-            keep_trailing_newline=True,
-        )
-
-        # remove the options where disable is True, and print disabled options (keep
-        # track of disabled option names and default values)
-        self.disabled_option_defaults = [
-            {row["name"]: row["options"][0]} for row in option_rows if row["disable"]
-        ]
-        disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
-
-        option_rows = [row for row in option_rows if not row["disable"]]
-
-        # E.g.,
-        # {
-        #     "objective": ["single", "multi"],
-        #     "model": ["GPEI", "FULLYBAYESIAN"],
-        #     "use_custom_gen": [True, False],
-        # }
-
-        if self.disabled_option_defaults:
-            print("The following options have been disabled:")
-            for default in self.disabled_option_defaults:
-                print(f"Disabled option and default: {default}")
-
-        for row in option_rows:
-            if row["name"] in tooltips:
-                row["tooltip"] = tooltips[row["name"]]
-
-        self.option_names = [row["name"] for row in option_rows]
-
-        self.visible_option_names = [
-            row["name"] for row in option_rows if not row["hidden"]
-        ]
-        self.visible_option_rows = [row for row in option_rows if not row["hidden"]]
-
-        self.jinja_var_names = (
-            self.option_names + extra_jinja_var_names + disabled_option_names
-        )
-
-        self.jinja_option_rows = [row for row in self.visible_option_rows]
-
-        directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
-
-        [create_and_clear_dir(directory) for directory in directories]
-
-    def generate(self, selections):
-
-        # set the default values for the disabled options
-        for default in self.disabled_option_defaults:
-            selections.update(default)
-
-        # in-place operation
-        self.add_model_specific_keys_fn(self.option_names, selections)
-
-        # Check the compatibility of the given options and update the selections
-        # dictionary with the rendered template stem and compatibility status
-        selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
-
-        if selections[core_cst.IS_COMPATIBLE_KEY]:
-            selections[core_cst.PREAMBLE_KEY] = ""
-        else:
-            # newline for "INVALID" message formatting
-            selections[core_cst.PREAMBLE_KEY] = "\n"
-
-        # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
-        selections[core_cst.DUMMY_KEY] = False
-
-        if self.is_incompatible_fn(selections):
-            return "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
-
-        selections = {
-            var_name: selections[var_name] for var_name in self.jinja_var_names
-        }
-
-        script = self.template.render(selections)
-
-        # apply black formatting
-        script = format_file_contents(script, fast=False, mode=FileMode())
-
-        return script
 
 
 # %% Code Graveyard
