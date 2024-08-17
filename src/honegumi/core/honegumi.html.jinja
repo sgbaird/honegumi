@@ -88,14 +88,25 @@
                     label.innerHTML = label.textContent;
                 }
             });
-            var key = Array.from(rows, function (row) { return row.value; }).join(',');
-            var rendered = scriptLookup[key];
-            var preamble = preambleLookup[key];
+            var currentConfig = Array.from(rows, function (row) { return row.value; });
+
+            // Placeholder functions to generate rendered and preamble
+            function generateRendered(values) {
+                // Implement the logic to generate the rendered content based on the selected values
+                return "Generated rendered content for: " + values.join(', ');
+            }
+
+            function generatePreamble(values) {
+                // Implement the logic to generate the preamble content based on the selected values
+                return "Generated preamble content for: " + values.join(', ');
+            }
+
+            var rendered = generateRendered(currentConfig);
+            var preamble = generatePreamble(currentConfig);
 
             // Update the GitHub link
             document.getElementById("preamble").innerHTML = preamble
             document.getElementById("text").innerHTML = "\n" + rendered;
-            var currentConfig = Array.from(rows, function (row) { return row.value; });
 
             // Generate all possible configurations that deviate exactly by one option from the current configuration
             var possibleDeviatingConfigs = [];

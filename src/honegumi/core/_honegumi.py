@@ -423,17 +423,20 @@ class Honegumi:
         # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
         selections[core_cst.DUMMY_KEY] = False
 
-        if self.is_incompatible_fn(selections):
-            return "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
-
         selections = {
             var_name: selections[var_name] for var_name in self.jinja_var_names
         }
 
-        script = self.template.render(selections)
+        selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
 
-        # apply black formatting
-        script = format_file_contents(script, fast=False, mode=FileMode())
+        if self.is_incompatible_fn(selections):
+            # override
+            script = "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
+
+        else:
+            script = self.template.render(selections)
+            # apply black formatting
+            script = format_file_contents(script, fast=False, mode=FileMode())
 
         if return_selections:
             return script, selections

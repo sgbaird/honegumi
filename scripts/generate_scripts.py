@@ -37,6 +37,8 @@ all_opts = gen_combs_with_keys(hg.visible_option_names, hg.visible_option_rows)
 
 data = all_opts.copy()
 
+new_data = []
+
 for selections in data:
     options_model = hg.OptionsModel(**selections)
     script, selections = hg.generate(options_model, return_selections=True)
@@ -58,7 +60,7 @@ for selections in data:
     # # be mindful of max file component length (255?), regardless of path limits
     # # https://stackoverflow.com/a/61628356/13697228
 
-    if not selections[core_cst.IS_COMPATIBLE_KEY]:
+    if is_incompatible(selections):
         selections["stem"] = get_rendered_template_stem(
             selections, hg.visible_option_names
         )
@@ -68,7 +70,9 @@ for selections in data:
         # HACK: "stem" key required in `selections` within create_notebook()
         notebook, notebook_path = create_notebook(selections, gen_script_path, script)
 
-data_df = pd.DataFrame(data)
+    new_data.append(selections)
+
+data_df = pd.DataFrame(new_data)
 
 # find the configs that either failed or were incompatible
 invalid_configs = data_df[data_df[core_cst.IS_COMPATIBLE_KEY] == False][  # noqa
