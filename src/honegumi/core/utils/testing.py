@@ -3,6 +3,9 @@ from typing import List
 
 import _pytest
 import pytest
+from black import FileMode, format_file_contents
+
+import honegumi.core.utils.constants as core_cst
 
 
 class ResultsCollector:
@@ -121,3 +124,30 @@ class ResultsCollector:
         self.num_skipped = len(self.skipped)
 
         self.total_duration = time.time() - terminalreporter._sessionstarttime
+
+
+def generate_test(
+    script_template,
+    render_datum,
+    dummy=True,
+    model_kwargs_test_override_fn=None,
+):
+    test_render_datum = render_datum.copy()
+    test_render_datum[core_cst.DUMMY_KEY] = dummy
+
+    if model_kwargs_test_override_fn is not None:
+        test_render_datum = model_kwargs_test_override_fn(test_render_datum)
+
+    test_script = script_template.render(test_render_datum)
+    test_script = format_file_contents(test_script, fast=False, mode=FileMode())
+
+    # indent each line by 4 spaces and prefix def test_script():
+    four_spaces = "    "
+    rendered_test_template = "def test_script():\n" + "\n".join(
+        [four_spaces + line for line in test_script.split("\n")]
+    )
+
+    # append the if __name__ == "__main__": block
+    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
+
+    return rendered_test_template
