@@ -1,7 +1,5 @@
 from os import path
 
-import pandas as pd
-
 import honegumi.ax.utils.constants as cst
 import honegumi.core.utils.constants as core_cst
 from honegumi.ax._ax import (
@@ -11,14 +9,7 @@ from honegumi.ax._ax import (
     option_rows,
     tooltips,
 )
-from honegumi.core._honegumi import (
-    Honegumi,
-    create_and_clear_dir,
-    create_notebook,
-    gen_combs_with_keys,
-    generate_lookup_dict,
-    get_rendered_template_stem,
-)
+from honegumi.core._honegumi import Honegumi, create_and_clear_dir, gen_combs_with_keys
 
 hg = Honegumi(
     cst,
@@ -44,53 +35,25 @@ for selections in data:
     script, selections = hg.generate(options_model, return_selections=True)
 
     # for the HTML template
-    selections[core_cst.RENDERED_KEY] = script
+    selections[core_cst.RENDERED_KEY] = script  # type: ignore
 
-    if hg.is_incompatible_fn(selections):
-        # newline for "INVALID" message formatting
-        selections[core_cst.PREAMBLE_KEY] = "\n"
-    else:
-        selections[core_cst.PREAMBLE_KEY] = ""
-
-    selections["stem"] = get_rendered_template_stem(selections, hg.visible_option_names)
-
-    gen_script_name = f"{selections['stem']}.py"
-    gen_script_path = path.join(cst.GEN_SCRIPT_DIR, gen_script_name)
-
-    # # be mindful of max file component length (255?), regardless of path limits
-    # # https://stackoverflow.com/a/61628356/13697228
-
-    if is_incompatible(selections):
-        selections["stem"] = get_rendered_template_stem(
-            selections, hg.visible_option_names
-        )
-        gen_script_name = f"{selections['stem']}.py"
-        gen_script_path = path.join(hg.cst.GEN_SCRIPT_DIR, gen_script_name)
-
-        # HACK: "stem" key required in `selections` within create_notebook()
-        notebook, notebook_path = create_notebook(selections, gen_script_path, script)
+    # \n was to complement open in colab badge line
+    selections[core_cst.PREAMBLE_KEY] = ""  # type: ignore
 
     new_data.append(selections)
 
-data_df = pd.DataFrame(new_data)
+# Find the configs that either failed or were incompatible
+invalid_configs = [
+    {key: value for key, value in item.items() if key in hg.option_names}
+    for item in new_data
+    if not item[core_cst.IS_COMPATIBLE_KEY]
+]
 
-# find the configs that either failed or were incompatible
-invalid_configs = data_df[data_df[core_cst.IS_COMPATIBLE_KEY] == False][  # noqa
-    hg.option_names
-].to_dict(orient="records")
-
-# extract the values for each option name
+# Extract the values for each option name
 invalid_configs = [
     [str(opt[option_name]) for option_name in hg.visible_option_names]
     for opt in invalid_configs
 ]
-
-script_lookup = generate_lookup_dict(
-    data_df, hg.visible_option_names, core_cst.RENDERED_KEY
-)
-preamble_lookup = generate_lookup_dict(
-    data_df, hg.visible_option_names, core_cst.PREAMBLE_KEY
-)
 
 
 # Define the path to your HTML template file
@@ -106,8 +69,6 @@ for row in hg.jinja_option_rows:
 # Render the template with your variables
 html = template.render(
     jinja_option_rows=hg.jinja_option_rows,
-    script_lookup=script_lookup,
-    preamble_lookup=preamble_lookup,
     invalid_configs=invalid_configs,
 )
 

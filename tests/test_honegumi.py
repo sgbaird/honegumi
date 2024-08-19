@@ -21,15 +21,14 @@ def test_pydantic():
     from honegumi.ax._ax import option_rows
 
     hg = Honegumi(cst, option_rows)
-    GenerateOptions = hg.OptionsModel
-    selections = GenerateOptions(
+    options_model = hg.OptionsModel(
         objective="multi", model="Default", custom_gen=False, existing_data=True
     )
-    result = hg.generate(selections)
+    result = hg.generate(options_model)
     print(result)
 
-    print(selections.model_fields["objective"].json_schema_extra["hidden"])
-    print(selections.model_fields["objective"].json_schema_extra["disable"])
+    print(options_model.model_fields["objective"].json_schema_extra["hidden"])
+    print(options_model.model_fields["objective"].json_schema_extra["disable"])
 
     # print(list(selections.model_fields.values())[0].json_schema_extra["hidden"])
 

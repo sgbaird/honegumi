@@ -7,23 +7,18 @@ References:
 """
 
 import argparse
-import io
 import logging
 import os
 import sys
 import warnings
 from itertools import product
-from os import path
 from pathlib import Path
-from typing import Any, Dict, List
-from urllib.parse import quote, urljoin
+from typing import Any, Dict, List, Tuple, Union
 
-import jupytext
 from black import FileMode, format_file_contents
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pydantic import BaseModel, Field, create_model
 
-import honegumi.ax.utils.constants as cst
 import honegumi.core.utils.constants as core_cst
 from honegumi.ax._ax import (
     add_model_specific_keys,
@@ -189,91 +184,26 @@ def gen_combs_with_keys(
 # but boolean syntax can vary).
 
 
-def generate_lookup_dict(df, option_names, key):
+def generate_lookup_dict(data, option_names, key):
     """
-    Generate a lookup dictionary from a pandas DataFrame.
+    Generate a lookup dictionary from a list of dictionaries.
 
     Examples
     --------
-    >>> df = pd.DataFrame(
-    >>>     {
-    >>>         "option1": ["a", "b", "c"],
-    >>>         "option2": [1, 2, 3],
-    >>>         "key": ["foo", "bar", "baz"],
-    >>>     }
-    >>> )
-    >>> generate_lookup_dict(df, ['option1', 'option2'], 'key')
+    >>> data = [
+    >>>     {"option1": "a", "option2": 1, "key": "foo"},
+    >>>     {"option1": "b", "option2": 2, "key": "bar"},
+    >>>     {"option1": "c", "option2": 3, "key": "baz"},
+    >>> ]
+    >>> generate_lookup_dict(data, ['option1', 'option2'], 'key')
     {'a,1': 'foo', 'b,2': 'bar', 'c,3': 'baz'}
     """
-    if key not in df.columns:
-        raise ValueError(f"key {key} not in {df.columns}")
+    if not all(key in item for item in data):
+        raise ValueError(f"key {key} not in all items")
     return {
-        ",".join([str(opt[option_name]) for option_name in option_names]): opt[key]
-        for opt in df.to_dict(orient="records")
+        ",".join([str(item[option_name]) for option_name in option_names]): item[key]
+        for item in data
     }
-
-
-def create_notebook(datum, gen_script_path, script, cst=cst):
-    github_username = "sgbaird"
-    github_prefix = f"https://github.com/{github_username}/honegumi/tree/main/"
-    github_link = urljoin(github_prefix, gen_script_path)
-
-    github_badge = f'<a href="{github_link}"><img alt="Open in GitHub" src="https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey"></a>'  # noqa E501
-
-    colab_prefix = (
-        "https://colab.research.google.com/github/sgbaird/honegumi/blob/main/"
-    )
-
-    notebook_fname = f"{datum['stem']}.ipynb"
-    notebook_path = path.join(cst.GEN_NOTEBOOK_DIR, notebook_fname)
-    # HACK: issue with + encoding becoming %20 instead of %2B due to use of \\,
-    # and maybe other issues (hence both quote fn and replace line)
-    encoded_notebook_fname = quote(notebook_fname)
-    encoded_notebook_path = path.join(cst.GEN_NOTEBOOK_DIR, encoded_notebook_fname)
-    colab_link = urljoin(colab_prefix, encoded_notebook_path).replace("\\", "/")
-    colab_badge = f'<a href="{colab_link}"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>'  # noqa E501
-
-    preamble = f"{colab_badge} {github_badge}"
-    datum[core_cst.PREAMBLE_KEY] = preamble  # for the HTML template
-
-    # create an intermediate file object for gen_script and prepend colab link
-    nb_text = f"# %% [markdown]\n{colab_badge}\n\n# %%\n%pip install ax-platform\n\n# %%\n{script}"  # noqa E501
-    gen_script_file = io.StringIO(nb_text)
-
-    # generate the notebook
-    notebook = jupytext.read(gen_script_file, fmt="py:percent")
-
-    with open(notebook_path, "w") as f:
-        jupytext.write(notebook, f, fmt="notebook")
-
-    return notebook, notebook_path
-
-
-def generate_test(
-    script_template,
-    render_datum,
-    dummy=True,
-    model_kwargs_test_override_fn=None,
-):
-    test_render_datum = render_datum.copy()
-    test_render_datum[core_cst.DUMMY_KEY] = dummy
-
-    if model_kwargs_test_override_fn is not None:
-        test_render_datum = model_kwargs_test_override_fn(test_render_datum)
-
-    test_script = script_template.render(test_render_datum)
-    test_script = format_file_contents(test_script, fast=False, mode=FileMode())
-
-    # indent each line by 4 spaces and prefix def test_script():
-    four_spaces = "    "
-    rendered_test_template = "def test_script():\n" + "\n".join(
-        [four_spaces + line for line in test_script.split("\n")]
-    )
-
-    # append the if __name__ == "__main__": block
-    rendered_test_template += "\n\nif __name__ == '__main__':\n    test_script()"
-
-    return rendered_test_template
 
 
 # NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
@@ -283,7 +213,7 @@ def generate_test(
 # also, this would make ax an explicit dependency, so perhaps better not to do so.
 
 
-def create_options_model(option_rows: List[Dict[str, Any]]) -> BaseModel:
+def create_options_model(option_rows: List[Dict[str, Any]]):
     fields = {}
 
     for row in option_rows:
@@ -311,8 +241,12 @@ def create_options_model(option_rows: List[Dict[str, Any]]) -> BaseModel:
             ),
         )
 
+        # TODO: auto-create the docstring __doc__ since this dynamically
+        # generates the pydantic model (i.e., useful hover typehints are lost)
+        # https://chatgpt.com/share/d3cce48d-effe-4496-82be-476c1889e7fd
+
     # Create a Pydantic model dynamically
-    model = create_model("GenerateOptions", **fields)
+    model = create_model("OptionsModel", **fields)
     return model
 
 
@@ -405,7 +339,9 @@ class Honegumi:
 
         self.jinja_option_rows = [row for row in self.visible_option_rows]
 
-    def generate(self, options_model: BaseModel, return_selections=False) -> str:
+    def generate(
+        self, options_model: BaseModel, return_selections=False
+    ) -> Union[str, Tuple[str, Dict[str, Any]]]:
         # You can check if selections is an instance of the expected type
         if not isinstance(options_model, self.OptionsModel):
             warnings.warn(f"Expected {self.OptionsModel}, got {type(options_model)}")
