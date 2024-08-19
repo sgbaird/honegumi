@@ -56,3 +56,4 @@ venv/*
 reports/~$honegumi-logo.pptx
 docs/curriculum/assignments/Assignment_1_SOBO.ipynb
 docs/curriculum/assignments/Assignment_2_MOBO.ipynb
+src/honegumi/core/honegumi-pyodide-refactor-backup.html.jinja
