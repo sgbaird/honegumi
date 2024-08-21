@@ -25,31 +25,16 @@ def multi_task_objective(task, x1, x2):
         raise ValueError("Unknown task")
 
 
-def featurize_data(x1, x2):
-    # An example featurization, but often featurization is non-invertible
-    feat1 = (x1 + x2) ** 2
-    feat2 = (x1 - x2) ** 2
-    return feat1, feat2
-
-
 # Synthetic training data
 train_parameterizations = pd.DataFrame(
     {"x1": np.random.uniform(-5, 10, 10), "x2": np.random.uniform(0, 15, 10)}
 )
 
-train_data_feat = pd.DataFrame(
-    [
-        featurize_data(row["x1"], row["x2"])
-        for _, row in train_parameterizations.iterrows()
-    ],
-    columns=["feat1", "feat2"],
-)
-
-train_data_feat["task_1"] = train_parameterizations.apply(
+train_parameterizations["task_1"] = train_parameterizations.apply(
     lambda row: multi_task_objective("task_1", row["x1"], row["x2"]), axis=1
 )
 
-train_data_feat["task_2"] = train_parameterizations.apply(
+train_parameterizations["task_2"] = train_parameterizations.apply(
     lambda row: multi_task_objective("task_2", row["x1"], row["x2"]), axis=1
 )
 
@@ -63,25 +48,20 @@ candidate_params = pd.DataFrame(
     }
 )
 
-candidate_features = pd.DataFrame(
-    [featurize_data(row["x1"], row["x2"]) for _, row in candidate_params.iterrows()],
-    columns=["feat1", "feat2"],
-)
-
 gs = GenerationStrategy(
     steps=[  # skip Sobol generation step
         GenerationStep(model=Models.BOTORCH_MODULAR, num_trials=-1, max_parallelism=3)
     ]
 )
 
-featurized_parameters = [
-    {"name": "feat1", "type": "range", "bounds": [0.0, 625.0]},
-    {"name": "feat2", "type": "range", "bounds": [0.0, 400.0]},
+parameters = [
+    {"name": "x1", "type": "range", "bounds": [-5.0, 10.0]},
+    {"name": "x2", "type": "range", "bounds": [0.0, 15.0]},
 ]
 
 ax_client = AxClient(generation_strategy=gs, verbose_logging=False, random_seed=42)
 ax_client.create_experiment(
-    parameters=featurized_parameters,
+    parameters=parameters,
     objectives={
         "task_1": ObjectiveProperties(minimize=True),
         "task_2": ObjectiveProperties(minimize=True),
@@ -89,8 +69,8 @@ ax_client.create_experiment(
 )
 
 # Add training data to the ax client for both tasks
-for _, row in train_data_feat.iterrows():
-    obs_data = row[["feat1", "feat2"]].to_dict()
+for _, row in train_parameterizations.iterrows():
+    obs_data = row[["x1", "x2"]].to_dict()
     trial, trial_index = ax_client.attach_trial(obs_data)
     ax_client.complete_trial(
         trial_index=trial_index,
@@ -106,8 +86,8 @@ for _ in range(10):
     model = ax_client.generation_strategy.model
 
     obs_feat = [
-        ObservationFeatures(row[["feat1", "feat2"]].to_dict())
-        for _, row in candidate_features.iterrows()
+        ObservationFeatures(row[["x1", "x2"]].to_dict())
+        for _, row in candidate_params.iterrows()
     ]
 
     acqf_values_task_1 = np.array(
@@ -121,13 +101,12 @@ for _ in range(10):
     acqf_values = acqf_values_task_1 + acqf_values_task_2
     best_index = np.argmax(acqf_values)
 
-    best_feat = candidate_features.iloc[best_index].to_dict()
     best_params = candidate_params.iloc[best_index].to_dict()
 
     result_task_1 = multi_task_objective("task_1", best_params["x1"], best_params["x2"])
     result_task_2 = multi_task_objective("task_2", best_params["x1"], best_params["x2"])
 
-    _, trial_index = ax_client.attach_trial(best_feat)
+    _, trial_index = ax_client.attach_trial(best_params)
     ax_client.complete_trial(
         trial_index=trial_index,
         raw_data={"task_1": result_task_1, "task_2": result_task_2},
@@ -141,6 +120,6 @@ assert len(pareto_results) == 1, "Expected one optimal parameterization"
 # Find the original parameters from the best_features using lookup
 best_pareto_params = list(pareto_results.values())[0][0]
 best_params = candidate_params[
-    (candidate_features["feat1"] == best_pareto_params["feat1"])
-    & (candidate_features["feat2"] == best_pareto_params["feat2"])
+    (candidate_params["x1"] == best_pareto_params["x1"])
+    & (candidate_params["x2"] == best_pareto_params["x2"])
 ]
