@@ -28,15 +28,13 @@ These Pareto optimal solutions are identified by optimizing a metric referred to
 
 In deciding between single or multi-objective optimization, it's important to consider the complexity of your goals and the trade-off's you're willing to navigate. Single-objective optimization is straightforward, which makes the optimization process simpler, more interpretable, and often faster. However, in omitting competing objectives you may be oversimplify complex problems where multiple, often conflicting objectives must be balanced. Multi-objective optimization allows for the simultaneous consideration of several goals and the ability to learn the bounds on the tradeoffs between them. This, however, comes at a higher computational cost and  requires more sophisticated decision making processes for selecting the optimal solution. When other objectives, such as cost, can be directly computed, consider representing them in the form of a constraint rather than a separate objective.
 
+> **Want to see them in action?**\
+Check out our single and multi-objective optimization tutorials.
 
 ## Additional Resources
 
-P. Frazier, A Tutorial on Bayesian Optimization
-- https://arxiv.org/abs/1807.02811
+A. Agnihotri, Exploring Bayesian Optimization [🔗](https://distill.pub/2020/bayesian-optimization/)
 
-Ax Multi-Objective Optimization Tutorial
-- https://ax.dev/tutorials/multiobjective_optimization.html
+P. Frazier, A Tutorial on Bayesian Optimization [🔗](https://arxiv.org/abs/1807.02811)
 
-
-Emmerich et al. A tutorial on multiobjective optimization: fundamentals and evolutionary methods
-- https://link.springer.com/article/10.1007/s11047-018-9685-y
+Ax Multi-Objective Optimization Tutorial [🔗](https://ax.dev/tutorials/multiobjective_optimization.html)

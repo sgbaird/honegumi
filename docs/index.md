@@ -23,26 +23,23 @@ aria-label="Issue sgbaird/honegumi on GitHub">Issue</a>
 If you're new to Bayesian optimization, watch [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c?si=BsT8duYZ1i8Sa38B)
 ```
 
-Real-world chemistry and materials science optimization tasks are complex! Here are some example features of these kinds of tasks:
+Real-world chemistry and materials science optimization tasks are complex! Noise, multiple fidelities, objectives, tasks, parameters, parameter types, and constraints riddle our optimization campaigns. However, applications of state-of-the-art algorithms to these materials science tasks have been limited, even for veteran materials informatics practitioners. Other logistical issues arise, such as using existing data, embedding physical descriptors, and ad-hoc modification of search spaces. To address these challenges, we present *Honegumi*, an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).
 
-| Topic           | Description |
-| --------------- | ----------- |
-| Noise           | Repeat measurements are stochastic |
-| Multi-fidelity  | Some measurements are higher quality but much more costly |
-| Multi-objective | Almost always, tasks have multiple properties that are important |
-| High-dimensional| Like finding the proverbial "needle-in-a-haystack", the search spaces are enormous |
-| Constraints     | Not all combinations of parameters are valid (i.e., constraints) |
-| Mixed-variable  | Often there is a mixture of numerical and categorical variables |
+**Interact with Honegumi using the grid below!** Select one option per row and watch the template dynamically appear. Click the corresponding ![colab](https://colab.research.google.com/assets/colab-badge.svg) badge to open a self-contained Google Colab notebook for the selected script. Click the corresponding ![github](https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey) badge to view the script source code directly. Hover your mouse over the 🛈 icon to the right of each row and explore our docs/tutorials to learn more about each option.
 
-<!-- Maybe alloy discovery slide as a figure? -->
-
-However, applications of state-of-the-art algorithms to these materials science tasks have been limited. Advanced implementations are still challenging, even for veteran materials informatics practitioners. In addition to combining multiple algorithms, there are other logistical issues, such as using existing data, embedding physical descriptors, and modifying search spaces. To address these challenges, we present *Honegumi*, an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).
-
-```{note}
-Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), a Japanese word meaning *skeletal framework*, is technically pronounced "ho-nay-goo-mee", but you can also refer to this tool as "honey gummy" to make it easy to remember 😉
+```{raw} html
+:file: honegumi.html
 ```
 
+#
+
+## Where does the name "Honegumi" come from?
+
+Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), a Japanese word meaning *skeletal framework*, is technically pronounced "ho-nay-goo-mee", but you can also refer to this tool as "honey gummy" to make it easy to remember 😉
+
 <!-- *Honegumi* is an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).  -->
+
+## What's the scope of honegumi?
 
 Similar to [PyTorch's installation docs](https://pytorch.org/get-started/locally/), users interactively toggle the options to generate the desired code output. These scripts are unit-tested, and invalid configurations are crossed out. This means you can expect the scripts to run without throwing errors. Honegumi is *not* a wrapper for optimization packages; instead, think of it as an interactive tutorial generator. Honegumi is the first Bayesian optimization template generator of its kind, and we envision that this tool will reduce the barrier to entry for applying advanced Bayesian optimization to real-world materials science tasks. It also [pairs well with LLMs](#a-perfect-pairing-with-llms)!
 
@@ -51,14 +48,6 @@ Similar to [PyTorch's installation docs](https://pytorch.org/get-started/locally
 <!-- Honegumi ([骨組み](https://translate.google.com/?sl=ja&tl=en&text=%E9%AA%A8%E7%B5%84%E3%81%BF&op=translate)), which means _skeletal framework_ in Japanese, is a package for interactively creating API tutorials with a focus on optimization packages such as Meta's Ax Platform.  -->
 
 <!-- https://myst-parser.readthedocs.io/en/latest/syntax/images_and_figures.html -->
-
-Interact with Honegumi using the grid below. Select one option per row and watch the template dynamically appear. Click the corresponding ![colab](https://colab.research.google.com/assets/colab-badge.svg) badge to open a self-contained Google Colab notebook for the selected script. Click the corresponding ![github](https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey) badge to view the script source code directly. For example, if you want a script that optimizes multiple objectives simultaneously (multi-objective) as a function of many parameters (high-dimensional), you would select `multi` from the `objective` option row and `FULLYBAYESIAN` from the `model` row. Hover your mouse over the 🛈 icon to the right of each row to learn more about each option.
-
-```{raw} html
-:file: honegumi.html
-```
-
-#
 
 ```{note} If you like this tool, please consider [starring it on GitHub](https://github.com/sgbaird/honegumi). If you're interested in contributing, reach out to [sterling.baird@utoronto.ca](mailto:sterling.baird@utoronto.ca) 😊
 ```
@@ -72,6 +61,23 @@ Use Honegumi with ChatGPT to create non-halucinatory, custom Bayesian optimizati
 LLMs are good at recognizing patterns but really bad at suggesting Bayesian optimization scripts from scratch. Since Honegumi is really good at programatically giving valid Bayes opt scripts, you can use Honegumi to get a template and then ask an LLM to adapt it to your use case. The two-minute video below shows how a Honegumi template can be adapted using an LLM (in our case, ChatGPT Plus) to a cookie taste optimization as a function of flour, sugar, and butter content.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/rnI2BvGgP9o?si=HGODRbP19MlkC662" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+## What does "advanced" Bayesian optimization mean?
+
+Here are some example features of these kinds of tasks:
+
+| Topic            | Description                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Noise            | Repeat measurements are stochastic                                                 |
+| Multi-fidelity   | Some measurements are higher quality but much more costly                          |
+| Multi-objective  | Almost always, tasks have multiple properties that are important                   |
+| High-dimensional | Like finding the proverbial "needle-in-a-haystack", the search spaces are enormous |
+| Constraints      | Not all combinations of parameters are valid (i.e., constraints)                   |
+| Mixed-variable   | Often there is a mixture of numerical and categorical variables                    |
+
+## Concept Docs and Tutorials
+
+Wisely, you may choose not to trust a script you don't understand. To address that, we've worked hard to provide concept docs and coding tutorials to make it as painless as possible to gain that perspective and assess the fit with your task.
 
 ## Contents
 

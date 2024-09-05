@@ -41,10 +41,11 @@ Looking at the above results, it might be tempting to choose the fully Bayesian 
 
 In the above examples it should be clear that the key advantage of going fully Bayesian is that it can provide more robust models when knowledge about the domain is extremely limited, data is scarce relative to the number of input dimensions, and observation noise is difficult to measure. For many problems, a standard "frequentist" GP will give equivalent optimization performance and should be the default unless a fully Bayesian approach can be justified.
 
+> **Want to see it in action?**\
+Check out our batch optimization tutorial where we apply a fully Bayesian GP model to optimizing corrosion resistant coatings.
+
 ## Additional Resources
 
-ML Tutorial: Gaussian Processes (Richard Turner)
-- https://www.youtube.com/watch?v=92-98SYOdlY
+ML Tutorial: Gaussian Processes (Richard Turner) [🔗](https://www.youtube.com/watch?v=92-98SYOdlY)
 
-High-Dimensional Bayesian Optimization with SAASBO
-- https://ax.dev/tutorials/saasbo.html
+High-Dimensional Bayesian Optimization with SAASBO [🔗](https://ax.dev/tutorials/saasbo.html)
