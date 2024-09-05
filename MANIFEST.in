@@ -1,0 +1,3 @@
+prune docs/*
+prune reports/*
+prune notebooks/*
