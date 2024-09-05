@@ -10,15 +10,24 @@ import argparse
 import logging
 import os
 import sys
-import time
+import warnings
 from itertools import product
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List, Tuple, Union
 
-import _pytest
-import pytest
+from black import FileMode, format_file_contents
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from pydantic import BaseModel, Field, create_model
 
-import honegumi.ax.utils.constants as cst
+import honegumi.core.utils.constants as core_cst
+from honegumi.ax._ax import (
+    add_model_specific_keys,
+    extra_jinja_var_names,
+    is_incompatible,
+    model_kwargs_test_override,
+    option_rows,
+    tooltips,
+)
 from honegumi.core import __version__
 
 __author__ = "sgbaird"
@@ -108,124 +117,6 @@ def unpack_rendered_template_stem(rendered_template_stem):
     return options
 
 
-class ResultsCollector:
-    """A class for collecting and summarizing results of pytest test runs.
-
-    https://stackoverflow.com/a/72278485/13697228
-
-    Attributes
-    ----------
-    reports : List[pytest.TestReport]
-        A list of test reports generated during the test run.
-    collected : int
-        The number of test items collected for the test run.
-    exitcode : int
-        The exit code of the test run.
-    passed : List[pytest.TestReport]
-        A list of test reports for tests that passed.
-    failed : List[pytest.TestReport]
-        A list of test reports for tests that failed.
-    xfailed : List[pytest.TestReport]
-        A list of test reports for tests that were expected to fail but passed.
-    skipped : List[pytest.TestReport]
-        A list of test reports for tests that were skipped.
-    total_duration : float
-        The total duration of the test run in seconds.
-
-    Examples
-    --------
-    >>> collector = ResultsCollector()
-    >>> # run pytest tests
-    >>> collector.total_duration
-    10.123456789
-    """
-
-    def __init__(self) -> None:
-        self.reports: List[pytest.TestReport] = []
-        self.collected: int = 0
-        self.exitcode: int = 0
-        self.passed: List[pytest.TestReport] = []
-        self.failed: List[pytest.TestReport] = []
-        self.xfailed: List[pytest.TestReport] = []
-        self.skipped: List[pytest.TestReport] = []
-        self.total_duration: float = 0
-
-    @pytest.hookimpl(hookwrapper=True)
-    def pytest_runtest_makereport(
-        self, item: pytest.Item, call: pytest.CallInfo
-    ) -> None:
-        """A pytest hook for collecting test reports.
-
-        Parameters
-        ----------
-        item : pytest.Item
-            The test item being run.
-        call : pytest.CallInfo
-            The result of running the test item.
-
-        Examples
-        --------
-        >>> item = ...
-        >>> call = ...
-        >>> collector = ResultsCollector()
-        >>> collector.pytest_runtest_makereport(item, call)
-        """
-
-        outcome = yield
-        report = outcome.get_result()
-        if report.when == "call":
-            self.reports.append(report)
-
-    def pytest_collection_modifyitems(self, items: List[pytest.Item]) -> None:
-        """A pytest hook for modifying collected test items.
-
-        Parameters
-        ----------
-        items : List[pytest.Item]
-            A list of pytest.Item objects representing the collected test items.
-
-        Examples
-        --------
-        >>> items = ...
-        >>> collector = ResultsCollector()
-        >>> collector.pytest_collection_modifyitems(items)
-        """
-
-        self.collected = len(items)
-
-    def pytest_terminal_summary(
-        self, terminalreporter: _pytest.terminal.TerminalReporter, exitstatus: int
-    ) -> None:
-        """A pytest hook for summarizing test results.
-
-        Parameters
-        ----------
-        terminalreporter : pytest.terminal.TerminalReporter
-            The terminal reporter object used to report test results.
-        exitstatus : int
-            The exit status code of the test run.
-
-        Examples
-        --------
-        >>> terminalreporter = ...
-        >>> exitstatus = ...
-        >>> collector = ResultsCollector()
-        >>> collector.pytest_terminal_summary(terminalreporter, exitstatus)
-        """
-
-        self.exitcode = exitstatus
-        self.passed = terminalreporter.stats.get("passed", [])
-        self.failed = terminalreporter.stats.get("failed", [])
-        self.xfailed = terminalreporter.stats.get("xfailed", [])
-        self.skipped = terminalreporter.stats.get("skipped", [])
-        self.num_passed = len(self.passed)
-        self.num_failed = len(self.failed)
-        self.num_xfailed = len(self.xfailed)
-        self.num_skipped = len(self.skipped)
-
-        self.total_duration = time.time() - terminalreporter._sessionstarttime
-
-
 def create_and_clear_dir(directory):
     # create the directory if it doesn't exist
     Path(directory).mkdir(parents=True, exist_ok=True)
@@ -293,28 +184,200 @@ def gen_combs_with_keys(
 # but boolean syntax can vary).
 
 
-def generate_lookup_dict(df, option_names, key):
+def generate_lookup_dict(data, option_names, key):
     """
-    Generate a lookup dictionary from a pandas DataFrame.
+    Generate a lookup dictionary from a list of dictionaries.
 
     Examples
     --------
-    >>> df = pd.DataFrame(
-    >>>     {
-    >>>         "option1": ["a", "b", "c"],
-    >>>         "option2": [1, 2, 3],
-    >>>         "key": ["foo", "bar", "baz"],
-    >>>     }
-    >>> )
-    >>> generate_lookup_dict(df, ['option1', 'option2'], 'key')
+    >>> data = [
+    >>>     {"option1": "a", "option2": 1, "key": "foo"},
+    >>>     {"option1": "b", "option2": 2, "key": "bar"},
+    >>>     {"option1": "c", "option2": 3, "key": "baz"},
+    >>> ]
+    >>> generate_lookup_dict(data, ['option1', 'option2'], 'key')
     {'a,1': 'foo', 'b,2': 'bar', 'c,3': 'baz'}
     """
-    if key not in df.columns:
-        raise ValueError(f"key {key} not in {df.columns}")
+    if not all(key in item for item in data):
+        raise ValueError(f"key {key} not in all items")
     return {
-        ",".join([str(opt[option_name]) for option_name in option_names]): opt[key]
-        for opt in df.to_dict(orient="records")
+        ",".join([str(item[option_name]) for option_name in option_names]): item[key]
+        for item in data
     }
+
+
+# NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
+# i.e., hard-code the model names instead of accessing them programatically
+# see https://github.com/facebook/Ax/issues/1781
+
+# also, this would make ax an explicit dependency, so perhaps better not to do so.
+
+
+def create_options_model(option_rows: List[Dict[str, Any]]):
+    fields = {}
+
+    for row in option_rows:
+        name = row["name"]
+        options = row["options"]
+        hidden = row["hidden"]
+        disable = row["disable"]
+
+        # Handle different types of options (e.g., bool, str)
+        if all(isinstance(opt, bool) for opt in options):
+            field_type = bool
+        elif all(isinstance(opt, str) for opt in options):
+            field_type = str
+        else:
+            field_type = Any  # Fallback for mixed types
+
+        # Handle field default and other metadata
+        default_value = options[0]  # Default to the first option in the list
+        fields[name] = (
+            field_type,
+            Field(
+                default=default_value,
+                description=name,
+                json_schema_extra={"hidden": hidden, "disable": disable},
+            ),
+        )
+
+        # TODO: auto-create the docstring __doc__ since this dynamically
+        # generates the pydantic model (i.e., useful hover typehints are lost)
+        # https://chatgpt.com/share/d3cce48d-effe-4496-82be-476c1889e7fd
+
+    # Create a Pydantic model dynamically
+    model = create_model("OptionsModel", **fields)
+    return model
+
+
+class Honegumi:
+    def __init__(
+        self,
+        cst,
+        option_rows: List[Dict[str, Any]] = option_rows,
+        tooltips=tooltips,
+        script_template_name="main.py.jinja",
+        is_incompatible_fn=is_incompatible,
+        add_model_specific_keys_fn=add_model_specific_keys,
+        model_kwargs_test_override_fn=model_kwargs_test_override,
+        dummy=None,
+        skip_tests=None,
+    ):
+        self.cst = cst
+
+        self.is_incompatible_fn = is_incompatible_fn
+        self.add_model_specific_keys_fn = add_model_specific_keys_fn
+        self.model_kwargs_test_override_fn = model_kwargs_test_override_fn
+
+        # Generate the Pydantic options model dynamically
+        self.OptionsModel = create_options_model(option_rows)
+
+        if dummy is None:
+            dummy = os.getenv("SMOKE_TEST", "False").lower() == "true"
+
+        if skip_tests is None:
+            skip_tests = os.getenv("SKIP_TESTS", "False").lower() == "true"
+
+        self.dummy = dummy
+        self.skip_tests = skip_tests
+
+        if dummy:
+            print("DUMMY RUN / SMOKE TEST FOR FASTER DEBUGGING")
+
+        if skip_tests:
+            print("SKIPPING TESTS")
+
+        self.env = Environment(
+            loader=FileSystemLoader(cst.TEMPLATE_DIR),
+            undefined=StrictUndefined,
+            keep_trailing_newline=True,
+        )
+
+        self.template = self.env.get_template(script_template_name)
+
+        self.core_env = Environment(
+            loader=FileSystemLoader(core_cst.CORE_TEMPLATE_DIR),
+            undefined=StrictUndefined,
+            keep_trailing_newline=True,
+        )
+
+        # remove the options where disable is True, and print disabled options (keep
+        # track of disabled option names and default values)
+        self.disabled_option_defaults = [
+            {row["name"]: row["options"][0]} for row in option_rows if row["disable"]
+        ]
+        disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
+
+        option_rows = [row for row in option_rows if not row["disable"]]
+
+        # E.g.,
+        # {
+        #     "objective": ["single", "multi"],
+        #     "model": ["GPEI", "FULLYBAYESIAN"],
+        #     "use_custom_gen": [True, False],
+        # }
+
+        if self.disabled_option_defaults:
+            print("The following options have been disabled:")
+            for default in self.disabled_option_defaults:
+                print(f"Disabled option and default: {default}")
+
+        for row in option_rows:
+            if row["name"] in tooltips:
+                row["tooltip"] = tooltips[row["name"]]
+
+        self.option_names = [row["name"] for row in option_rows]
+
+        self.visible_option_names = [
+            row["name"] for row in option_rows if not row["hidden"]
+        ]
+        self.visible_option_rows = [row for row in option_rows if not row["hidden"]]
+
+        self.jinja_var_names = (
+            self.option_names + extra_jinja_var_names + disabled_option_names
+        )
+
+        self.jinja_option_rows = [row for row in self.visible_option_rows]
+
+    def generate(
+        self, options_model: BaseModel, return_selections=False
+    ) -> Union[str, Tuple[str, Dict[str, Any]]]:
+        # You can check if selections is an instance of the expected type
+        if not isinstance(options_model, self.OptionsModel):
+            warnings.warn(f"Expected {self.OptionsModel}, got {type(options_model)}")
+
+        # Convert validated selections to a dict
+        selections = options_model.model_dump()
+
+        # set the default values for the disabled options
+        for default in self.disabled_option_defaults:
+            selections.update(default)
+
+        # in-place operation
+        self.add_model_specific_keys_fn(self.option_names, selections)
+
+        # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
+        selections[core_cst.DUMMY_KEY] = False
+
+        selections = {
+            var_name: selections[var_name] for var_name in self.jinja_var_names
+        }
+
+        selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
+
+        if self.is_incompatible_fn(selections):
+            # override
+            script = "INVALID: The parameters you have selected are incompatible, either from not being implemented or being logically inconsistent."  # noqa E501
+
+        else:
+            script = self.template.render(selections)
+            # apply black formatting
+            script = format_file_contents(script, fast=False, mode=FileMode())
+
+        if return_selections:
+            return script, selections
+
+        return script
 
 
 # ---- CLI ----
@@ -424,157 +487,6 @@ if __name__ == "__main__":
     #     python -m honegumi.core.skeleton 42
     #
     run()
-
-
-def add_model_specific_keys(option_names, opt):
-    """Add model-specific keys to the options dictionary (in-place).
-
-    This function adds model-specific keys to the options dictionary `opt`. For
-    example, if use_custom_gen is a hidden variable, and the model is
-    FULLYBAYESIAN, then use_custom_gen should be True.
-
-    It also sets the value of the key `model_kwargs` based on the value of
-    `MODEL_OPT_KEY` in `opt`.
-
-    Parameters
-    ----------
-    option_names : list
-        A list of option names.
-    opt : dict
-        The options dictionary.
-
-    Examples
-    --------
-    The following example is demonstrative, the range of cases may be expanded
-    later.
-
-    >>> option_names = [
-    ...     "objective",
-    ...     "model",
-    ...     "custom_gen",
-    ...     "existing_data",
-    ...     "sum_constraint",
-    ...     "order_constraint",
-    ...     "linear_constraint",
-    ...     "composition_constraint",
-    ...     "categorical",
-    ...     "custom_threshold",
-    ...     "fidelity",
-    ...     "synchrony",
-    ... ]
-    >>> opt = {
-    ...     "objective": "single",
-    ...     "model": "Default",
-    ...     "existing_data": False,
-    ...     "sum_constraint": False,
-    ...     "order_constraint": False,
-    ...     "linear_constraint": False,
-    ...     "composition_constraint": False,
-    ...     "categorical": False,
-    ...     "custom_threshold": False,
-    ...     "fidelity": "single",
-    ...     "synchrony": "single",
-    ... }
-
-    >>> add_model_specific_keys(option_names, opt)
-    {
-        "objective": "single",
-        "model": "Default",
-        "existing_data": False,
-        "sum_constraint": False,
-        "order_constraint": False,
-        "linear_constraint": False,
-        "composition_constraint": False,
-        "categorical": False,
-        "custom_threshold": False,
-        "fidelity": "single",
-        "synchrony": "single",
-        "custom_gen": False,
-        "model_kwargs": {},
-    }
-    """
-    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
-
-    # increased from the default in Ax tutorials for quality/robustness
-    opt["model_kwargs"] = (
-        {"num_samples": 1024, "warmup_steps": 1024}
-        if opt[cst.MODEL_OPT_KEY] == "FULLYBAYESIAN"
-        else {}
-    )  # override later to 16 and 32 later on, but only for test script
-
-    # verify that all variables (hidden and visible) are represented
-    assert all(
-        [opt.get(option_name, None) is not None for option_name in option_names]
-    ), f"option_names {option_names} not in opt {opt}"
-
-
-def is_incompatible(opt):
-    """
-    Check if the given option dictionary contains incompatible options.
-
-    An option is considered incompatible if it cannot be used together with
-    another option. For example, if the model is fully Bayesian, it cannot use
-    the custom generator (`use_custom_gen`). Similarly, if the objective is
-    single, it cannot use the custom threshold (`use_custom_threshold`).
-
-    Parameters
-    ----------
-    opt : dict
-        The option dictionary to check for incompatibility.
-
-    Returns
-    -------
-    bool
-        True if any incompatibility is found among the options, False otherwise.
-    """
-    use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
-    model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == "FULLYBAYESIAN"
-    use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
-    objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
-
-    checks = [
-        model_is_fully_bayesian and not use_custom_gen,
-        objective_is_single and use_custom_threshold,
-        # add new incompatibility checks here
-    ]
-    return any(checks)
-
-
-def prep_datum_for_render(option_names, datum):
-    """
-    Checks the compatibility of the given options and updates the datum
-    dictionary with the rendered template stem and compatibility status.
-
-    Parameters
-    ----------
-    option_names : list
-        The full list of option names in order to generate the filename stem.
-    datum : dict
-        The dictionary of option key-value pairs.
-
-    Returns
-    -------
-    None
-
-    Examples
-    --------
-    >>> check_compatibility_and_update(['option1', 'option2'], {'option1': 'value1', 'option2': 'value2'}) # noqa: E501
-    OUTPUT
-
-    Notes
-    -----
-    This function will always set the 'dummy' key in the 'datum' dictionary to
-    False.
-    """
-    rendered_template_stem = get_rendered_template_stem(datum, option_names)
-
-    datum["stem"] = rendered_template_stem
-
-    datum[cst.IS_COMPATIBLE_KEY] = not is_incompatible(datum)
-
-    # NOTE: Decided to always keep dummy key false for scripts, let dummy only
-    # affect tests
-    datum[cst.DUMMY_KEY] = False
 
 
 # %% Code Graveyard

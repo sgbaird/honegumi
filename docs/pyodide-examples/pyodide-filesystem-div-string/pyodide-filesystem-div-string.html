@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jinja2 with Pyodide Example</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.21.3/full/pyodide.js"></script>
+</head>
+<body>
+    <h1>Jinja2 with Pyodide Example</h1>
+    <pre id="output"></pre>
+
+    <script type="text/javascript">
+        async function main() {
+            // Load Pyodide
+            let pyodide = await loadPyodide();
+            await pyodide.loadPackage("jinja2");
+
+            // Fetch the Python script from the _static directory
+            const response = await fetch("process_template.py");
+            const scriptText = await response.text();
+
+            // Write the script to Pyodide's virtual file system
+            pyodide.FS.writeFile("/process_template.py", scriptText);
+
+            // Run the Python script and capture the rendered template
+            let rendered_template = pyodide.runPython(`
+                import sys
+                sys.path.insert(0, "/")
+                import process_template
+                process_template.rendered_template
+            `);
+
+            // Display the rendered template in the HTML page
+            document.getElementById("output").textContent = rendered_template;
+        }
+
+        main();
+    </script>
+</body>
+</html>

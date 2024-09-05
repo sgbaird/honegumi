@@ -6,9 +6,10 @@
     </style>
     <link rel="stylesheet" href="_static/prism/prism.css">
     <link rel="stylesheet" href="_static/honegumi_style.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
 </head>
 
-<body onload="updateText()">
+<body onload="initializePyodide()">
     <script>
         var optionRows = {{ jinja_option_rows|tojson }};
         // E.g.,
@@ -17,25 +18,6 @@
         //     { "name": "row2", "options": ["C", "D", "E"] },
         //     { "name": "row3", "options": ["F", "G"] }
         // ];
-
-        var scriptLookup = {{ script_lookup|tojson }};
-        // E.g.,
-        // var lookup = {
-        //     "A,C,F": "ACF",
-        //     "A,C,G": "INVALID",
-        //     "A,D,F": "ADF",
-        //     "A,D,G": "ADG",
-        //     "A,E,F": "AEF",
-        //     "A,E,G": "AEG",
-        //     "B,C,F": "BCF",
-        //     "B,C,G": "BCG",
-        //     "B,D,F": "INVALID",
-        //     "B,D,G": "BDG",
-        //     "B,E,F": "INVALID",
-        //     "B,E,G": "BEG"
-        // };
-
-        var preambleLookup = {{ preamble_lookup|tojson }};
 
         var invalidConfigs = {{ invalid_configs|tojson }};
         // E.g.,
@@ -78,7 +60,42 @@
         </div>
     </form>
     <script>
-        function updateText() {
+        let pyodide;
+
+        async function initializePyodide() {
+            pyodide = await loadPyodide();
+            await pyodide.loadPackage(["micropip", "jinja2", "pydantic"]);
+            const micropip = pyodide.pyimport("micropip");
+            await micropip.install(["black"]);
+        }
+
+        async function generateRendered(values) {
+            const kwargs = values.reduce((acc, val) => {
+                const [key, value] = val.split('=');
+                acc[key] = value;
+                return acc;
+            }, {});
+
+            const code = `
+from honegumi.ax._ax import option_rows
+from honegumi import Honegumi
+
+# Assuming 'cst' is defined somewhere in your context
+cst = ...
+
+hg = Honegumi(cst, option_rows)
+options_model = hg.OptionsModel(**${JSON.stringify(kwargs)})
+result = hg.generate(options_model)
+result
+    `;
+            return pyodide.runPython(code);
+        }
+
+        async function generatePreamble(values) {
+            return "";
+        }
+
+        async function updateText() {
             var rows = document.querySelectorAll('input[type="radio"]:checked');
             // Remove strikethrough formatting from all labels except for the selected radio button's label
             // While not strictly necessary, it prevents a possible "disappear/appear" effect
@@ -88,14 +105,14 @@
                     label.innerHTML = label.textContent;
                 }
             });
-            var key = Array.from(rows, function (row) { return row.value; }).join(',');
-            var rendered = scriptLookup[key];
-            var preamble = preambleLookup[key];
+            var currentConfig = Array.from(rows, function (row) { return row.value; });
+
+            var rendered = await generateRendered(currentConfig);
+            var preamble = await generatePreamble(currentConfig);
 
             // Update the GitHub link
             document.getElementById("preamble").innerHTML = preamble
             document.getElementById("text").innerHTML = "\n" + rendered;
-            var currentConfig = Array.from(rows, function (row) { return row.value; });
 
             // Generate all possible configurations that deviate exactly by one option from the current configuration
             var possibleDeviatingConfigs = [];
