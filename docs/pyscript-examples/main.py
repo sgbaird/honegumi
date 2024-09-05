@@ -1,10 +1,10 @@
 import js
 from js import invalidConfigs, optionRows
 
-invalid_configs = invalidConfigs  # needs a loop of to_py() calls
-option_rows = optionRows  # needs a loop of to_py() calls
+invalid_configs = invalidConfigs
+option_rows_temp = optionRows
 
-print(option_rows[0].to_py())
+option_rows = list(row.to_py() for row in option_rows_temp)
 
 
 def generate_rendered(kwargs):
@@ -87,12 +87,6 @@ def update_text():
         ]
         deviating_options.extend(current_config_with_name)
 
-    # Logging for debugging purposes (can be commented out in production)
-    print("Current Config:", current_config)
-    print("Possible Deviating Configs:", possible_deviating_configs)
-    print("Deviating Configs:", deviating_configs)
-    print("Deviating Options:", deviating_options)
-
     # Apply strikethrough formatting to labels of deviating options
     for option in deviating_options:
         label = js.document.querySelector(f'label[for="{option}"]')
@@ -101,3 +95,7 @@ def update_text():
 
     # Re-highlight the code block using Prism.js
     js.Prism.highlightAll()
+
+
+# initialize the text content
+update_text()

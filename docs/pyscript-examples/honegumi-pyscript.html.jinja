@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title>Interactive Grid Example</title>
@@ -40,7 +40,7 @@
             <label class="row-label">{{ row.name }}:</label>
             {% for option in row.options %}
             <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"
-                {% if option == row.options[0] %} checked{% endif %}>
+                {% if option == row.options[0] %} checked{% endif %} py-click="update_text()">
             <label class="row-option" for="{{ row.name }}-{{ option }}">{{ option }}</label>
             {% endfor %}
             <div class="tooltip-icon">&#9432;
@@ -61,17 +61,6 @@
             </div>
         </div>
     </form>
-
-    <py-script>
-        def setup_update_listener():
-            # Bind the update_text function to run when a change occurs in the radio buttons
-            for radio in js.document.querySelectorAll('input[type="radio"]'):
-                radio.addEventListener("change", lambda event: update_text())
-
-        setup_update_listener()
-        update_text()  # Initial update
-
-    </py-script>
 
     <script src="../_static/prism/prism.js"></script>
 </body>
