@@ -37,7 +37,7 @@ for selections in data:
     # for the HTML template
     selections[core_cst.RENDERED_KEY] = script  # type: ignore
 
-    # \n was to complement open in colab badge line
+    # "\n" was to complement open in colab badge line
     selections[core_cst.PREAMBLE_KEY] = ""  # type: ignore
 
     new_data.append(selections)
