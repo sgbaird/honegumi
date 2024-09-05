@@ -1,6 +1,7 @@
-from honegumi.ax.utils import constants as cst
+import pytest
+
 from honegumi.core._honegumi import (
-    Honegumi,
+    fib,
     get_rendered_template_stem,
     main,
     unpack_rendered_template_stem,
@@ -11,28 +12,13 @@ __copyright__ = "sgbaird"
 __license__ = "MIT"
 
 
-def test_honegumi():
-    hg = Honegumi()
-    hg.generate(**{cst.OBJECTIVE_OPT_KEY: "multi", cst.EXISTING_DATA_KEY: True})
-    # hg.generate(objective="multi", existing_data=True)
-
-
-def test_pydantic():
-    from honegumi.ax._ax import option_rows
-
-    hg = Honegumi(cst, option_rows)
-    options_model = hg.OptionsModel(
-        objective="multi", model="Default", custom_gen=False, existing_data=True
-    )
-    result = hg.generate(options_model)
-    print(result)
-
-    print(options_model.model_fields["objective"].json_schema_extra["hidden"])
-    print(options_model.model_fields["objective"].json_schema_extra["disable"])
-
-    # print(list(selections.model_fields.values())[0].json_schema_extra["hidden"])
-
-    1 + 1
+def test_fib():
+    """API Tests"""
+    assert fib(1) == 1
+    assert fib(2) == 1
+    assert fib(7) == 13
+    with pytest.raises(AssertionError):
+        fib(-10)
 
 
 def test_get_rendered_template_stem():
@@ -167,5 +153,4 @@ def test_main(capsys):
 
 if __name__ == "__main__":
     """Execute the test suite"""
-    test_pydantic()
     test_unpack_rendered_template_stem()
