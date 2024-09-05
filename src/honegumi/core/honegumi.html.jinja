@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title>Interactive Grid Example</title>
-    </style>
     <link rel="stylesheet" href="_static/prism/prism.css">
     <link rel="stylesheet" href="_static/honegumi_style.css">
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </head>
 
-<body onload="initializePyodide()">
+<body>
     <script>
         var optionRows = {{ jinja_option_rows|tojson }};
         // E.g.,
@@ -35,169 +35,37 @@
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
             </div>
         </div>
+
         {% for row in jinja_option_rows %}
         <div class="row">
-            <label class="row-label">{{row.name}}:</label>
+            <label class="row-label">{{ row.name }}:</label>
             {% for option in row.options %}
-            <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"{% if
-                option==row.options[0] %} checked{% endif %} onclick="updateText()">
+            <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"
+                {% if option == row.options[0] %} checked{% endif %} py-click="update_text()">
             <label class="row-option" for="{{ row.name }}-{{ option }}">{{ option }}</label>
             {% endfor %}
             <div class="tooltip-icon">&#9432;
-                <span class="tooltip-text arrow">{{row.tooltip}}</span>
+                <span class="tooltip-text arrow">{{ row.tooltip }}</span>
             </div>
         </div>
         {% endfor %}
+
         <div class="row align-items-end">
             <p id="preamble"></p>
         </div>
+
         <div class="row">
-        <div class="highlight highlight-python notranslate">
-            <pre class="language-python" style="width: 102ch; overflow: auto; font-size: 12px;">
-                <code id="text" style="border: none;"></code>
-            </pre>
-        </div>
+            <div class="highlight highlight-python notranslate">
+                <pre class="language-python" style="width: 102ch; overflow: auto; font-size: 12px;">
+                    <code id="text" style="border: none;"></code>
+                </pre>
+            </div>
         </div>
     </form>
-    <script>
-        let pyodide;
 
-        async function initializePyodide() {
-            pyodide = await loadPyodide();
-            await pyodide.loadPackage(["micropip", "jinja2", "pydantic"]);
-            const micropip = pyodide.pyimport("micropip");
-            await micropip.install(["black"]);
-        }
+    <py-script src="honegumi_pyscript_helper.py"></py-script>
 
-        async function generateRendered(values) {
-            const kwargs = values.reduce((acc, val) => {
-                const [key, value] = val.split('=');
-                acc[key] = value;
-                return acc;
-            }, {});
-
-            const code = `
-from honegumi.ax._ax import option_rows
-from honegumi import Honegumi
-
-# Assuming 'cst' is defined somewhere in your context
-cst = ...
-
-hg = Honegumi(cst, option_rows)
-options_model = hg.OptionsModel(**${JSON.stringify(kwargs)})
-result = hg.generate(options_model)
-result
-    `;
-            return pyodide.runPython(code);
-        }
-
-        async function generatePreamble(values) {
-            return "";
-        }
-
-        async function updateText() {
-            var rows = document.querySelectorAll('input[type="radio"]:checked');
-            // Remove strikethrough formatting from all labels except for the selected radio button's label
-            // While not strictly necessary, it prevents a possible "disappear/appear" effect
-            var labels = document.querySelectorAll('label');
-            labels.forEach(function (label) {
-                if (label.htmlFor !== rows.id) {
-                    label.innerHTML = label.textContent;
-                }
-            });
-            var currentConfig = Array.from(rows, function (row) { return row.value; });
-
-            var rendered = await generateRendered(currentConfig);
-            var preamble = await generatePreamble(currentConfig);
-
-            // Update the GitHub link
-            document.getElementById("preamble").innerHTML = preamble
-            document.getElementById("text").innerHTML = "\n" + rendered;
-
-            // Generate all possible configurations that deviate exactly by one option from the current configuration
-            var possibleDeviatingConfigs = [];
-            for (var i = 0; i < optionRows.length; i++) {
-                var options = optionRows[i]['options'];
-                for (var j = 0; j < options.length; j++) {
-                    var option = options[j];
-                    var deviation = currentConfig.slice();
-                    deviation[i] = option;
-                    // Skip the configuration if it's the same as the current configuration
-                    if (JSON.stringify(deviation) !== JSON.stringify(currentConfig)) {
-                        possibleDeviatingConfigs.push(deviation);
-                    }
-                }
-            }
-            // Remove duplicates
-            possibleDeviatingConfigs = possibleDeviatingConfigs.filter(function (config, index) {
-                return possibleDeviatingConfigs.indexOf(config) === index;
-            });
-
-            // Find the invalid configurations that match the deviating configurations
-            var deviatingConfigs = [];
-            for (var i = 0; i < invalidConfigs.length; i++) {
-                var config = invalidConfigs[i];
-                if (possibleDeviatingConfigs.some(function (deviation) {
-                    return deviation.every(function (value, index) {
-                        return value === config[index];
-                    });
-                })) {
-                    deviatingConfigs.push(config);
-                }
-            }
-            // Track the one option that was the deviation for each deviating config
-            var deviatingOptions = deviatingConfigs.map(function (config) {
-                var deviatingIndex = config.findIndex(function (value, index) {
-                    return value !== currentConfig[index];
-                });
-                return optionRows[deviatingIndex]['name'] + '-' + config[deviatingIndex];
-            });
-
-            // Check if the current configuration is invalid
-            var isInvalid = invalidConfigs.some(function (config) {
-                return config.every(function (value, index) {
-                    return value === currentConfig[index];
-                });
-            });
-
-            // If the current configuration is invalid, add all selected options to the list of deviatingOptions
-            if (isInvalid) {
-                var currentConfigWithName = currentConfig.map(function (value, index) {
-                    return optionRows[index]['name'] + '-' + value;
-                });
-                deviatingOptions = deviatingOptions.concat(currentConfigWithName);
-            }
-
-            // Logging (OK to comment out)
-            console.group('Current Config');
-            console.table(currentConfig);
-            console.group('Deviations');
-            console.group('Possible Deviating Configs');
-            console.table(possibleDeviatingConfigs);
-            console.groupEnd();
-            console.group('Deviating Configs');
-            console.table(deviatingConfigs);
-            console.groupEnd();
-            console.group('Deviating Options');
-            console.table(deviatingOptions);
-            console.groupEnd();
-            console.groupEnd();
-
-            // Add strikethrough for each deviating option
-            deviatingOptions.forEach(function (option) {
-                var label = document.querySelector('label[for="' + option + '"]');
-                if (label) {
-                    label.innerHTML = '<s>' + label.innerHTML + '</s>';
-                }
-            });
-            Prism.highlightAll();
-        }
-    </script>
     <script src="_static/prism/prism.js"></script>
 </body>
 
 </html>
-
-<!-- // Generate all possible configurations that deviate by zero or one option from the current configuration
-// start with current config
-var possibleDeviatingConfigs = [currentConfig.slice()]; -->
