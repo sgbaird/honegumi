@@ -10,6 +10,13 @@
 </head>
 
 <body>
+    <!-- Specify the Python environment -->
+    <py-env>
+        - jinja2
+        - pydantic
+        - black
+    </py-env>
+
     <script>
         var optionRows = {{ jinja_option_rows|tojson }};
         // E.g.,
