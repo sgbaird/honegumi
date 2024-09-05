@@ -36,4 +36,3 @@ Check out our batch optimization tutorial where we apply it to optimizing corros
 Hunt N. Batch Bayesian optimization (Doctoral dissertation, Massachusetts Institute of Technology). [🔗](https://dspace.mit.edu/bitstream/handle/1721.1/128591/1220836868-MIT.pdf?sequence=1#page=32.20)
 
 Botorch Batch Optimization Tutorial [🔗](https://botorch.org/docs/batching)
-
