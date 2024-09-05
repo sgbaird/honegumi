@@ -218,12 +218,16 @@ html_favicon = "_static/logo.ico"
 html_static_path = ["_static"]
 
 nbsphinx_thumbnails = {
-    "curriculum/tutorials/sobo/sobo-tutorial": "_static/thumbnails/sobo-tutorial-thumbnail.jpg",
-    "curriculum/tutorials/mobo/mobo-tutorial": "_static/thumbnails/mobo-tutorial-thumbnail.jpg",
-    "curriculum/tutorials/batch/batch-bo-tutorial": "_static/thumbnails/batch_tutorial_thumbnail.png",
-    "curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo": "_static/thumbnails/SOBOMOBO_concept_thumbnail.png",
-    "curriculum/concepts/freq-vs-bayes/freq-vs-bayes": "_static/thumbnails/FullyBayesian_concept_thumbnail.png",
-    "curriculum/concepts/batch/single-vs-batch": "_static/thumbnails/BatchBO_concept_thumbnail.png",
+    "curriculum/tutorials/sobo/sobo": "_static/thumbnails/tutorials/sobo.jpg",
+    "curriculum/tutorials/mobo/mobo": "_static/thumbnails/tutorials/mobo.jpg",
+    "curriculum/tutorials/batch/batch-fullybayesian": "_static/thumbnails/tutorials/batch.png",
+    "curriculum/tutorials/featurization/featurization": "_static/thumbnails/tutorials/featurization.png",
+    "curriculum/tutorials/multitask/multitask": "_static/thumbnails/tutorials/multitask.png",
+    "curriculum/tutorials/benchmarking/benchmarking": "_static/thumbnails/tutorials/benchmarking.png",
+    "curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo": "_static/thumbnails/concepts/sobo-mobo.png",
+    "curriculum/concepts/freq-vs-bayes/freq-vs-bayes": "_static/thumbnails/concepts/fully-bayesian.png",
+    "curriculum/concepts/batch/single-vs-batch": "_static/thumbnails/concepts/batch.png",
+    "curriculum/concepts/multitask/multitask": "_static/thumbnails/concepts/multitask.png",
 }
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
