@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>AddEventListener</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="https://pyscript.net/releases/2022.12.1/pyscript.css" />
+    <script defer src="https://pyscript.net/releases/2022.12.1/pyscript.js"></script>
+</head>
+<body>
+    <main>
+        <h1>Add eventListener Example</h1>
+        <p>This example shows you how to add event listeners to your HTML elements using <code>py-*</code> attributes and also using Javascript through Pyodide's ffi wrappers.</p>
+        <button id="py-click" py-click="myfunc()">Py-click event</button>
+        <button id="js-click">Javascript event</button>
+        <py-config src="./pyscript.toml"></py-config>
+        <py-script src="./main.py"></py-script>
+    </main>
+</body>
+</html>
