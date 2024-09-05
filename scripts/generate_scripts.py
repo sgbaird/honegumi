@@ -7,14 +7,12 @@ from honegumi.ax._ax import (
     is_incompatible,
     model_kwargs_test_override,
     option_rows,
-    tooltips,
 )
 from honegumi.core._honegumi import Honegumi, create_and_clear_dir, gen_combs_with_keys
 
 hg = Honegumi(
     cst,
     option_rows=option_rows,
-    tooltips=tooltips,
     is_incompatible_fn=is_incompatible,
     add_model_specific_keys_fn=add_model_specific_keys,
     model_kwargs_test_override_fn=model_kwargs_test_override,

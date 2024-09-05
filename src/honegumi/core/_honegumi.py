@@ -26,7 +26,6 @@ from honegumi.ax._ax import (
     is_incompatible,
     model_kwargs_test_override,
     option_rows,
-    tooltips,
 )
 from honegumi.core import __version__
 
@@ -255,7 +254,6 @@ class Honegumi:
         self,
         cst,
         option_rows: List[Dict[str, Any]] = option_rows,
-        tooltips=tooltips,
         script_template_name="main.py.jinja",
         is_incompatible_fn=is_incompatible,
         add_model_specific_keys_fn=add_model_specific_keys,
@@ -321,10 +319,6 @@ class Honegumi:
             print("The following options have been disabled:")
             for default in self.disabled_option_defaults:
                 print(f"Disabled option and default: {default}")
-
-        for row in option_rows:
-            if row["name"] in tooltips:
-                row["tooltip"] = tooltips[row["name"]]
 
         self.option_names = [row["name"] for row in option_rows]
 
