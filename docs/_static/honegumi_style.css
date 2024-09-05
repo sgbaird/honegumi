@@ -1,3 +1,4 @@
+/* General Styling for Form and Flex Containers */
 input[type="radio"] {
     opacity: 0;
     position: absolute;
@@ -6,52 +7,62 @@ input[type="radio"] {
 }
 
 form {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
+/* Styling for Rows and Row Elements */
 .row {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f2f2f2;
+    flex-wrap: nowrap; /* Prevents wrapping */
+    background-color: #f2f2f2; /* Default background for light mode */
     border: 0px solid #ccc;
 }
 
 .row-label {
-    display: inline-block;
     padding: 5px;
-    background-color: #f2f2f2;
+    background-color: #f2f2f2; /* Default background for light mode */
     width: 28ch;
     pointer-events: none;
     cursor: default;
     text-align: left;
     border: none;
     border-left: 3px solid #868686;
-    flex-basis: 25.0%;
-
+    flex: 0 1 25%; /* Allows flexibility while constraining max width */
 }
 
 .row-option {
-    display: inline-block;
     border: 1px solid #ccc;
     padding: 5px;
     cursor: pointer;
-    background-color: #f2f2f2;
+    background-color: #f2f2f2; /* Default background for light mode */
     text-align: center;
-    flex-basis: 35.0%;
+    flex: 1 1 35%; /* Flexible size with a base of 35% */
 }
 
-input[type="radio"]:checked+label {
-    background-color: #b1b1b1;
+input[type="radio"]:checked + label {
+    background-color: #b1b1b1; /* Default checked color */
 }
 
+/* Custom Logo Styling */
+.custom-logo {
+    height: 2em; /* Define a fixed height */
+    width: auto; /* Maintain the aspect ratio */
+    margin-right: 1em;
+    vertical-align: middle;
+    object-fit: contain; /* Ensures the image scales correctly within its container */
+    max-width: 100%; /* Prevents the logo from stretching beyond its container */
+}
+
+/* Tooltip Styling */
 .tooltip-icon {
     display: inline-block;
     position: relative;
-    cursor: pointer;
-    color: #000;
     cursor: help;
+    color: #000; /* Default text color for light mode */
     flex-basis: 3.0%;
     margin: 0px 5px;
     text-align: center;
@@ -61,24 +72,24 @@ input[type="radio"]:checked+label {
     position: absolute;
     display: none;
     margin-left: 40px;
-    padding: 10px ;
+    padding: 10px;
     width: 300px;
     top: -3%;
     text-align: left;
     color: #FFF;
     background: #2C2C2C;
-  }
+}
 
 .tooltip-text.active {
     display: block;
 }
 
 .tooltip-icon:hover .tooltip-text,
-.tooltip-text:hover{
+.tooltip-text:hover {
     display: block;
 }
 
-/* An invisible arrow that prevents hover deactivation*/
+/* Tooltip Arrow Styling */
 .tooltip-text.arrow:before {
     content: "";
     position: absolute;
@@ -90,7 +101,6 @@ input[type="radio"]:checked+label {
     border-bottom: 10px solid transparent;
 }
 
-/* The black arrow the user sees */
 .tooltip-text.arrow:after {
     content: "";
     position: absolute;
@@ -100,4 +110,52 @@ input[type="radio"]:checked+label {
     border-right: 8px solid #2C2C2C;
     border-left: none;
     border-bottom: 8px solid transparent;
+}
+
+/* Light Theme Styles */
+html[data-theme="light"] .row,
+html[data-theme="light"] .row-label,
+html[data-theme="light"] .row-option {
+    background-color: #f2f2f2; /* Light theme background */
+    color: #000; /* Light theme text color */
+    border-color: #ccc; /* Light theme border color */
+}
+
+html[data-theme="light"] input[type="radio"]:checked + label {
+    background-color: #b1b1b1; /* Checked color for light mode */
+}
+
+html[data-theme="light"] .tooltip-icon {
+    color: #000; /* Tooltip icon color for light mode */
+}
+
+html[data-theme="light"] .tooltip-text {
+    background: #2C2C2C; /* Tooltip background for light mode */
+    color: #FFF; /* Tooltip text color for light mode */
+}
+
+/* Dark Theme Styles */
+html[data-theme="dark"] .row,
+html[data-theme="dark"] .row-label,
+html[data-theme="dark"] .row-option {
+    background-color: #333; /* Dark theme background */
+    color: #ddd; /* Dark theme text color */
+    border-color: #555; /* Dark theme border color */
+}
+
+html[data-theme="dark"] input[type="radio"]:checked + label {
+    background-color: #555; /* Checked color for dark mode */
+}
+
+html[data-theme="dark"] .tooltip-icon {
+    color: #fff; /* Tooltip icon color for dark mode */
+}
+
+html[data-theme="dark"] .tooltip-text {
+    background: #444; /* Tooltip background for dark mode */
+    color: #ddd; /* Tooltip text color for dark mode */
+}
+
+html[data-theme="dark"] .tooltip-text.arrow:after {
+    border-right-color: #444; /* Arrow color for tooltip in dark mode */
 }

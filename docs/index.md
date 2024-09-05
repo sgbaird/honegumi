@@ -87,7 +87,6 @@ Wisely, you may choose not to trust a script you don't understand. To address th
 🔰 Tutorials <tutorials>
 📖 Concepts <concepts>
 🧑‍💻 Development <development>
-🌐 GitHub Source <https://github.com/sgbaird/honegumi>
 ```
 
 <!-- Overview <readme> -->

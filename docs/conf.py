@@ -11,7 +11,7 @@ import os
 import sys
 import shutil
 
-import sphinx_rtd_theme  # noqa
+# import sphinx_rtd_theme  # noqa
 
 # -- Path setup --------------------------------------------------------------
 
@@ -77,8 +77,10 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    "sphinx_rtd_theme",
+    # "sphinx_rtd_theme",
+    "sphinx_book_theme",
     "sphinx_copybutton",
+    "sphinx_design",
     "nbsphinx",
     # "sphinx_rtd_dark_mode", # Honegumi table looks strange with dark mode due to custom html
 ]
@@ -115,7 +117,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "honegumi"
-copyright = "2023, sgbaird"
+copyright = "2023, Sterling G. Baird"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -186,7 +188,24 @@ todo_emit_warnings = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+# html_theme = "sphinx_rtd_theme"
+
+html_theme = "sphinx_book_theme"
+html_theme_options = {
+    "repository_provider": "github",
+    "repository_url": "https://github.com/sgbaird/honegumi",
+    "path_to_docs": "docs",
+    "use_repository_button": True,
+    "use_edit_page_button": True,
+    "use_source_button": True,
+    "use_issues_button": True,
+    "use_download_button": True,
+    "launch_buttons": {"colab_url": "https://colab.research.google.com"},
+    # "home_page_in_toc": True,
+    "show_navbar_depth": 1,  # Adjust based on your structure
+    "navigation_with_keys": True,
+    # "navbar_center": ["navbar-nav"], # adds Course 1 / Course 2 buttons at top
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
