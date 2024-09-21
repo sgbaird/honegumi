@@ -44,3 +44,5 @@ Check out our multitask tutorial where we apply multitask optimization to the jo
 Swersky K, Snoek J, Adams RP. Multi-task bayesian optimization. Advances in neural information processing systems. 2013. [🔗](https://proceedings.neurips.cc/paper/2013/hash/f33ba15effa5c10e873bf3842afb46a6-Abstract.html)
 
 Bonilla EV, Chai K, Williams C. Multi-task Gaussian process prediction. Advances in neural information processing systems. 2007. [🔗](https://proceedings.neurips.cc/paper_files/paper/2007/hash/66368270ffd51418ec58bd793f2d9b1b-Abstract.html)
+
+Gaussian Process Summer School: https://youtu.be/VAQRguYCoDI
