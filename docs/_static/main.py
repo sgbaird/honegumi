@@ -4,7 +4,7 @@ from js import invalidConfigs, optionRows
 invalid_configs = invalidConfigs
 option_rows_temp = optionRows
 
-# Ensure invalid_configs is a list of lists
+# HACK: Ensure invalid_configs is a list of lists
 if isinstance(invalid_configs, str):
     import ast
 
@@ -38,9 +38,6 @@ def get_deviating_options(current_config, invalid_configs):
     current_config = tuple(current_config)
     invalid_configs = [tuple(config) for config in invalid_configs]
 
-    print(f"Current Config: {current_config}")
-    print(f"Invalid Configs: {invalid_configs}")
-
     # Generate all possible configurations that deviate by exactly one option
     possible_deviating_configs = [
         [option if i == idx else current_config[i] for i in range(len(current_config))]
@@ -54,16 +51,10 @@ def get_deviating_options(current_config, invalid_configs):
         {tuple(config) for config in possible_deviating_configs}
     )
 
-    # Debug: Print possible deviating configurations
-    print("Possible Deviating Configs:", possible_deviating_configs)
-
     # Find the invalid configurations that match the deviating configurations
     deviating_configs = [
         config for config in possible_deviating_configs if config in invalid_configs
     ]
-
-    # Debug: Print deviating configurations
-    print("Deviating Configs:", deviating_configs)
 
     # Identify the deviating options based on the configurations
     deviating_options = [
@@ -83,9 +74,6 @@ def get_deviating_options(current_config, invalid_configs):
             for i, value in enumerate(current_config)
         ]
         deviating_options.extend(current_config_with_name)
-
-    # Debug: Print deviating options
-    print("Deviating Options:", deviating_options)
 
     return deviating_options
 
