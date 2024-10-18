@@ -1,3 +1,4 @@
+import subprocess
 from os import path
 
 import honegumi.ax.utils.constants as cst
@@ -76,24 +77,7 @@ with open(path.join(core_cst.DOC_DIR, "honegumi.html"), "w") as f:
 
 # TODO: run make html command from here
 
+# Run the make html command
+subprocess.run(["make", "html"], check=True, cwd="../docs", timeout=90)
+
 1 + 1
-
-
-# doesn't work on Windows due to https://stackoverflow.com/a/61628356/13697228
-# try:
-#     with open(gen_script_path, "w") as f:
-#         f.write(script)
-
-# except Exception as e:
-#     # Get the absolute path of the file
-#     abs_gen_script_path = os.path.abspath(gen_script_path)
-
-#     # Add the \\?\ prefix to the absolute path to disable string parsing
-#     # by Windows API
-#     abs_gen_script_path = "\\\\?\\" + abs_gen_script_path
-
-#     with open(abs_gen_script_path, "w") as f:
-#         f.write(script)
-
-# # track cases where certain combinations of non-hidden options are invalid
-# incompatible_configs = [opt for opt in all_opts if is_incompatible_ax(opt)]
