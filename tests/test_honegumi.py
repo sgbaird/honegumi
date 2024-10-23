@@ -12,7 +12,7 @@ __license__ = "MIT"
 
 
 def test_honegumi():
-    hg = Honegumi()
+    hg = Honegumi(cst)
     hg.generate(**{cst.OBJECTIVE_OPT_KEY: "multi", cst.EXISTING_DATA_KEY: True})
     # hg.generate(objective="multi", existing_data=True)
 
@@ -167,5 +167,6 @@ def test_main(capsys):
 
 if __name__ == "__main__":
     """Execute the test suite"""
+    test_honegumi()
     test_pydantic()
     test_unpack_rendered_template_stem()
