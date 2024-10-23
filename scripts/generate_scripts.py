@@ -1,4 +1,4 @@
-import subprocess
+# import subprocess
 from os import path
 
 import honegumi.ax.utils.constants as cst
@@ -31,15 +31,15 @@ new_data = []
 
 for selections in data:
     options_model = hg.OptionsModel(**selections)
-    script, selections = hg.generate(options_model, return_selections=True)
+    script, new_selections = hg.generate(options_model, return_selections=True)
 
     # for the HTML template
-    selections[core_cst.RENDERED_KEY] = script  # type: ignore
+    new_selections[core_cst.RENDERED_KEY] = script  # type: ignore
 
     # "\n" was to complement open in colab badge line
-    selections[core_cst.PREAMBLE_KEY] = ""  # type: ignore
+    new_selections[core_cst.PREAMBLE_KEY] = ""  # type: ignore
 
-    new_data.append(selections)
+    new_data.append(new_selections)
 
 # Find the configs that either failed or were incompatible
 invalid_configs = [
@@ -78,6 +78,6 @@ with open(path.join(core_cst.DOC_DIR, "honegumi.html"), "w") as f:
 # TODO: run make html command from here
 
 # Run the make html command
-subprocess.run(["make", "html"], check=True, cwd="../docs", timeout=90)
+# subprocess.run(["make", "html"], check=True, cwd="../docs", timeout=90)
 
 1 + 1
