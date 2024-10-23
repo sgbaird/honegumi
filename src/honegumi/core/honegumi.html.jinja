@@ -13,11 +13,13 @@
     <!-- Specify the Python environment -->
     <py-env>
         - jinja2
-        - pydantic
-        - black
+        {# - honegumi #}
     </py-env>
 
-    <script>
+    <!-- Import the external Python file -->
+    <py-script src="honegumi_pyscript_helper.py"></py-script>
+
+    <script type="text/javascript">
         var optionRows = {{ jinja_option_rows|tojson }};
         // E.g.,
         // var optionRows = [
@@ -69,8 +71,6 @@
             </div>
         </div>
     </form>
-
-    <py-script src="honegumi_pyscript_helper.py"></py-script>
 
     <script src="_static/prism/prism.js"></script>
 </body>
