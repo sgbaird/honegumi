@@ -24,7 +24,7 @@ import logging
 
 import honegumi.ax.utils.constants as cst
 import honegumi.core.utils.constants  # noqa: F401
-from honegumi.core import __version__  # noqa: F401
+from honegumi import __version__  # noqa: F401
 
 # from jinja2 import Environment, FileSystemLoader
 

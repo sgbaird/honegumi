@@ -20,6 +20,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pydantic import BaseModel, Field, create_model
 
 import honegumi.core.utils.constants as core_cst
+from honegumi import __version__
 from honegumi.ax._ax import (
     add_model_specific_keys,
     extra_jinja_var_names,
@@ -27,7 +28,6 @@ from honegumi.ax._ax import (
     model_kwargs_test_override,
     option_rows,
 )
-from honegumi.core import __version__
 
 __author__ = "sgbaird"
 __copyright__ = "sgbaird"
