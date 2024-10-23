@@ -1,5 +1,12 @@
+import constants as cst
 import js
 from js import invalidConfigs, optionRows
+
+from honegumi import Honegumi
+
+# Create an instance of Honegumi with the appropriate context and options
+hg = Honegumi(cst)
+# hg = Honegumi(cst, option_rows)
 
 invalid_configs = invalidConfigs
 option_rows_temp = optionRows

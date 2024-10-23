@@ -15,9 +15,8 @@
         - jinja2
         - pydantic
         - black
+        - honegumi
         <!-- - honegumi -->
-        paths:
-            - src/honegumi
     </py-env>
 
     <!-- Import the external Python file -->
@@ -36,12 +35,16 @@
             </div>
         </div>
 
+
         <div class="row">
             <label class="row-label">row1:</label>
-            <input type="radio" id="row1-A" name="row1" value="A" checked py-click="update_text()">
+
+            <input type="radio" id="row1-A" name="row1" value="A"
+                 checked py-click="update_text()">
             <label class="row-option" for="row1-A">A</label>
 
-            <input type="radio" id="row1-B" name="row1" value="B" py-click="update_text()">
+            <input type="radio" id="row1-B" name="row1" value="B"
+                 py-click="update_text()">
             <label class="row-option" for="row1-B">B</label>
 
             <div class="tooltip-icon">&#9432;
@@ -51,13 +54,17 @@
 
         <div class="row">
             <label class="row-label">row2:</label>
-            <input type="radio" id="row2-C" name="row2" value="C" checked py-click="update_text()">
+
+            <input type="radio" id="row2-C" name="row2" value="C"
+                 checked py-click="update_text()">
             <label class="row-option" for="row2-C">C</label>
 
-            <input type="radio" id="row2-D" name="row2" value="D" py-click="update_text()">
+            <input type="radio" id="row2-D" name="row2" value="D"
+                 py-click="update_text()">
             <label class="row-option" for="row2-D">D</label>
 
-            <input type="radio" id="row2-E" name="row2" value="E" py-click="update_text()">
+            <input type="radio" id="row2-E" name="row2" value="E"
+                 py-click="update_text()">
             <label class="row-option" for="row2-E">E</label>
 
             <div class="tooltip-icon">&#9432;
@@ -67,16 +74,20 @@
 
         <div class="row">
             <label class="row-label">row3:</label>
-            <input type="radio" id="row3-F" name="row3" value="F" checked py-click="update_text()">
+
+            <input type="radio" id="row3-F" name="row3" value="F"
+                 checked py-click="update_text()">
             <label class="row-option" for="row3-F">F</label>
 
-            <input type="radio" id="row3-G" name="row3" value="G" py-click="update_text()">
+            <input type="radio" id="row3-G" name="row3" value="G"
+                 py-click="update_text()">
             <label class="row-option" for="row3-G">G</label>
 
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Tooltip for row3</span>
             </div>
         </div>
+
 
         <div class="row align-items-end">
             <p id="preamble"></p>
