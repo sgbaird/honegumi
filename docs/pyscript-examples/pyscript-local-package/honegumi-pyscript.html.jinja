@@ -3,8 +3,8 @@
 
 <head>
     <title>Interactive Grid Example</title>
-    <link rel="stylesheet" href="_static/prism/prism.css">
-    <link rel="stylesheet" href="_static/honegumi_style.css">
+    <link rel="stylesheet" href="../_static/prism/prism.css">
+    <link rel="stylesheet" href="../_static/honegumi_style.css">
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </head>
@@ -13,31 +13,16 @@
     <!-- Specify the Python environment -->
     <py-env>
         - jinja2
-        - black
-        - pytest
-        - jupytext
         - pydantic
+        - black
     </py-env>
 
     <!-- Import the external Python file -->
-    <py-script src="honegumi_pyscript_helper.py"></py-script>
+    <script type="py" src="main.py" config="pyscript.toml"></script>
 
     <script type="text/javascript">
         var optionRows = {{ jinja_option_rows|tojson }};
-        // E.g.,
-        // var optionRows = [
-        //     { "name": "row1", "options": ["A", "B"] },
-        //     { "name": "row2", "options": ["C", "D", "E"] },
-        //     { "name": "row3", "options": ["F", "G"] }
-        // ];
-
         var invalidConfigs = {{ invalid_configs|tojson }};
-        // E.g.,
-        // var invalidConfigs = [
-        //     ["B", "D", "F"],
-        //     ["B", "E", "F"],
-        //     ["A", "C", "G"]
-        // ];
     </script>
 
     <form onsubmit="return false;">
@@ -75,7 +60,7 @@
         </div>
     </form>
 
-    <script src="_static/prism/prism.js"></script>
+    <script src="../_static/prism/prism.js"></script>
 </body>
 
 </html>
