@@ -188,6 +188,15 @@ todo_emit_warnings = True
 # a list of builtin themes.
 html_theme = "sphinx_rtd_theme"
 
+# html_context = {
+#     "display_github": True,  # Add 'Edit on Github' link instead of 'View page source'
+#     "github_user": "sgbaird",
+#     "github_repo": "honegumi",  # assuming an exact match
+#     "github_version": "main",
+#     "conf_py_path": "/docs/",  # needs leading and trailing slashes!
+#     # "source_suffix": source_suffix,
+# }
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -255,7 +264,7 @@ nbsphinx_thumbnails = {
 # html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-# html_show_sourcelink = True
+html_show_sourcelink = True
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 # html_show_sphinx = True
