@@ -188,14 +188,14 @@ todo_emit_warnings = True
 # a list of builtin themes.
 html_theme = "sphinx_rtd_theme"
 
-# html_context = {
-#     "display_github": True,  # Add 'Edit on Github' link instead of 'View page source'
-#     "github_user": "sgbaird",
-#     "github_repo": "honegumi",  # assuming an exact match
-#     "github_version": "main",
-#     "conf_py_path": "/docs/",  # needs leading and trailing slashes!
-#     # "source_suffix": source_suffix,
-# }
+html_context = {
+    "display_github": True,  # Add 'Edit on Github' link instead of 'View page source'
+    "github_user": "sgbaird",
+    "github_repo": "honegumi",  # assuming an exact match
+    "github_version": "main",
+    "conf_py_path": "/docs/",  # needs leading and trailing slashes!
+    # "source_suffix": source_suffix,
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -241,7 +241,7 @@ nbsphinx_thumbnails = {
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-# html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = "%b %d, %Y"
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
