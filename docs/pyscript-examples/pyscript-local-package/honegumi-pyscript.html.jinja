@@ -11,14 +11,8 @@
 
 <body>
     <!-- Specify the Python environment -->
-    <py-env>
-        - jinja2
-        - pydantic
-        - black
-    </py-env>
-
     <!-- Import the external Python file -->
-    <script type="py" src="main.py" config="pyscript.toml"></script>
+    <script type="mpy" src="main.py" config="pyscript.toml"></script>
 
     <script type="text/javascript">
         var optionRows = {{ jinja_option_rows|tojson }};
@@ -28,7 +22,7 @@
     <form onsubmit="return false;">
         <div class="title-block">
             <div class="row align-items-center">
-                <img src="_static/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
             </div>
         </div>
@@ -38,7 +32,7 @@
             <label class="row-label">{{ row.name }}:</label>
             {% for option in row.options %}
             <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"
-                {% if option == row.options[0] %} checked{% endif %} py-click="update_text()">
+                {% if option == row.options[0] %} checked{% endif %} mpy-click="update_text()">
             <label class="row-option" for="{{ row.name }}-{{ option }}">{{ option }}</label>
             {% endfor %}
             <div class="tooltip-icon">&#9432;

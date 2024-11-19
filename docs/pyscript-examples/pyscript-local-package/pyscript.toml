@@ -1,4 +1,8 @@
-[files]
-"https://github.com/sgbaird/honegumi/raw/refs/heads/main/src/honegumi/ax/utils/constants.py" = "./constants.py"
+name = "Honegumi"
 
 packages = ["jinja2", "pydantic", "black"]
+
+async = "false"
+
+[files]
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/utils/constants.py" = "constants.py"

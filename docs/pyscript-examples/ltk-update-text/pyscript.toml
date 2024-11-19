@@ -1,0 +1,19 @@
+name = "LTK on MicroPython Copy"
+
+[files]
+"https://raw.githubusercontent.com/pyscript/ltk/main/ltk/jquery.py" = "ltk/jquery.py"
+"https://raw.githubusercontent.com/pyscript/ltk/main/ltk/widgets.py" = "ltk/widgets.py"
+"https://raw.githubusercontent.com/pyscript/ltk/main/ltk/pubsub.py" = "ltk/pubsub.py"
+"https://raw.githubusercontent.com/pyscript/ltk/main/ltk/__init__.py" = "ltk/__init__.py"
+"https://raw.githubusercontent.com/pyscript/ltk/main/ltk/logger.py" = "ltk/logger.py"
+"https://raw.githubusercontent.com/pyscript/ltk/main/ltk/ltk.js" = "ltk/ltk.js"
+"https://raw.githubusercontent.com/pyscript/ltk/main/ltk/ltk.css" = "ltk/ltk.css"
+
+# # Correct, same format as above (LTK examples)
+# "https://raw.githubusercontent.com/sgbaird/honegumi/main/src/honegumi/ax/utils/constants.py" = "constants.py"
+
+# Correct download URL (i.e., copied from browser bar after clicking "raw" and letting it redirect)
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/utils/constants.py" = "constants.py"
+
+# # Default "copy link address" from "raw" button (e.g., https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/utils/constants.py), makes "world" button disappear. Maybe other issues. Likely because this is a redirect URL
+# "https://github.com/sgbaird/honegumi/raw/refs/heads/main/src/honegumi/ax/utils/constants.py" = "constants.py"

@@ -1,0 +1,7 @@
+name = "Piratical Copy"
+
+packages = ["arrr"]
+
+# [files]
+# # Correct download URL (i.e., copied from browser bar after clicking "raw" and letting it redirect)
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/utils/constants.py" = "constants.py"
