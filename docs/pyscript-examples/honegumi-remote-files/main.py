@@ -4,20 +4,10 @@ import constants as cst
 import js
 from js import invalidConfigs, optionRows
 
-from honegumi import Honegumi
-
-# print("importing constants...")
-# print(f"Current directory: {os.getcwd()}")
-# # ls
-# print(f"Files in current directory: {os.listdir()}")
-
-
-# print("importing honegumi...")
+from honegumi.core._honegumi import Honegumi
 
 
 # Create an instance of Honegumi with the appropriate context and options
-hg = Honegumi(cst)
-# hg = Honegumi(cst, option_rows)
 
 invalid_configs = invalidConfigs
 option_rows_temp = optionRows
@@ -29,6 +19,20 @@ if isinstance(invalid_configs, str):
     invalid_configs = ast.literal_eval(invalid_configs)
 
 option_rows = list(row.to_py() for row in option_rows_temp)
+
+hg = Honegumi(
+    cst,
+    option_rows=option_rows,
+    is_incompatible_fn=is_incompatible,
+    add_model_specific_keys_fn=add_model_specific_keys,
+    model_kwargs_test_override_fn=model_kwargs_test_override,
+    script_template_dir=path.join("honegumi", "ax"),
+    script_template_name="main.py.jinja",
+    core_template_dir=path.join("honegumi", "core"),
+    core_template_name="honegumi.html.jinja",
+    output_dir="docs",
+    output_name="honegumi.html",
+)
 
 
 def generate_rendered(kwargs):

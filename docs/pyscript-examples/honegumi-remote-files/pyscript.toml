@@ -1,0 +1,30 @@
+name = "Honegumi"
+
+packages = ["jinja2", "pydantic", "black"]
+
+# Is this needed? https://docs.pyscript.net/2024.10.2/user-guide/first-steps/
+async = "false"
+
+[files]
+
+# Honegumi
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/__init__.py" = "./honegumi/__init__.py"
+
+# Honegumi Ax
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
+
+# Honegumi Ax Utils
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/utils/__init__.py" = "./honegumi/ax/utils/__init__.py"
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/utils/constants.py" = "./honegumi/ax/utils/constants.py"
+
+# Honegumi Core
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/core/__init__.py" = "./honegumi/core/__init__.py"
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/core/_honegumi.py" = "./honegumi/core/_honegumi.py"
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/core/honegumi.html.jinja" = "./honegumi/core/honegumi.html.jinja"
+
+# Honegumi Core Utils
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/utils/constants.py" = "./honegumi/core/utils/constants.py"
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/utils/notebooks.py" = "./honegumi/core/utils/notebooks.py"
+"https://github.com/sgbaird/honegumi/blob/dev/src/honegumi/core/utils/testing.py" = "./honegumi/core/utils/testing.py"

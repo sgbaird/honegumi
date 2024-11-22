@@ -4,14 +4,15 @@ from os import path
 from jinja2 import Environment, FileSystemLoader
 
 # Define the paths for the templates and output directory
-template_dir = "docs/pyscript-examples/pyscript-local-package/"
-output_dir = "docs/pyscript-examples/pyscript-local-package/"
+template_dir = "docs/pyscript-examples/honegumi-remote-files/"
+output_dir = "docs/pyscript-examples/honegumi-remote-files/"
+template_name = "honegumi-pyscript.html.jinja"
 
 # Set up the Jinja2 environment
 env = Environment(loader=FileSystemLoader(template_dir))
 
 # Load the Jinja2 template
-template = env.get_template("honegumi-pyscript.html.jinja")
+template = env.get_template(template_name)
 
 # Example data to be used for rendering
 jinja_option_rows = [
