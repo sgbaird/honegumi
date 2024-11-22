@@ -39,97 +39,6 @@ _logger = logging.getLogger(__name__)
 # ---- Python API ----
 
 
-def get_rendered_template_stem(datum, option_names):
-    """
-    Returns a string that represents the rendered template stem based on the given data
-    and option names.
-
-    Filenames still have strict character limits even if longpaths enabled on Windows
-    (https://stackoverflow.com/a/61628356/13697228), so use folder structure instead
-
-    Parameters
-    ----------
-    data : dict
-        A dictionary containing the data to be used in the rendered template stem.
-    option_names : list
-        A list of strings representing the names of the options to be included in the
-        rendered template stem.
-
-    Returns
-    -------
-    str
-        A string representing the rendered template stem.
-
-    Examples
-    --------
-    >>> data = {'option1': 'value1', 'option2': 'value2'}
-    >>> option_names = ['option1', 'option2']
-    >>> get_rendered_template_stem(data, option_names)
-    'option1-value1+option2-value2'
-    """
-    rendered_template_stem = "+".join(
-        [f"{option_name}-{str(datum[option_name])}" for option_name in option_names]
-    )  # `str()` was intended for boolean values, but no longer using booleans
-    return rendered_template_stem
-
-
-def unpack_rendered_template_stem(rendered_template_stem):
-    """
-    This function takes a rendered template stem as input and returns a dictionary of
-    options and their values.
-
-    Parameters
-    ----------
-    rendered_template_stem : str
-        The rendered template stem to be unpacked.
-
-    Returns
-    -------
-    dict
-        A dictionary containing the options and their values.
-
-    Examples
-    --------
-    >>> unpack_rendered_template_stem("option1-value1+option2-value2+option3-value3")
-    {'option1': 'value1', 'option2': 'value2', 'option3': 'value3'}
-    """
-    options = {}
-
-    # split the string into a list of option-value pairs
-    option_value_pairs = rendered_template_stem.split("+")
-
-    # extract the option names and values from the pairs and add them to a dictionary
-    for pair in option_value_pairs:
-        option_name, option_value = pair.split("-")
-
-        if option_value.lower() == "true":
-            option_value = True
-        elif option_value.lower() == "false":
-            option_value = False
-        elif option_value.isdigit():
-            option_value = int(option_value)
-        elif option_value.replace(".", "", 1).isdigit():
-            option_value = float(option_value)
-
-        options[option_name] = option_value
-
-    return options
-
-
-def create_and_clear_dir(directory):
-    # create the directory if it doesn't exist
-    Path(directory).mkdir(parents=True, exist_ok=True)
-
-    # clear out the directory (to avoid confusion/running old scripts)
-    for file in os.listdir(directory):
-        file_path = os.path.join(directory, file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        except Exception as e:
-            print(e)
-
-
 def gen_combs_with_keys(
     visible_option_names: List[str], visible_option_rows: List[dict]
 ):
@@ -178,40 +87,6 @@ def gen_combs_with_keys(
     return all_opts
 
 
-# NOTE: `custom_gen_opt_name` gets converted to a string from a boolean to
-# simply things on a Python/Jinja/Javascript side (i.e., strings are strings,
-# but boolean syntax can vary).
-
-
-def generate_lookup_dict(data, option_names, key):
-    """
-    Generate a lookup dictionary from a list of dictionaries.
-
-    Examples
-    --------
-    >>> data = [
-    >>>     {"option1": "a", "option2": 1, "key": "foo"},
-    >>>     {"option1": "b", "option2": 2, "key": "bar"},
-    >>>     {"option1": "c", "option2": 3, "key": "baz"},
-    >>> ]
-    >>> generate_lookup_dict(data, ['option1', 'option2'], 'key')
-    {'a,1': 'foo', 'b,2': 'bar', 'c,3': 'baz'}
-    """
-    if not all(key in item for item in data):
-        raise ValueError(f"key {key} not in all items")
-    return {
-        ",".join([str(item[option_name]) for option_name in option_names]): item[key]
-        for item in data
-    }
-
-
-# NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
-# i.e., hard-code the model names instead of accessing them programatically
-# see https://github.com/facebook/Ax/issues/1781
-
-# also, this would make ax an explicit dependency, so perhaps better not to do so.
-
-
 def create_options_model(option_rows: List[Dict[str, Any]]):
     fields = {}
 
@@ -254,7 +129,12 @@ class Honegumi:
         self,
         cst,
         option_rows: List[Dict[str, Any]] = option_rows,
+        script_template_dir=path.join("src", "honegumi", "ax"),
         script_template_name="main.py.jinja",
+        core_template_dir=path.join("src", "honegumi", "core"),
+        core_template_name="honegumi.html.jinja",
+        output_dir="docs",
+        output_name="honegumi.html",
         is_incompatible_fn=is_incompatible,
         add_model_specific_keys_fn=add_model_specific_keys,
         model_kwargs_test_override_fn=model_kwargs_test_override,
@@ -262,6 +142,9 @@ class Honegumi:
         skip_tests=None,
     ):
         self.cst = cst
+
+        self.output_dir = output_dir
+        self.output_name = output_name
 
         self.is_incompatible_fn = is_incompatible_fn
         self.add_model_specific_keys_fn = add_model_specific_keys_fn
@@ -286,7 +169,7 @@ class Honegumi:
             print("SKIPPING TESTS")
 
         self.env = Environment(
-            loader=FileSystemLoader(cst.TEMPLATE_DIR),
+            loader=FileSystemLoader(script_template_dir),
             undefined=StrictUndefined,
             keep_trailing_newline=True,
         )
@@ -294,10 +177,12 @@ class Honegumi:
         self.template = self.env.get_template(script_template_name)
 
         self.core_env = Environment(
-            loader=FileSystemLoader(core_cst.CORE_TEMPLATE_DIR),
+            loader=FileSystemLoader(core_template_dir),
             undefined=StrictUndefined,
             keep_trailing_newline=True,
         )
+
+        self.core_template = self.core_env.get_template(core_template_name)
 
         # remove the options where disable is True, and print disabled options (keep
         # track of disabled option names and default values)
@@ -378,6 +263,8 @@ class Honegumi:
 # The functions defined in this section are wrappers around the main Python
 # API allowing them to be called directly from the terminal as a CLI
 # executable/script.
+
+# NOTE: Still just a placeholder, might be discarded entirely
 
 
 def fib(n):
@@ -484,3 +371,112 @@ if __name__ == "__main__":
 
 
 # %% Code Graveyard
+
+# def get_rendered_template_stem(datum, option_names):
+#     """
+#     Returns a string that represents the rendered template stem based on the given data
+#     and option names.
+
+#     Filenames still have strict character limits even if longpaths enabled on Windows
+#     (https://stackoverflow.com/a/61628356/13697228), so use folder structure instead
+
+#     Parameters
+#     ----------
+#     data : dict
+#         A dictionary containing the data to be used in the rendered template stem.
+#     option_names : list
+#         A list of strings representing the names of the options to be included in the
+#         rendered template stem.
+
+#     Returns
+#     -------
+#     str
+#         A string representing the rendered template stem.
+
+#     Examples
+#     --------
+#     >>> data = {'option1': 'value1', 'option2': 'value2'}
+#     >>> option_names = ['option1', 'option2']
+#     >>> get_rendered_template_stem(data, option_names)
+#     'option1-value1+option2-value2'
+#     """
+#     rendered_template_stem = "+".join(
+#         [f"{option_name}-{str(datum[option_name])}" for option_name in option_names]
+#     )  # `str()` was intended for boolean values, but no longer using booleans
+#     return rendered_template_stem
+
+
+# def unpack_rendered_template_stem(rendered_template_stem):
+#     """
+#     This function takes a rendered template stem as input and returns a dictionary of
+#     options and their values.
+
+#     Parameters
+#     ----------
+#     rendered_template_stem : str
+#         The rendered template stem to be unpacked.
+
+#     Returns
+#     -------
+#     dict
+#         A dictionary containing the options and their values.
+
+#     Examples
+#     --------
+#     >>> unpack_rendered_template_stem("option1-value1+option2-value2+option3-value3")
+#     {'option1': 'value1', 'option2': 'value2', 'option3': 'value3'}
+#     """
+#     options = {}
+
+#     # split the string into a list of option-value pairs
+#     option_value_pairs = rendered_template_stem.split("+")
+
+#     # extract the option names and values from the pairs and add them to a dictionary
+#     for pair in option_value_pairs:
+#         option_name, option_value = pair.split("-")
+
+#         if option_value.lower() == "true":
+#             option_value = True
+#         elif option_value.lower() == "false":
+#             option_value = False
+#         elif option_value.isdigit():
+#             option_value = int(option_value)
+#         elif option_value.replace(".", "", 1).isdigit():
+#             option_value = float(option_value)
+
+#         options[option_name] = option_value
+
+#     return options
+
+# # NOTE: `custom_gen_opt_name` gets converted to a string from a boolean to
+# # simply things on a Python/Jinja/Javascript side (i.e., strings are strings,
+# # but boolean syntax can vary).
+
+
+# def generate_lookup_dict(data, option_names, key):
+#     """
+#     Generate a lookup dictionary from a list of dictionaries.
+
+#     Examples
+#     --------
+#     >>> data = [
+#     >>>     {"option1": "a", "option2": 1, "key": "foo"},
+#     >>>     {"option1": "b", "option2": 2, "key": "bar"},
+#     >>>     {"option1": "c", "option2": 3, "key": "baz"},
+#     >>> ]
+#     >>> generate_lookup_dict(data, ['option1', 'option2'], 'key')
+#     {'a,1': 'foo', 'b,2': 'bar', 'c,3': 'baz'}
+#     """
+#     if not all(key in item for item in data):
+#         raise ValueError(f"key {key} not in all items")
+#     return {
+#         ",".join([str(item[option_name]) for option_name in option_names]): item[key]
+#         for item in data
+#     }
+
+
+# NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
+# i.e., hard-code the model names instead of accessing them programatically
+# see https://github.com/facebook/Ax/issues/1781
+
+# also, this would make ax an explicit dependency, so perhaps better not to do so.

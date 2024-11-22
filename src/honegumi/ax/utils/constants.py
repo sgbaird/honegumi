@@ -20,10 +20,3 @@ SYNCHRONY_OPT_KEY = "synchrony"  # single, batch, asynchronous
 MODEL_KWARGS_KEY = "model_kwargs"
 
 FULLYBAYESIAN_KEY = "Fully Bayesian"
-
-# REVIEW: technically could separate base from suffix, but maybe not worth it
-# REVIEW: Is this constants.py file still necessary?
-TEMPLATE_DIR = path.join("src", "honegumi", "ax")
-GEN_SCRIPT_DIR = path.join("docs", "generated_scripts", "ax")
-GEN_NOTEBOOK_DIR = path.join("docs", "generated_notebooks", "ax")
-TEST_TEMPLATE_DIR = path.join("tests", "generated_scripts", "ax")

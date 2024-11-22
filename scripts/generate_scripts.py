@@ -9,7 +9,7 @@ from honegumi.ax._ax import (
     model_kwargs_test_override,
     option_rows,
 )
-from honegumi.core._honegumi import Honegumi, create_and_clear_dir, gen_combs_with_keys
+from honegumi.core._honegumi import Honegumi, gen_combs_with_keys
 
 hg = Honegumi(
     cst,
@@ -17,11 +17,13 @@ hg = Honegumi(
     is_incompatible_fn=is_incompatible,
     add_model_specific_keys_fn=add_model_specific_keys,
     model_kwargs_test_override_fn=model_kwargs_test_override,
+    script_template_dir=path.join("src", "honegumi", "ax"),
+    script_template_name="main.py.jinja",
+    core_template_dir=path.join("src", "honegumi", "core"),
+    core_template_name="honegumi.html.jinja",
+    output_dir="docs",
+    output_name="honegumi.html",
 )
-
-# removing directories should happen outside of the class
-directories = [cst.GEN_SCRIPT_DIR, cst.GEN_NOTEBOOK_DIR, cst.TEST_TEMPLATE_DIR]
-[create_and_clear_dir(directory) for directory in directories]
 
 all_opts = gen_combs_with_keys(hg.visible_option_names, hg.visible_option_rows)
 
@@ -54,25 +56,18 @@ invalid_configs = [
     for opt in invalid_configs
 ]
 
-
-# Define the path to your HTML template file
-template_path = "honegumi.html.jinja"
-
-# Create a Jinja2 environment and load the template file
-template = hg.core_env.get_template(template_path)
-
 # convert boolean values within option_rows to strings
 for row in hg.jinja_option_rows:
     row["options"] = [str(opt) for opt in row["options"]]
 
 # Render the template with your variables
-html = template.render(
+html = hg.core_template.render(
     jinja_option_rows=hg.jinja_option_rows,
     invalid_configs=invalid_configs,
 )
 
 # Write the rendered HTML to a file
-with open(path.join(core_cst.DOC_DIR, "honegumi.html"), "w") as f:
+with open(path.join(hg.output_dir, hg.output_name), "w") as f:
     f.write(html)
 
 # TODO: run make html command from here
