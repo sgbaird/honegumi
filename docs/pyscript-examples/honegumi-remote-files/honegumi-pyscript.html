@@ -5,8 +5,9 @@
     <title>Interactive Grid Example</title>
     <link rel="stylesheet" href="../_static/prism/prism.css">
     <link rel="stylesheet" href="../_static/honegumi_style.css">
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.10.2/core.css">
+    <!-- Do I need script defer below? -->
+    <script type="module" src="https://pyscript.net/releases/2024.10.2/core.js"></script>
 </head>
 
 <body>
@@ -15,71 +16,65 @@
     <script type="mpy" src="main.py" config="pyscript.toml"></script>
 
     <script type="text/javascript">
-        var optionRows = [{"name": "row1", "options": ["A", "B"], "tooltip": "Tooltip for row1"}, {"name": "row2", "options": ["C", "D", "E"], "tooltip": "Tooltip for row2"}, {"name": "row3", "options": ["F", "G"], "tooltip": "Tooltip for row3"}];
+        var optionRows = [{ "name": "row1", "options": ["A", "B"], "tooltip": "Tooltip for row1" }, { "name": "row2", "options": ["C", "D", "E"], "tooltip": "Tooltip for row2" }, { "name": "row3", "options": ["F", "G"], "tooltip": "Tooltip for row3" }];
         var invalidConfigs = "[[\"B\", \"D\", \"F\"], [\"B\", \"E\", \"F\"], [\"A\", \"C\", \"G\"]]";
     </script>
 
     <form onsubmit="return false;">
         <div class="title-block">
             <div class="row align-items-center">
-                <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png" alt="Logo"
+                    style="height: 2em; margin-right: 1em; vertical-align: middle;">
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
             </div>
         </div>
 
-        
+
         <div class="row">
             <label class="row-label">row1:</label>
-            
-            <input type="radio" id="row1-A" name="row1" value="A"
-                 checked mpy-click="update_text()">
+
+            <input type="radio" id="row1-A" name="row1" value="A" checked mpy-click="update_text()">
             <label class="row-option" for="row1-A">A</label>
-            
-            <input type="radio" id="row1-B" name="row1" value="B"
-                 mpy-click="update_text()">
+
+            <input type="radio" id="row1-B" name="row1" value="B" mpy-click="update_text()">
             <label class="row-option" for="row1-B">B</label>
-            
+
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Tooltip for row1</span>
             </div>
         </div>
-        
+
         <div class="row">
             <label class="row-label">row2:</label>
-            
-            <input type="radio" id="row2-C" name="row2" value="C"
-                 checked mpy-click="update_text()">
+
+            <input type="radio" id="row2-C" name="row2" value="C" checked mpy-click="update_text()">
             <label class="row-option" for="row2-C">C</label>
-            
-            <input type="radio" id="row2-D" name="row2" value="D"
-                 mpy-click="update_text()">
+
+            <input type="radio" id="row2-D" name="row2" value="D" mpy-click="update_text()">
             <label class="row-option" for="row2-D">D</label>
-            
-            <input type="radio" id="row2-E" name="row2" value="E"
-                 mpy-click="update_text()">
+
+            <input type="radio" id="row2-E" name="row2" value="E" mpy-click="update_text()">
             <label class="row-option" for="row2-E">E</label>
-            
+
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Tooltip for row2</span>
             </div>
         </div>
-        
+
         <div class="row">
             <label class="row-label">row3:</label>
-            
-            <input type="radio" id="row3-F" name="row3" value="F"
-                 checked mpy-click="update_text()">
+
+            <input type="radio" id="row3-F" name="row3" value="F" checked mpy-click="update_text()">
             <label class="row-option" for="row3-F">F</label>
-            
-            <input type="radio" id="row3-G" name="row3" value="G"
-                 mpy-click="update_text()">
+
+            <input type="radio" id="row3-G" name="row3" value="G" mpy-click="update_text()">
             <label class="row-option" for="row3-G">G</label>
-            
+
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Tooltip for row3</span>
             </div>
         </div>
-        
+
 
         <div class="row align-items-end">
             <p id="preamble"></p>
