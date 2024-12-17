@@ -1,5 +1,3 @@
-from os import path
-
 OBJECTIVE_OPT_KEY = "objective"
 MODEL_OPT_KEY = "model"
 CUSTOM_GEN_KEY = "custom_gen"
@@ -18,5 +16,7 @@ FIDELITY_OPT_KEY = "fidelity"
 TASK_OPT_KEY = "task"
 SYNCHRONY_OPT_KEY = "synchrony"  # single, batch, asynchronous
 MODEL_KWARGS_KEY = "model_kwargs"
+CUSTOM_KEY = "custom"
+VISUALIZE_KEY = "visualize"
 
 FULLYBAYESIAN_KEY = "Fully Bayesian"
