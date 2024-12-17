@@ -1,0 +1,414 @@
+import numpy as np
+from ax.service.ax_client import AxClient, ObjectiveProperties
+
+{% if custom_gen -%}
+from ax.modelbridge.factory import Models
+from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
+from botorch.acquisition import LogExpectedImprovement
+{%- endif %}
+
+{% if multi_task -%}
+from ax.modelbridge.registry import Specified_Task_ST_MTGP_tran
+{%- endif %}
+
+{% if existing_data -%}
+import pandas as pd
+{%- endif %}
+
+obj1_name = "branin"
+{% if objective == "multi" -%}
+obj2_name = "branin_swapped"
+{%- endif %}
+
+def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" %}_moo{% endif %}{% if multi_task %}_mt{% endif %}(x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if multi_task %}, task{% endif %}):
+    y = float(
+        (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
+        + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x1)
+        + 10
+    )
+
+    # if multi-task, add a made-up penalty based on task
+    {% if multi_task %}
+    penalty_lookup = {"A": 1.0, "B": 1.1 + x1 + 2*x2}
+    y += penalty_lookup[task]
+    {% endif %}
+
+    {% if composition_constraint -%}
+    # Contrived way to incorporate x3 into the objective
+    y = y * (1 + 0.1 * x1 * x2 * x3)
+    {%- endif %}
+
+    {% if categorical %}
+    # add a made-up penalty based on category
+    penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
+    y += penalty_lookup[c1]
+    {% endif %}
+    {% if objective == "multi" -%}
+    # second objective has x1 and x2 swapped
+    y2 = float(
+        (x1 - 5.1 / (4 * np.pi**2) * x2**2 + 5.0 / np.pi * x2 - 6.0) ** 2
+        + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x2)
+        + 10
+    )
+    {% if composition_constraint -%}
+    # Contrived way to incorporate x3 into the second objective
+    y2 = y2 * (1 - 0.1 * x1 * x2 * x3)
+    {%- endif %}
+    {% if categorical %}
+    # add a made-up penalty based on category
+    penalty_lookup = {"A": 0.0, "B": 2.0, "C": 1.0}
+    y2 += penalty_lookup[c1]
+    {% endif %}
+    return {obj1_name: y, obj2_name: y2}
+    {% else %} {# single objective #}
+    return y
+    {%- endif %}
+
+{% set objective_function = "branin" %}
+
+{% if composition_constraint -%}
+    {% set objective_function = objective_function + "3" %}
+{% endif %}
+
+{# set the objective function for multi_task #}
+{% if multi_task %}
+    {% set objective_function = objective_function + "_mt" %}
+{% endif %}
+
+{# Set the objective function based on the objective #}
+{% if objective == "multi" -%}
+    {% set objective_function = objective_function + "_moo" %}
+{%- endif %}
+
+{# List of expected models #}
+{% set expected_models = ["Fully Bayesian", "Default"] %}
+
+{# Check if model is in the list of expected models #}
+{% if model not in expected_models %}
+    {{ 0/0 }}
+{% endif %}
+
+{# add MOO to FULLYBAYESIAN if multi-objective #}
+{% if model == "Custom" and objective == "multi" and not multi_task -%}
+    {% set model_name = "FULLYBAYESIANMOO" %}
+{% elif model == "Custom" and objective != "multi" and not multi_task -%}
+    {% set model_name = "FULLYBAYESIAN" %}
+{% else %}
+    {% set model_name = "BOTORCH_MODULAR" %}
+{%- endif %}
+
+{% if composition_constraint %}
+# Define total for compositional constraint, where x1 + x2 + x3 == total
+total = 10.0
+{% endif %}
+
+{% if existing_data -%} {# categorical inline/repeated because will be clearer to readers #}
+# Define the training data
+{% if composition_constraint %}
+# note that for this training data, the compositional constraint is satisfied
+{% endif %}
+{% if order_constraint %}
+# note that for this training data, the order constraint is satisfied
+{% endif %} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
+{# Set some shorthand variables to make X_train more readable #}
+{% set mt = multi_task%}
+{% set comp = composition_constraint %}
+{% set cat = categorical %}
+{% set ord = order_constraint %}
+{# Note the lack of comma after x2, and the presence of a comma before the x3 #}
+X_train = pd.DataFrame([
+    {
+        "x1": {% if comp %}4.0{% else %}-3.0{% endif %},
+        "x2": 5.0
+        {% if mt %}, "task": "A"{% endif %}
+        {% if comp %},"x3": 1.0{% endif %}
+        {% if cat %},"c1": "A"{% endif %}
+    },
+    {
+        "x1": 0.0,
+        "x2": 6.2
+        {% if mt %}, "task": "B"{% endif %}
+        {% if comp %},"x3": 3.8{% endif %}
+        {% if cat %},"c1": "B"{% endif %}
+    },
+    {
+        "x1": {% if ord %}2.1{% else %}5.9{% endif %},
+        "x2": {% if ord %}5.9{% else %}2.0{% endif %}
+        {% if mt %}, "task": "A"{% endif %}
+        {% if comp %},"x3": 2.0{% endif %}
+        {% if cat %},"c1": "C"{% endif %}
+    },
+    {
+        "x1": 1.5,
+        "x2": 2.0
+        {% if mt %}, "task": "B"{% endif %}
+        {% if comp %},"x3": 6.5{% endif %}
+        {% if cat %},"c1": "A"{% endif %}
+    },
+    {
+        "x1": 1.0,
+        "x2": 9.0
+        {% if mt %}, "task": "A"{% endif %}
+        {% if comp %},"x3": 0.0{% endif %}
+        {% if cat %},"c1": "B"{% endif %}
+    }
+])
+
+# Define y_train (normally the values would be supplied directly instead of calculating here)
+y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if composition_constraint %}, row["x3"]{% endif %}{% if categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
+
+# See https://youtu.be/4tnaL9ts6CQ for simple human-in-the-loop BO instructions
+
+# Define the number of training examples
+n_train = len(X_train)
+{%- endif %}
+
+{# Logic around the number of iterations #}
+{# A reasonable default for initialization points is 2 * number of parameters #}
+{% set num_init = 4 + 2 * (categorical + composition_constraint) if not dummy else 3 %}
+{% set num_bayes = 15 if not dummy else 2 %}
+{% set num_iter = num_init + num_bayes %}
+
+{% if custom_gen -%}
+gs = GenerationStrategy(
+    steps=[
+        GenerationStep(
+            model=Models.SOBOL,
+            num_trials={{ num_init }}, # how many sobol trials to perform
+            min_trials_observed=3,
+            max_parallelism=5,
+            model_kwargs={"seed": 999},
+            model_gen_kwargs={{% if multi_task%} "deduplicate": True, "transforms": Specified_Task_ST_MTGP_trans}{% endif %},
+        ),
+        GenerationStep(
+            model=Models.{{ model_name }},
+            num_trials=-1,
+            max_parallelism=3,
+            model_kwargs={{% if model == "Custom" and not multi_task%}"num_samples": 256, "warmup_steps": 256, "botorch_acqf_class": LogExpectedImprovement {% elif if model == "Custom" and multi_task %}"botorch_acqf_class": LogExpectedImprovement, "transforms": Specified_Task_ST_MTGP_trans{% endif %}},
+        ),
+    ]
+)
+{%- endif %}
+
+ax_client = AxClient({% if custom_gen %}generation_strategy=gs{% endif %})
+{% if composition_constraint -%} # note how lower bound of x1 is now 0.0 instead of -5.0, which is for the sake of illustrating a composition, where negative values wouldn't make sense
+{%- endif %}
+ax_client.create_experiment(
+    parameters=[
+        {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[-5.0, 10.0]{% endif %}},
+        {"name": "x2", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[0.0, 10.0]{% endif %}},
+        {% if multi_task%}
+            {
+                "name": "task",
+                "type": "choice",
+                "values": ["A", "B"],
+                "is_task": True,
+                "target_value": "B"
+            }
+        {% endif %}
+        {% if categorical %}
+                {
+                    "name": "c1",
+                    "type": "choice",
+                    "is_ordered": False,
+                    "values": ["A", "B", "C"]
+                },
+        {% endif %}
+    ],
+    objectives={
+        obj1_name: ObjectiveProperties(minimize=True{% if custom_threshold %}, threshold=25.0{% endif %}),
+{% if objective == "multi" -%}
+        obj2_name: ObjectiveProperties(minimize=True{% if custom_threshold %}, threshold=15.0{% endif %}),
+{%- endif %}
+    },
+{% if sum_constraint or composition_constraint or order_constraint or linear_constraint %}
+    parameter_constraints=[
+        {% if sum_constraint %}
+            {% if composition_constraint %}
+                "x1 + x2 <= 15.0", # example of a sum constraint, which may be redundant/unintended if composition_constraint is also selected
+            {% else %}
+                "x1 + x2 <= 15.0", # example of a sum constraint
+            {% endif %}
+        {% endif %}
+        {% if composition_constraint %}f"x1 + x2 <= {total}", # reparameterized compositional constraint, which is a type of sum constraint
+        {% endif %}
+        {% if order_constraint %}"x1 <= x2", # example of an order constraint
+        {% endif %}
+        {% if linear_constraint %}"1.0*x1 + 0.5*x2 <= 15.0", # example of a linear constraint. Note the lack of space around the asterisks
+        {% endif %}
+        ],
+{% endif %}
+)
+
+{% if existing_data -%}
+# Add existing data to the AxClient
+for i in range(n_train):
+    parameterization = X_train.iloc[i].to_dict()
+
+    {% if composition_constraint %}
+    # remove x3, since it's hidden from search space due to composition constraint
+    parameterization.pop('x3')
+    {% endif %}
+
+    ax_client.attach_trial(parameterization)
+    ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
+{%- endif %}
+{# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
+{% if synchrony == "batch" %}
+batch_size = 2
+{% endif %}
+{% set indent = "    " if synchrony == "batch" else "" %}
+for i in range({{ num_iter }}):
+    {% if synchrony == "single" and not multi_task %}
+    parameterization, trial_index = ax_client.get_next_trial()
+    {% elif synchrony == "single" and multi_task%}
+    parameterization, trial_index = ax_client.get_next_trial(fixed_features={{"task": "A" if i % 2 == 0 else "B"}})
+    {% elif synchrony == "batch" and multi_task%}
+    parameterization, trial_index = ax_client.get_next_trial(batch_size, fixed_features={{"task": "A" if i % 2 == 0 else "B"}})
+    {% else %}
+    parameterizations, optimization_complete = ax_client.get_next_trials(batch_size)
+    for trial_index, parameterization in list(parameterizations.items()):
+    {%- endif %}
+    # extract parameters {# Consider using **parameters instead, but might require explanation and a link to ** docs #}
+    {{ indent }}x1 = parameterization["x1"]
+    {{ indent }}x2 = parameterization["x2"]
+    {% if composition_constraint -%}
+    {{ indent }}x3 = total - (x1 + x2) # composition constraint: x1 + x2 + x3 == total
+    {%- endif %}
+    {% if multi_task %}
+    {{ indent }}task = parameterization["task"]
+    {%- endif %}
+    {% if categorical -%}
+    {{ indent }}c1 = parameterization["c1"]
+    {%- endif %}
+
+    {{ indent }}results = {{ objective_function }}(
+    {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if multi_task %}, task{% endif %}
+    {{ indent }}    )
+    {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
+
+{% if objective == "multi" -%}
+pareto_results = ax_client.get_pareto_optimal_parameters()
+{% else %}
+best_parameters, metrics = ax_client.get_best_parameters()
+{%- endif %}
+
+{% if visualize and objective == "single" and synchrony == "single"%}
+
+import matplotlib.pyplot as plt
+
+objectives = ax_client.objective_names
+df = ax_client.get_trials_data_frame()[objectives]
+
+trace = np.minimum.accumulate(df) # MOD: change to maxmimum
+
+fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
+ax.plot(df.index, trace, color="#0033FF", lw=2, label="Best to Trial")
+
+ax.set_xlabel("Trial Number")
+ax.set_ylabel(objectives[0])
+ax.legend()
+plt.show()
+
+{% elif visualize and objective == "single" and synchrony == "batch" %}
+
+import matplotlib.pyplot as plt
+
+objectives = ax_client.objective_names
+df = ax_client.get_trials_data_frame()[objectives]
+df.index = df.index // batch_size
+
+best_to_trial = np.minimum.accumulate(df.groupby(df.index).min()) # change if maximizing
+
+fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
+ax.plot(df.index.unique(), best_to_trial, color="#0033FF", lw=2, label="Best to Trial")
+
+ax.set_xlabel("Trial Number")
+ax.set_ylabel(objectives[0])
+ax.legend()
+plt.show()
+
+{% elif visualize and objective == "multi" and not multi_task%}
+
+import matplotlib.pyplot as plt
+
+objectives = ax_client.objective_names
+df = ax_client.get_trials_data_frame()[objectives]
+
+pareto = ax_client.get_pareto_optimal_parameters()
+pareto = pd.DataFrame([p[1][0] for p in pareto.values()]).sort_values(objectives[0])
+
+fig, ax = plt.subplots(figsize=(6, 4), dpi=200)
+ax.scatter(df[objectives[0]], df[objectives[1]], fc="None", ec="k", label="Observed")
+ax.plot(pareto[objectives[0]], pareto[objectives[1]], color="#0033FF", lw=2, label="Pareto Front")
+
+ax.set_xlabel(objectives[0])
+ax.set_ylabel(objectives[1])
+ax.legend()
+plt.show()
+
+{% elif visualize and objective == "single" and synchrony == "single" and objective == "multi"%}
+
+task = "A"  # specify task results to plot
+
+objectives = ax_client.objective_names
+objectives.extend(["task"])
+df = ax_client.get_trials_data_frame()[objectives]
+df = df[df.task == task].drop(columns=["task"])
+
+trace = np.minimum.accumulate(df) # change if maximizing
+
+fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
+ax.plot(df.index, trace, color="#0033FF", lw=2, label="Best to Trial")
+ax.set_xlabel("Trial Number")
+ax.set_ylabel(objectives[0])
+ax.legend()
+ax.set_title(f"Task {task}")
+plt.show()
+
+{% elif visualize and objective == "single" and synchrony == "batch" and objective == "multi" %}
+
+task = "A"  # specify task results to plot
+
+objectives = ax_client.objective_names
+objectives.extend(["task"])
+df = ax_client.get_trials_data_frame()[objectives]
+df = df[df.task == task].drop(columns=["task"])
+df.index = df.index // batch_size
+
+trace = np.minimum.accumulate(df.groupby(df.index).min()) # change if maximizing
+
+fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
+ax.plot(df.index.unique, trace, color="#0033FF", lw=2, label="Best to Trial")
+ax.set_xlabel("Trial Number")
+ax.set_ylabel(objectives[0])
+ax.legend()
+plt.show()
+
+{%- endif %}
+
+{# CODE GRAVEYARD #}
+
+{# {% if objective == "multi" -%}
+obj1_name = "branin"
+obj2_name = "neg_branin"
+
+def branin_moo(x1, x2):
+    """Multi-objective branin function
+
+    The first objective is the normal branin value and the second
+    objective is the negative branin value.
+    """
+    return {obj1_name: branin(x1, x2), obj2_name: -branin(x1, x2)}
+{%- endif %} #}
+
+{# # Calculate y_train using the objective function (didn't work due to not being able to execute Python code)
+y_train = [
+    {% for _, row in X_train.iterrows() %}
+    {{ objective_function }}(row["x1"], row["x2"]{% if categorical %}, row["c1"]{% endif %}){% if not loop.last %}, {% endif %}
+    {% endfor %}
+] #}
