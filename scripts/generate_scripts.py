@@ -25,30 +25,30 @@ hg = Honegumi(
     output_name="honegumi.html",
 )
 
-all_opts = gen_combs_with_keys(hg.visible_option_names, hg.visible_option_rows)
+# all_opts = gen_combs_with_keys(hg.visible_option_names, hg.visible_option_rows)
 
-data = all_opts.copy()
+# data = all_opts.copy()
 
-new_data = []
+# new_data = []
 
-for selections in data:
-    options_model = hg.OptionsModel(**selections)
-    script, new_selections = hg.generate(options_model, return_selections=True)
+# for selections in data:
+#     options_model = hg.OptionsModel(**selections)
+#     script, new_selections = hg.generate(options_model, return_selections=True)
 
-    # for the HTML template
-    new_selections[core_cst.RENDERED_KEY] = script  # type: ignore
+#     # for the HTML template
+#     new_selections[core_cst.RENDERED_KEY] = script  # type: ignore
 
-    # "\n" was to complement open in colab badge line
-    new_selections[core_cst.PREAMBLE_KEY] = ""  # type: ignore
+#     # "\n" was to complement open in colab badge line
+#     new_selections[core_cst.PREAMBLE_KEY] = ""  # type: ignore
 
-    new_data.append(new_selections)
+#     new_data.append(new_selections)
 
-# Find the configs that either failed or were incompatible
-invalid_configs = [
-    {key: value for key, value in item.items() if key in hg.active_option_names}
-    for item in new_data
-    if not item[core_cst.IS_COMPATIBLE_KEY]
-]
+# # Find the configs that either failed or were incompatible
+# invalid_configs = [
+#     {key: value for key, value in item.items() if key in hg.active_option_names}
+#     for item in new_data
+#     if not item[core_cst.IS_COMPATIBLE_KEY]
+# ]
 
 # # Extract the values for each option name
 # invalid_configs = [
@@ -63,7 +63,7 @@ for row in hg.jinja_option_rows:
 # Render the template with your variables
 html = hg.core_template.render(
     jinja_option_rows=hg.jinja_option_rows,
-    invalid_configs=invalid_configs,
+    # invalid_configs=invalid_configs,
 )
 
 # Write the rendered HTML to a file
