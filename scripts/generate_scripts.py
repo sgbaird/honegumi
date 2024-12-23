@@ -1,5 +1,5 @@
 # import subprocess
-from os import path
+import os
 
 import honegumi.ax.utils.constants as cst
 import honegumi.core.utils.constants as core_cst
@@ -17,9 +17,9 @@ hg = Honegumi(
     is_incompatible_fn=is_incompatible,
     add_model_specific_keys_fn=add_model_specific_keys,
     model_kwargs_test_override_fn=model_kwargs_test_override,
-    script_template_dir=path.join("src", "honegumi", "ax"),
+    script_template_dir=os.path.join("src", "honegumi", "ax"),
     script_template_name="main.py.jinja",
-    core_template_dir=path.join("src", "honegumi", "core"),
+    core_template_dir=os.path.join("src", "honegumi", "core"),
     core_template_name="honegumi.html.jinja",
     output_dir="docs",
     output_name="honegumi.html",
@@ -45,16 +45,16 @@ for selections in data:
 
 # Find the configs that either failed or were incompatible
 invalid_configs = [
-    {key: value for key, value in item.items() if key in hg.option_names}
+    {key: value for key, value in item.items() if key in hg.active_option_names}
     for item in new_data
     if not item[core_cst.IS_COMPATIBLE_KEY]
 ]
 
-# Extract the values for each option name
-invalid_configs = [
-    [str(opt[option_name]) for option_name in hg.visible_option_names]
-    for opt in invalid_configs
-]
+# # Extract the values for each option name
+# invalid_configs = [
+#     [str(opt[option_name]) for option_name in hg.visible_option_names]
+#     for opt in invalid_configs
+# ]
 
 # convert boolean values within option_rows to strings
 for row in hg.jinja_option_rows:
@@ -67,7 +67,7 @@ html = hg.core_template.render(
 )
 
 # Write the rendered HTML to a file
-with open(path.join(hg.output_dir, hg.output_name), "w") as f:
+with open(os.path.join(hg.output_dir, hg.output_name), "w") as f:
     f.write(html)
 
 # TODO: run make html command from here
