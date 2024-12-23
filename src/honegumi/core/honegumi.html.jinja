@@ -5,25 +5,17 @@
     <title>Interactive Grid Example</title>
     <link rel="stylesheet" href="_static/prism/prism.css">
     <link rel="stylesheet" href="_static/honegumi_style.css">
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.10.2/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.10.2/core.js"></script>
 </head>
 
 <body>
-    <!-- Specify the Python environment -->
-    <py-env>
-        - jinja2
-        - black
-        - pytest
-        - jupytext
-        - pydantic
-    </py-env>
-
     <!-- Import the external Python file -->
-    <py-script src="honegumi_pyscript_helper.py"></py-script>
+    <script type="py" src="main.py" config="pyscript.toml"></script>
+    {# <py-script src="honegumi_pyscript_helper.py"></py-script> #}
 
     <script type="text/javascript">
-        var optionRows = {{ jinja_option_rows|tojson }};
+        var optionRows = {{ jinja_option_rows| tojson }};
         // E.g.,
         // var optionRows = [
         //     { "name": "row1", "options": ["A", "B"] },
@@ -31,7 +23,7 @@
         //     { "name": "row3", "options": ["F", "G"] }
         // ];
 
-        var invalidConfigs = {{ invalid_configs|tojson }};
+        var invalidConfigs = {{ invalid_configs| tojson }};
         // E.g.,
         // var invalidConfigs = [
         //     ["B", "D", "F"],
@@ -43,7 +35,10 @@
     <form onsubmit="return false;">
         <div class="title-block">
             <div class="row align-items-center">
-                <img src="_static/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                {# <img src="_static/logo.png" alt="Logo"
+                    style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
+                <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png" alt="Logo"
+                    style="height: 2em; margin-right: 1em; vertical-align: middle;">
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
             </div>
         </div>
@@ -52,8 +47,8 @@
         <div class="row">
             <label class="row-label">{{ row.name }}:</label>
             {% for option in row.options %}
-            <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"
-                {% if option == row.options[0] %} checked{% endif %} py-click="update_text()">
+            <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}" {% if
+                option==row.options[0] %} checked{% endif %} py-click="update_text">
             <label class="row-option" for="{{ row.name }}-{{ option }}">{{ option }}</label>
             {% endfor %}
             <div class="tooltip-icon">&#9432;
