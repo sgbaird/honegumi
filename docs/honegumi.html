@@ -5,19 +5,14 @@
     <title>Interactive Grid Example</title>
     <link rel="stylesheet" href="_static/prism/prism.css">
     <link rel="stylesheet" href="_static/honegumi_style.css">
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css">
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.10.2/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.10.2/core.js"></script>
 </head>
 
 <body>
-    <!-- Specify the Python environment -->
-    <py-env>
-        - jinja2
-
-    </py-env>
-
     <!-- Import the external Python file -->
-    <py-script src="honegumi_pyscript_helper.py"></py-script>
+    <script type="py" src="main.py" config="pyscript.toml"></script>
+    
 
     <script type="text/javascript">
         var optionRows = [{"disable": false, "hidden": false, "name": "objective", "options": ["single", "multi"], "tooltip": "Choose between \u003ca href=\u0027curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html\u0027\u003esingle and multi-objective optimization\u003c/a\u003e based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity."}, {"disable": false, "hidden": false, "name": "model", "options": ["Default", "Fully Bayesian"], "tooltip": "Choose between \u003ca href=\u0027curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html\u0027\u003efrequentist and fully bayesian\u003c/a\u003e implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between \u0027Default\u0027 and \u0027FullyBayesian\u0027, where, depending on the other options, \u0027Default\u0027 may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc."}, {"disable": false, "hidden": false, "name": "existing_data", "options": ["False", "True"], "tooltip": "Choose whether to fit the surrogate model to previous data before starting the optimization process. Including historical data may give your model a better starting place and potentially speed up convergence. Conversely, excluding existing data means starting the optimization from scratch, which might be preferred in scenarios where historical data could introduce bias or noise into the optimization process. Consider the relevance and reliability of your existing data when making your selection."}, {"disable": false, "hidden": false, "name": "custom_threshold", "options": ["False", "True"], "tooltip": "Choose whether to apply custom thresholds to objectives in a multi-objective optimization problem (e.g. a minimum acceptable strength requirement for a material). Setting a threshold on an objective guides the optimization algorithm to prioritize solutions that meet or exceed these criteria. Excluding thresholds enables greater exploration of the design space, but may produce sub-optimal solutions. Consider whether threshold values reflect the reality or expectations of your optimization task when selection this option."}];
@@ -28,7 +23,7 @@
         //     { "name": "row3", "options": ["F", "G"] }
         // ];
 
-        var invalidConfigs = [["single", "Default", "False", "True"], ["single", "Default", "True", "True"], ["single", "Fully Bayesian", "False", "False"], ["single", "Fully Bayesian", "False", "True"], ["single", "Fully Bayesian", "True", "False"], ["single", "Fully Bayesian", "True", "True"], ["multi", "Fully Bayesian", "False", "False"], ["multi", "Fully Bayesian", "False", "True"], ["multi", "Fully Bayesian", "True", "False"], ["multi", "Fully Bayesian", "True", "True"]];
+        var invalidConfigs = [{"custom_gen": false, "custom_threshold": true, "existing_data": false, "model": "Default", "objective": "single"}, {"custom_gen": false, "custom_threshold": true, "existing_data": true, "model": "Default", "objective": "single"}, {"custom_gen": false, "custom_threshold": false, "existing_data": false, "model": "Fully Bayesian", "objective": "single"}, {"custom_gen": false, "custom_threshold": true, "existing_data": false, "model": "Fully Bayesian", "objective": "single"}, {"custom_gen": false, "custom_threshold": false, "existing_data": true, "model": "Fully Bayesian", "objective": "single"}, {"custom_gen": false, "custom_threshold": true, "existing_data": true, "model": "Fully Bayesian", "objective": "single"}, {"custom_gen": false, "custom_threshold": false, "existing_data": false, "model": "Fully Bayesian", "objective": "multi"}, {"custom_gen": false, "custom_threshold": true, "existing_data": false, "model": "Fully Bayesian", "objective": "multi"}, {"custom_gen": false, "custom_threshold": false, "existing_data": true, "model": "Fully Bayesian", "objective": "multi"}, {"custom_gen": false, "custom_threshold": true, "existing_data": true, "model": "Fully Bayesian", "objective": "multi"}];
         // E.g.,
         // var invalidConfigs = [
         //     ["B", "D", "F"],
@@ -40,76 +35,70 @@
     <form onsubmit="return false;">
         <div class="title-block">
             <div class="row align-items-center">
-                <img src="_static/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                
+                <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png" alt="Logo"
+                    style="height: 2em; margin-right: 1em; vertical-align: middle;">
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
             </div>
         </div>
 
-
+        
         <div class="row">
             <label class="row-label">objective:</label>
-
-            <input type="radio" id="objective-single" name="objective" value="single"
-                 checked py-click="update_text()">
+            
+            <input type="radio" id="objective-single" name="objective" value="single"  checked py-click="update_text">
             <label class="row-option" for="objective-single">single</label>
-
-            <input type="radio" id="objective-multi" name="objective" value="multi"
-                 py-click="update_text()">
+            
+            <input type="radio" id="objective-multi" name="objective" value="multi"  py-click="update_text">
             <label class="row-option" for="objective-multi">multi</label>
-
+            
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Choose between <a href='curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.</span>
             </div>
         </div>
-
+        
         <div class="row">
             <label class="row-label">model:</label>
-
-            <input type="radio" id="model-Default" name="model" value="Default"
-                 checked py-click="update_text()">
+            
+            <input type="radio" id="model-Default" name="model" value="Default"  checked py-click="update_text">
             <label class="row-option" for="model-Default">Default</label>
-
-            <input type="radio" id="model-Fully Bayesian" name="model" value="Fully Bayesian"
-                 py-click="update_text()">
+            
+            <input type="radio" id="model-Fully Bayesian" name="model" value="Fully Bayesian"  py-click="update_text">
             <label class="row-option" for="model-Fully Bayesian">Fully Bayesian</label>
-
+            
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Choose between <a href='curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.</span>
             </div>
         </div>
-
+        
         <div class="row">
             <label class="row-label">existing_data:</label>
-
-            <input type="radio" id="existing_data-False" name="existing_data" value="False"
-                 checked py-click="update_text()">
+            
+            <input type="radio" id="existing_data-False" name="existing_data" value="False"  checked py-click="update_text">
             <label class="row-option" for="existing_data-False">False</label>
-
-            <input type="radio" id="existing_data-True" name="existing_data" value="True"
-                 py-click="update_text()">
+            
+            <input type="radio" id="existing_data-True" name="existing_data" value="True"  py-click="update_text">
             <label class="row-option" for="existing_data-True">True</label>
-
+            
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Choose whether to fit the surrogate model to previous data before starting the optimization process. Including historical data may give your model a better starting place and potentially speed up convergence. Conversely, excluding existing data means starting the optimization from scratch, which might be preferred in scenarios where historical data could introduce bias or noise into the optimization process. Consider the relevance and reliability of your existing data when making your selection.</span>
             </div>
         </div>
-
+        
         <div class="row">
             <label class="row-label">custom_threshold:</label>
-
-            <input type="radio" id="custom_threshold-False" name="custom_threshold" value="False"
-                 checked py-click="update_text()">
+            
+            <input type="radio" id="custom_threshold-False" name="custom_threshold" value="False"  checked py-click="update_text">
             <label class="row-option" for="custom_threshold-False">False</label>
-
-            <input type="radio" id="custom_threshold-True" name="custom_threshold" value="True"
-                 py-click="update_text()">
+            
+            <input type="radio" id="custom_threshold-True" name="custom_threshold" value="True"  py-click="update_text">
             <label class="row-option" for="custom_threshold-True">True</label>
-
+            
             <div class="tooltip-icon">&#9432;
                 <span class="tooltip-text arrow">Choose whether to apply custom thresholds to objectives in a multi-objective optimization problem (e.g. a minimum acceptable strength requirement for a material). Setting a threshold on an objective guides the optimization algorithm to prioritize solutions that meet or exceed these criteria. Excluding thresholds enables greater exploration of the design space, but may produce sub-optimal solutions. Consider whether threshold values reflect the reality or expectations of your optimization task when selection this option.</span>
             </div>
         </div>
-
+        
 
         <div class="row align-items-end">
             <p id="preamble"></p>
