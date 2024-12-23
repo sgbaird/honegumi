@@ -102,8 +102,7 @@ def update_text(event):
 
     # Reset label text for all labels
     for label in labels:
-        if label.htmlFor != rows[0].id:
-            label.innerHTML = label.textContent
+        label.innerHTML = label.textContent
 
     # Gather the current configuration and kwargs from the selected radio buttons
     current_config = {row.name: row.value for row in rows}
@@ -129,10 +128,11 @@ def update_text(event):
     # window.console.log(f"Deviating options: {deviating_options}")
 
     # Apply strikethrough formatting to labels of deviating options
-    for name, option in deviating_options.items():
-        label = js.document.querySelector(f'label[for="{name}-{option}"]')
-        if label:
-            label.innerHTML = f"<s>{label.innerHTML}</s>"
+    for deviation in deviating_options:
+        for name, option in deviation.items():
+            label = js.document.querySelector(f'label[for="{name}-{option}"]')
+            if label:
+                label.innerHTML = f"<s>{label.innerHTML}</s>"
 
     # Re-highlight the code block using Prism.js
     js.Prism.highlightAll()
@@ -227,3 +227,6 @@ update_text(None)
 # deviating_configs = [
 #     config for config in possible_deviating_configs if hg.is_incompatible_fn(config)
 # ]
+
+
+# if label.htmlFor != rows[0].id: # NOTE: Not sure why this was here
