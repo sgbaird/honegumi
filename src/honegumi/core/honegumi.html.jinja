@@ -23,7 +23,7 @@
         //     { "name": "row3", "options": ["F", "G"] }
         // ];
 
-        var invalidConfigs = {{ invalid_configs| tojson }};
+        {# var invalidConfigs = {{ invalid_configs| tojson }}; #}
         // E.g.,
         // var invalidConfigs = [
         //     ["B", "D", "F"],
@@ -37,8 +37,9 @@
             <div class="row align-items-center">
                 {# <img src="_static/logo.png" alt="Logo"
                     style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
-                <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png" alt="Logo"
-                    style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                <img src="logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                {# <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png"
+                    alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
             </div>
         </div>
