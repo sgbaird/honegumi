@@ -338,16 +338,16 @@ class Honegumi:
         # ]
 
         # Identify the one option from each "deviates by one" configuration
-        deviating_options = {}
+        deviating_options = []
         for config in deviating_configs:
             for name in self.visible_option_names:
                 if config[name] != current_config[name]:
-                    deviating_options[name] = config[name]
+                    deviating_options.append({name: config[name]})
 
-        # If current configuration is invalid, highlight all current config options
+        # If current configuration is invalid, append all options
         if not current_is_valid:
             for name, value in current_config.items():
-                deviating_options[name] = value
+                deviating_options.append({name: value})
 
         return deviating_options
 
