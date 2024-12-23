@@ -95,7 +95,7 @@ def update_text(event):
     selections. This function also manages invalid configurations and highlights
     deviations.
     """
-    window.console.log(event)
+    # window.console.log(event)
 
     rows = js.document.querySelectorAll('input[type="radio"]:checked')
     labels = js.document.querySelectorAll("label")
@@ -107,12 +107,12 @@ def update_text(event):
 
     # Gather the current configuration and kwargs from the selected radio buttons
     current_config = {row.name: row.value for row in rows}
-    window.console.log(f"Current config: {current_config}")
+    # window.console.log(f"Current config: {current_config}")
 
     current_opt_model = hg.OptionsModel(**current_config)
-    _, current_config = hg.generate(current_opt_model, return_selections=True)
+    current_config = hg.process_selections(current_opt_model)
 
-    window.console.log(f"Current config: {current_config}")
+    # window.console.log(f"Current config: {current_config}")
 
     # window.console.log(f"Invalid configs: {invalid_configs[0].to_py()}")
 
@@ -126,7 +126,7 @@ def update_text(event):
 
     deviating_options = hg.get_deviating_options(current_config)
 
-    window.console.log(f"Deviating options: {deviating_options}")
+    # window.console.log(f"Deviating options: {deviating_options}")
 
     # Apply strikethrough formatting to labels of deviating options
     for name, option in deviating_options.items():
@@ -142,7 +142,7 @@ def update_text(event):
 update_text(None)
 
 
-## Code Graveyard
+## % Code Graveyard
 
 # def get_deviating_options(current_config: dict, is_incompatible_fn, option_rows):
 #     """
