@@ -34,6 +34,12 @@ __license__ = "MIT"
 
 _logger = logging.getLogger(__name__)
 
+try:
+    from pyscript import window
+
+    log_fn = window.console.log
+except Exception:
+    log_fn = lambda x: x
 
 # ---- Python API ----
 # The functions defined in this section can be imported by users in their
@@ -63,6 +69,7 @@ def is_incompatible(opt):
     """
     use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
     model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+    # use_custom_threshold = opt.get(cst.CUSTOM_THRESHOLD_KEY, False)
     use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
     objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
 
@@ -141,7 +148,12 @@ def add_model_specific_keys(option_names, opt):
         "model_kwargs": {},
     }
     """
-    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
+    # opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
+    # NOTE: setdefault was conflicting with create_model_options, which already was setting defaults
+    # Now it's simply overriding whatever was there
+    opt[cst.CUSTOM_GEN_KEY] = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+
+    # log_fn(f"opt: {opt}")
 
     # increased from the default in Ax tutorials for quality/robustness
     opt["model_kwargs"] = (
