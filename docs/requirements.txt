@@ -12,3 +12,4 @@ sphinx_copybutton
 # To build the module reference correctly, make sure every external package
 # under `install_requires` in `setup.cfg` is also listed here!
 sphinx_rtd_theme
+# pandoc should be installed with `conda install pandoc`
