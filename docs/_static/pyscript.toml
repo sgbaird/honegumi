@@ -6,6 +6,9 @@ packages = [ "jinja2", "pydantic", "black"]
 # PyScript Helper
 "./main.py" = "./main.py"
 
+# NOTE: Should I be using absolute instead of relative paths?
+# E.g., "/src/honegumi/__init__.py"
+
 # Honegumi
 "./../../src/honegumi/__init__.py" = "./honegumi/__init__.py"
 
