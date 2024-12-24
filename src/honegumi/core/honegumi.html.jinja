@@ -3,15 +3,15 @@
 
 <head>
     <title>Interactive Grid Example</title>
-    <link rel="stylesheet" href="_static/prism/prism.css">
-    <link rel="stylesheet" href="_static/honegumi_style.css">
+    <link rel="stylesheet" href="/docs/_static/prism/prism.css">
+    <link rel="stylesheet" href="/docs/_static/honegumi_style.css">
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.10.2/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.10.2/core.js"></script>
 </head>
 
 <body>
     <!-- Import the external Python file -->
-    <script type="py" src="_static/main.py" config="_static/pyscript.toml"></script>
+    <script type="py" src="/docs/_static/main.py" config="/docs/_static/pyscript.toml"></script>
 
     <script type="text/javascript">
         var optionRows = {{ jinja_option_rows| tojson }};
@@ -28,7 +28,8 @@
             <div class="row align-items-center">
                 {# <img src="_static/logo.png" alt="Logo"
                     style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
-                <img src="_static/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                <img src="/docs/_static/logo.png" alt="Logo"
+                    style="height: 2em; margin-right: 1em; vertical-align: middle;">
                 {# <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png"
                     alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
@@ -62,7 +63,7 @@
         </div>
     </form>
 
-    <script src="_static/prism/prism.js"></script>
+    <script src="/docs/_static/prism/prism.js"></script>
 </body>
 
 </html>
