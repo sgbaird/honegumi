@@ -1,14 +1,9 @@
-ax-platform
 black
-click
 Jinja2
 jupytext
 myst-parser[linkify]
 nbsphinx
-numpy
-pandas
 pytest
-scipy
 sphinx>=3.2.1
 # docutils<0.17 # https://stackoverflow.com/a/74355734/13697228
 # sphinx-rtd-dark-mode # honegumi table looks strange due to custom html
@@ -17,4 +12,3 @@ sphinx_copybutton
 # To build the module reference correctly, make sure every external package
 # under `install_requires` in `setup.cfg` is also listed here!
 sphinx_rtd_theme
-tqdm
