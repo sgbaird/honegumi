@@ -2,14 +2,15 @@
 import os
 
 import honegumi.ax.utils.constants as cst
-import honegumi.core.utils.constants as core_cst
+
+# import honegumi.core.utils.constants as core_cst
 from honegumi.ax._ax import (
     add_model_specific_keys,
     is_incompatible,
     model_kwargs_test_override,
     option_rows,
 )
-from honegumi.core._honegumi import Honegumi, gen_combs_with_keys
+from honegumi.core._honegumi import Honegumi  # , gen_combs_with_keys
 
 hg = Honegumi(
     cst,
@@ -21,7 +22,7 @@ hg = Honegumi(
     script_template_name="main.py.jinja",
     core_template_dir=os.path.join("src", "honegumi", "core"),
     core_template_name="honegumi.html.jinja",
-    output_dir="docs",
+    output_dir="docs/_static",
     output_name="honegumi.html",
 )
 
