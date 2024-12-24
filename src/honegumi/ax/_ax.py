@@ -224,35 +224,35 @@ option_rows = [
         "name": cst.SUM_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
-        "disable": True,
+        "disable": False,
         "tooltip": "Choose whether to apply a sum constraint over two or more optimization variables (e.g. ensuring total allocation remains within available budget). This constraint focusses generated optimization trials on feasible candidates at the cost of flexibility. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
     },
     {
         "name": cst.ORDER_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
-        "disable": True,
+        "disable": False,
         "tooltip": "Choose whether to implement an order constraint over two or more optimization variables (e.g. ensuring certain tasks precede others). This constraint focusses generated optimization trials on variable combinations that follow a specific order. Excluding the constraint offers flexibility in variable arrangements but may neglect important task sequencing or value inequality considerations. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
     },
     {
         "name": cst.LINEAR_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
-        "disable": True,
+        "disable": False,
         "tooltip": "Choose whether to implement a linear constraint over two or more optimization variables such that the linear combination of parameter values adheres to an inequality (e.g. 0.2*x_1 + x_2 < 0.1). This constraint focusses generated optimization trials on variable combinations that follow an enforced rule at the cost of flexibility. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
     },
     {
         "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
         "options": [False, True],
         "hidden": False,
-        "disable": True,
+        "disable": False,
         "tooltip": "Choose whether to include a composition constraint over two or more optimization variables such that their sum does not exceed a specified total (e.g. ensuring the mole fractions of elements in a composition sum to one). This constraint is particularly relevant to fabrication-related tasks where the quantities of components must sum to a total. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
     },
     {
         "name": cst.CATEGORICAL_KEY,
         "options": [False, True],
         "hidden": False,
-        "disable": True,
+        "disable": False,
         "tooltip": "Choose whether to include a categorical variable in the optimization process (e.g. dark or milk chocolate chips in a cookie recipe). Including categorical variables allows choice parameters and their interaction with continuous variables to be optimized. Note that adding categorical variables can create discontinuities in the search space that are difficult to optimize over. Consider the value of adding categorical variables to the optimization task when selecting this option.",  # noqa E501
     },
     {
@@ -279,7 +279,7 @@ option_rows = [
         "name": cst.SYNCHRONY_OPT_KEY,
         "options": ["single", "batch"],  # TODO: add "asynchronous"
         "hidden": False,
-        "disable": True,
+        "disable": False,
         "tooltip": "Choose whether to perform <a href='curriculum/concepts/batch/single-vs-batch.md'>single or batch evaluations</a> for your Bayesian optimization campaign. Single evaluations analyze one candidate solution at a time, offering precise control and adaptability after each trial at the expense of more compute time. Batch evaluations, however, process several solutions in parallel, significantly reducing the number of optimization cycles but potentially diluting the specificity of adjustments. Batch evaluation is helpful in scenarios where it is advantageous to test several solutions simultaneously. Consider the nature of your evaluation tool when selecting between the two options.",  # noqa E501
     },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
