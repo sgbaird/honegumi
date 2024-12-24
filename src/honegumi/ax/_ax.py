@@ -193,7 +193,7 @@ option_rows = [
         "options": ["single", "multi"],
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between <a href='curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.",  # noqa E501
+        "tooltip": "Choose between <a href='/docs/curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.",  # noqa E501
     },
     {
         "name": cst.MODEL_OPT_KEY,
@@ -203,7 +203,7 @@ option_rows = [
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between <a href='curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.",  # noqa E501
+        "tooltip": "Choose between <a href='/docs/curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.",  # noqa E501
     },
     {
         "name": cst.CUSTOM_GEN_KEY,
