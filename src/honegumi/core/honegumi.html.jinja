@@ -11,8 +11,7 @@
 
 <body>
     <!-- Import the external Python file -->
-    <script type="py" src="main.py" config="pyscript.toml"></script>
-    {# <py-script src="honegumi_pyscript_helper.py"></py-script> #}
+    <script type="py" src="_static/main.py" config="_static/pyscript.toml"></script>
 
     <script type="text/javascript">
         var optionRows = {{ jinja_option_rows| tojson }};
@@ -22,14 +21,6 @@
         //     { "name": "row2", "options": ["C", "D", "E"] },
         //     { "name": "row3", "options": ["F", "G"] }
         // ];
-
-        {# var invalidConfigs = {{ invalid_configs| tojson }}; #}
-        // E.g.,
-        // var invalidConfigs = [
-        //     ["B", "D", "F"],
-        //     ["B", "E", "F"],
-        //     ["A", "C", "G"]
-        // ];
     </script>
 
     <form onsubmit="return false;">
@@ -37,7 +28,7 @@
             <div class="row align-items-center">
                 {# <img src="_static/logo.png" alt="Logo"
                     style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
-                <img src="logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
+                <img src="_static/logo.png" alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;">
                 {# <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png"
                     alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
                 <h2 style="margin-bottom: 0;">Honegumi</h2>
