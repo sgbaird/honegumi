@@ -10,6 +10,7 @@ dependencies:
   - ipywidgets
   - numpy
   - pandas
+  - pandoc
   - pip:
      - -e .[dev]  # install git checkout of honegumi in editable mode
      - ax-platform # since not explicitly required within src
