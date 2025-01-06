@@ -34,6 +34,16 @@ __license__ = "MIT"
 
 _logger = logging.getLogger(__name__)
 
+try:
+    from pyscript import window
+
+    log_fn = window.console.log
+except Exception:
+
+    def log_fn(x):
+        return x
+
+    # log_fn = lambda x: x
 
 # ---- Python API ----
 # The functions defined in this section can be imported by users in their
@@ -63,6 +73,7 @@ def is_incompatible(opt):
     """
     use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
     model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+    # use_custom_threshold = opt.get(cst.CUSTOM_THRESHOLD_KEY, False)
     use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
     objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
 
@@ -141,7 +152,13 @@ def add_model_specific_keys(option_names, opt):
         "model_kwargs": {},
     }
     """
-    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
+    # opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] ==
+    # cst.FULLYBAYESIAN_KEY) NOTE: setdefault was conflicting with
+    # create_model_options, which already was setting defaults Now it's simply
+    # overriding whatever was there
+    opt[cst.CUSTOM_GEN_KEY] = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+
+    # log_fn(f"opt: {opt}")
 
     # increased from the default in Ax tutorials for quality/robustness
     opt["model_kwargs"] = (
@@ -181,7 +198,7 @@ option_rows = [
         "options": ["single", "multi"],
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between <a href='curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.",  # noqa E501
+        "tooltip": "Choose between <a href='/docs/curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.",  # noqa E501
     },
     {
         "name": cst.MODEL_OPT_KEY,
@@ -192,7 +209,7 @@ option_rows = [
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between <a href='curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.",  # noqa E501
+        "tooltip": "Choose between <a href='/docs/curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.",  # noqa E501
     },
     {
         "name": cst.CUSTOM_GEN_KEY,

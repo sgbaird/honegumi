@@ -1,0 +1,66 @@
+name = "Honegumi"
+packages = [ "jinja2", "pydantic", "black"]
+
+[files]
+
+# PyScript Helper
+"/docs/_static/main.py" = "./main.py"
+
+# NOTE: Should I be using absolute instead of relative paths?
+# E.g., "/src/honegumi/__init__.py"
+
+# Honegumi
+"/src/honegumi/__init__.py" = "./honegumi/__init__.py"
+
+# Honegumi Ax
+"/src/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
+"/src/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
+"/src/honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
+
+# Honegumi Ax Utils
+"/src/honegumi/ax/utils/__init__.py" = "./honegumi/ax/utils/__init__.py"
+"/src/honegumi/ax/utils/constants.py" = "./honegumi/ax/utils/constants.py"
+
+# Honegumi Core
+"/src/honegumi/core/__init__.py" = "./honegumi/core/__init__.py"
+"/src/honegumi/core/_honegumi.py" = "./honegumi/core/_honegumi.py"
+"/src/honegumi/core/honegumi.html.jinja" = "./honegumi/core/honegumi.html.jinja"
+
+# Honegumi Core Utils
+"/src/honegumi/core/utils/constants.py" = "./honegumi/core/utils/constants.py"
+"/src/honegumi/core/utils/notebooks.py" = "./honegumi/core/utils/notebooks.py"
+"/src/honegumi/core/utils/testing.py" = "./honegumi/core/utils/testing.py"
+
+# Honegumi CSS and JS
+"/docs/_static/honegumi_style.css" = "./_static/honegumi_style.css"
+"/docs/_static/prism/prism.css" = "./_static/prism/prism.css"
+"/docs/_static/prism/prism.js" = "./_static/prism/prism.js"
+
+
+# # Honegumi
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/__init__.py" = "./honegumi/__init__.py"
+
+# # Honegumi Ax
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
+# # "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
+# "/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
+
+# # Honegumi Ax Utils
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/ax/utils/__init__.py" = "./honegumi/ax/utils/__init__.py"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/ax/utils/constants.py" = "./honegumi/ax/utils/constants.py"
+
+# # Honegumi Core
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/__init__.py" = "./honegumi/core/__init__.py"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/_honegumi.py" = "./honegumi/core/_honegumi.py"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/honegumi.html.jinja" = "./honegumi/core/honegumi.html.jinja"
+
+# # Honegumi Core Utils
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/utils/constants.py" = "./honegumi/core/utils/constants.py"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/utils/notebooks.py" = "./honegumi/core/utils/notebooks.py"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/core/utils/testing.py" = "./honegumi/core/utils/testing.py"
+
+# # Honegumi CSS and JS
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/docs/_static/honegumi_style.css" = "./_static/honegumi_style.css"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/docs/_static/prism/prism.css" = "./_static/prism/prism.css"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/docs/_static/prism/prism.js" = "./_static/prism/prism.js"

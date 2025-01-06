@@ -13,7 +13,7 @@ name = "LTK on MicroPython Copy"
 # "https://raw.githubusercontent.com/sgbaird/honegumi/main/src/honegumi/ax/utils/constants.py" = "constants.py"
 
 # Correct download URL (i.e., copied from browser bar after clicking "raw" and letting it redirect)
-"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/utils/constants.py" = "constants.py"
+# "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/src/honegumi/ax/utils/constants.py" = "constants.py"
 
 # # Default "copy link address" from "raw" button (e.g., https://github.com/sgbaird/honegumi/blob/main/src/honegumi/ax/utils/constants.py), makes "world" button disappear. Maybe other issues. Likely because this is a redirect URL
 # "https://github.com/sgbaird/honegumi/raw/refs/heads/main/src/honegumi/ax/utils/constants.py" = "constants.py"

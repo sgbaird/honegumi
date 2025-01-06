@@ -36,6 +36,14 @@ __license__ = "MIT"
 _logger = logging.getLogger(__name__)
 
 
+try:
+    from pyscript import window
+
+    log_fn = window.console.log
+except Exception:
+    log_fn = lambda x: x
+
+
 # ---- Python API ----
 
 
@@ -115,6 +123,11 @@ def create_options_model(option_rows: List[Dict[str, Any]]):
             ),
         )
 
+        # NOTE: This may be conflicting and causing confusion relative to
+        # add_model_specific_keys, since originally I was using e.g.,
+        # `opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] ==
+        # cst.FULLYBAYESIAN_KEY)`
+
         # TODO: auto-create the docstring __doc__ since this dynamically
         # generates the pydantic model (i.e., useful hover typehints are lost)
         # https://chatgpt.com/share/d3cce48d-effe-4496-82be-476c1889e7fd
@@ -149,6 +162,8 @@ class Honegumi:
         self.is_incompatible_fn = is_incompatible_fn
         self.add_model_specific_keys_fn = add_model_specific_keys_fn
         self.model_kwargs_test_override_fn = model_kwargs_test_override_fn
+
+        self.option_rows = option_rows
 
         # Generate the Pydantic options model dynamically
         self.OptionsModel = create_options_model(option_rows)
@@ -191,7 +206,9 @@ class Honegumi:
         ]
         disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
 
-        option_rows = [row for row in option_rows if not row["disable"]]
+        active_option_rows = [row for row in option_rows if not row["disable"]]
+
+        self.active_option_rows = active_option_rows
 
         # E.g.,
         # {
@@ -205,22 +222,22 @@ class Honegumi:
             for default in self.disabled_option_defaults:
                 print(f"Disabled option and default: {default}")
 
-        self.option_names = [row["name"] for row in option_rows]
+        self.active_option_names = [row["name"] for row in active_option_rows]
 
         self.visible_option_names = [
-            row["name"] for row in option_rows if not row["hidden"]
+            row["name"] for row in active_option_rows if not row["hidden"]
         ]
-        self.visible_option_rows = [row for row in option_rows if not row["hidden"]]
+        self.visible_option_rows = [
+            row for row in active_option_rows if not row["hidden"]
+        ]
 
         self.jinja_var_names = (
-            self.option_names + extra_jinja_var_names + disabled_option_names
+            self.active_option_names + extra_jinja_var_names + disabled_option_names
         )
 
         self.jinja_option_rows = [row for row in self.visible_option_rows]
 
-    def generate(
-        self, options_model: BaseModel, return_selections=False
-    ) -> Union[str, Tuple[str, Dict[str, Any]]]:
+    def process_selections(self, options_model: BaseModel):
         # You can check if selections is an instance of the expected type
         if not isinstance(options_model, self.OptionsModel):
             warnings.warn(f"Expected {self.OptionsModel}, got {type(options_model)}")
@@ -233,7 +250,7 @@ class Honegumi:
             selections.update(default)
 
         # in-place operation
-        self.add_model_specific_keys_fn(self.option_names, selections)
+        self.add_model_specific_keys_fn(self.active_option_names, selections)
 
         # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
         selections[core_cst.DUMMY_KEY] = False
@@ -243,6 +260,14 @@ class Honegumi:
         }
 
         selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
+
+        return selections
+
+    def generate(
+        self, options_model: BaseModel, return_selections=False
+    ) -> Union[str, Tuple[str, Dict[str, Any]]]:
+
+        selections = self.process_selections(options_model)
 
         if self.is_incompatible_fn(selections):
             # override
@@ -257,6 +282,74 @@ class Honegumi:
             return script, selections
 
         return script
+
+    def get_deviating_options(self, current_config: dict):
+        """
+        Get the options that deviate by zero or one elements from the current
+        configuration based on the invalid configurations.
+        """
+        # if len(current_config) != len(option_rows):
+        #     raise ValueError(
+        #         "The length of the current configuration does not match the number of option rows."
+        #     )
+
+        current_config = self.process_selections(self.OptionsModel(**current_config))
+        current_is_valid = current_config[core_cst.IS_COMPATIBLE_KEY]
+        current_config = {key: current_config[key] for key in self.visible_option_names}
+
+        possible_deviating_configs = []
+        for option_row in self.visible_option_rows:
+            option_name = option_row["name"]
+            for option in option_row["options"]:
+                # Only consider options that differ from the current config
+                if str(option) != str(current_config[option_name]):
+                    new_config = current_config.copy()
+                    new_config[option_name] = option
+                    model = self.OptionsModel(**new_config)
+                    new_config = self.process_selections(model)
+                    # log_fn(f"New config: {new_config}")
+                    if not new_config[core_cst.IS_COMPATIBLE_KEY]:
+                        new_config = {
+                            key: new_config[key] for key in self.active_option_names
+                        }
+                        possible_deviating_configs.append(new_config)
+
+        # https://stackoverflow.com/a/9427216
+        # Remove duplicate configurations using flattened tuples
+        seen_configs = set()
+        unique_configs = []
+        for config in possible_deviating_configs:
+            # Convert the dictionary to a tuple of key-value pairs, converting nested dictionaries to strings
+            config_tuple = tuple(
+                (k, str(v) if isinstance(v, dict) else v) for k, v in config.items()
+            )
+            if config_tuple not in seen_configs:
+                seen_configs.add(config_tuple)
+                unique_configs.append(config)
+
+        deviating_configs = [dict(config) for config in unique_configs]
+        # possible_deviating_configs = [dict(config) for config in unique_configs]
+
+        # # Find the invalid configurations out of the possible ones
+        # deviating_configs = [
+        #     config
+        #     for config in possible_deviating_configs
+        #     if self.is_incompatible_fn(config)
+        # ]
+
+        # Identify the one option from each "deviates by one" configuration
+        deviating_options = []
+        for config in deviating_configs:
+            for name in self.visible_option_names:
+                if config[name] != current_config[name]:
+                    deviating_options.append({name: config[name]})
+
+        # If current configuration is invalid, append all options
+        if not current_is_valid:
+            for name, value in current_config.items():
+                deviating_options.append({name: value})
+
+        return deviating_options
 
 
 # ---- CLI ----
