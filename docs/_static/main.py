@@ -1,4 +1,4 @@
-from pyscript import window
+from pyscript import window  # noqa: F401
 import js
 
 # from js import invalidConfigs
@@ -7,7 +7,10 @@ import js
 
 import os
 
-from honegumi.core._honegumi import Honegumi
+try:
+    from honegumi.core._honegumi import Honegumi
+except Exception as e:
+    print(f"Failed to load Honegumi: {e}")
 
 # from honegumi.core._honegumi import Honegumi, get_deviating_options
 from honegumi.ax.utils import constants as cst
@@ -142,7 +145,8 @@ def update_text(event):
 update_text(None)
 
 
-## % Code Graveyard
+# % Code Graveyard
+
 
 # def get_deviating_options(current_config: dict, is_incompatible_fn, option_rows):
 #     """
@@ -151,7 +155,7 @@ update_text(None)
 #     """
 #     if len(current_config) != len(option_rows):
 #         raise ValueError(
-#             "The length of the current configuration does not match the number of option rows."
+#             "The length of the current configuration does not match the number of option rows." # noqa: E501
 #         )
 
 #     possible_deviating_configs = []
@@ -204,8 +208,11 @@ update_text(None)
 #     if label:
 #         label.innerHTML = f"<s>{label.innerHTML}</s>"
 
-# Manually loop through the configurations that deviate by zero or one options from the current configuration, and check to see if they are invalid via hg.is_incompatible()
-# This is a workaround for the fact that the get_deviating_options() function does not work properly in the current implementation
+# Manually loop through the configurations that deviate by zero or one options
+# from the current configuration, and check to see if they are invalid via
+# hg.is_incompatible() This is a workaround for the fact that the
+# get_deviating_options() function does not work properly in the current
+# implementation
 
 # possible_deviating_configs = []
 # for option_row in option_rows:
