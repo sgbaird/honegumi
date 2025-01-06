@@ -53,7 +53,7 @@
             <label class="row-label">{{ row.name }}:</label>
             {% for option in row.options %}
             <input type="radio" id="{{ row.name }}-{{ option }}" name="{{ row.name }}" value="{{ option }}"
-                {% if option == row.options[0] %} checked{% endif %} py-click="update_text()">
+                {% if option == row.options[0] %} checked{% endif %} py-click="update_text">
             <label class="row-option" for="{{ row.name }}-{{ option }}">{{ option }}</label>
             {% endfor %}
             <div class="tooltip-icon">&#9432;
