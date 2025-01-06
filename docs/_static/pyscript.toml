@@ -10,7 +10,8 @@ packages = [ "jinja2", "pydantic", "black"]
 # E.g., "/src/honegumi/__init__.py"
 
 # Honegumi
-"/src/honegumi/__init__.py" = "./honegumi/__init__.py"
+# "/src/honegumi/__init__.py" = "./honegumi/__init__.py"
+"https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/__init__.py" = "./honegumi/__init__.py"
 
 # Honegumi Ax
 "/src/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
