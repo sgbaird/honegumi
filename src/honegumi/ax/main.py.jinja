@@ -65,7 +65,7 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" 
 {%- endif %}
 
 {# List of expected models #}
-{% set expected_models = ["Fully Bayesian", "Default"] %}
+{% set expected_models = ["Default", "Custom", "Fully Bayesian"] %}
 
 {# Check if model is in the list of expected models #}
 {% if model not in expected_models %}

@@ -16,7 +16,7 @@ FIDELITY_OPT_KEY = "fidelity"
 TASK_OPT_KEY = "task"
 SYNCHRONY_OPT_KEY = "synchrony"  # single, batch, asynchronous
 MODEL_KWARGS_KEY = "model_kwargs"
-CUSTOM_KEY = "custom"
+CUSTOM_KEY = "Custom"
 VISUALIZE_KEY = "visualize"
 
 FULLYBAYESIAN_KEY = "Fully Bayesian"
