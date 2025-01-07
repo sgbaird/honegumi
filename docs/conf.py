@@ -153,6 +153,8 @@ exclude_patterns = [
     ".DS_Store",
     ".venv",
     "generated_notebooks/ax",
+    "honegumi.egg-info",
+    "**/__pycache__",
 ]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
@@ -217,6 +219,8 @@ html_favicon = "_static/logo.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+html_extra_path = ["honegumi.html", "main.py", "pyscript.toml", "../src"]
+
 nbsphinx_thumbnails = {
     "curriculum/tutorials/sobo/sobo-tutorial": "_static/thumbnails/sobo-tutorial-thumbnail.jpg",
     "curriculum/tutorials/mobo/mobo-tutorial": "_static/thumbnails/mobo-tutorial-thumbnail.jpg",
@@ -228,7 +232,7 @@ nbsphinx_thumbnails = {
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-# html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = "%b %d, %Y"
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.

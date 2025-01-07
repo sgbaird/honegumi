@@ -22,7 +22,7 @@ hg = Honegumi(
     script_template_name="main.py.jinja",
     core_template_dir=os.path.join("src", "honegumi", "core"),
     core_template_name="honegumi.html.jinja",
-    output_dir="docs/_static",
+    output_dir="docs",
     output_name="honegumi.html",
 )
 
