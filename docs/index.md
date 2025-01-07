@@ -25,14 +25,14 @@ If you're new to Bayesian optimization, watch [A Gentle Introduction to Bayesian
 
 Real-world chemistry and materials science optimization tasks are complex! Here are some example features of these kinds of tasks:
 
-| Topic           | Description |
-| --------------- | ----------- |
-| Noise           | Repeat measurements are stochastic |
-| Multi-fidelity  | Some measurements are higher quality but much more costly |
-| Multi-objective | Almost always, tasks have multiple properties that are important |
-| High-dimensional| Like finding the proverbial "needle-in-a-haystack", the search spaces are enormous |
-| Constraints     | Not all combinations of parameters are valid (i.e., constraints) |
-| Mixed-variable  | Often there is a mixture of numerical and categorical variables |
+| Topic            | Description                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Noise            | Repeat measurements are stochastic                                                 |
+| Multi-fidelity   | Some measurements are higher quality but much more costly                          |
+| Multi-objective  | Almost always, tasks have multiple properties that are important                   |
+| High-dimensional | Like finding the proverbial "needle-in-a-haystack", the search spaces are enormous |
+| Constraints      | Not all combinations of parameters are valid (i.e., constraints)                   |
+| Mixed-variable   | Often there is a mixture of numerical and categorical variables                    |
 
 <!-- Maybe alloy discovery slide as a figure? -->
 
@@ -55,7 +55,7 @@ Similar to [PyTorch's installation docs](https://pytorch.org/get-started/locally
 Interact with Honegumi using the grid below. Select one option per row and watch the template dynamically appear. Click the corresponding ![colab](https://colab.research.google.com/assets/colab-badge.svg) badge to open a self-contained Google Colab notebook for the selected script. Click the corresponding ![github](https://img.shields.io/badge/Open%20in%20GitHub-blue?logo=github&labelColor=grey) badge to view the script source code directly. For example, if you want a script that optimizes multiple objectives simultaneously (multi-objective) as a function of many parameters (high-dimensional), you would select `multi` from the `objective` option row and `FULLYBAYESIAN` from the `model` row. Hover your mouse over the 🛈 icon to the right of each row to learn more about each option.
 
 ```{raw} html
-:file: _static/honegumi.html
+:file: honegumi.html
 ```
 
 #
