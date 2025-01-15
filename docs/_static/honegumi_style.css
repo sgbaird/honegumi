@@ -12,10 +12,27 @@ form {
 
 .row {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch; /* Changed from center */
+    justify-content: flex-start; /* Changed from center */
     background-color: #f2f2f2;
     border: 0px solid #ccc;
+}
+
+.row-option {
+    display: inline-flex; /* Changed from inline-block */
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    padding: 5px;
+    cursor: pointer;
+    background-color: #f2f2f2;
+    text-align: center;
+    flex: 1; /* Changed from flex-basis */
+}
+
+/* Add this new class for three-option rows */
+.row-option-triple {
+    flex: 0.66; /* This will make each option take up 1/3 of the remaining space */
 }
 
 .row-label {
@@ -30,16 +47,6 @@ form {
     border-left: 3px solid #868686;
     flex-basis: 25.0%;
 
-}
-
-.row-option {
-    display: inline-block;
-    border: 1px solid #ccc;
-    padding: 5px;
-    cursor: pointer;
-    background-color: #f2f2f2;
-    text-align: center;
-    flex-basis: 35.0%;
 }
 
 input[type="radio"]:checked+label {

@@ -7,7 +7,7 @@ from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrateg
 from botorch.acquisition import UpperConfidenceBound
 {%- endif %}
 
-{% if task == "multi" -%}
+{% if task == "Multi" -%}
 from ax.modelbridge.registry import Specified_Task_ST_MTGP_tran
 {%- endif %}
 
@@ -16,19 +16,19 @@ import pandas as pd
 {%- endif %}
 
 obj1_name = "branin"
-{% if objective == "multi" -%}
+{% if objective == "Multi" -%}
 obj2_name = "branin_swapped"
 {%- endif %}
 
-def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" %}_moo{% endif %}{% if task == "multi" %}_mt{% endif %}(x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "multi" %}, task{% endif %}):
+def branin{% if composition_constraint %}3{% endif %}{% if objective == "Multi" %}_moo{% endif %}{% if task == "Multi" %}_mt{% endif %}(x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}):
     y = float(
         (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
         + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x1)
         + 10
     )
 
+    {% if task == "Multi" %}
     # if multi-task, add a penalty based on task
-    {% if task == "multi" %}
     penalty_lookup = {"A": 1.0, "B": 1.1 + x1 + 2*x2}
     y += penalty_lookup[task]
     {% endif %}
@@ -43,13 +43,19 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" 
     penalty_lookup = {"A": 1.0, "B": 0.0, "C": 2.0}
     y += penalty_lookup[c1]
     {% endif %}
-    {% if objective == "multi" -%}
+    {% if objective == "Multi" -%}
     # second objective has x1 and x2 swapped
     y2 = float(
         (x1 - 5.1 / (4 * np.pi**2) * x2**2 + 5.0 / np.pi * x2 - 6.0) ** 2
         + 10 * (1 - 1.0 / (8 * np.pi)) * np.cos(x2)
         + 10
     )
+    {% if task == "Multi" %}
+    # if multi-task, add a penalty based on task for second objective
+    penalty_lookup_2 = {"A": 0.8, "B": 0.9 + 2*x1 + x2}
+    y2 += penalty_lookup_2[task]
+    {% endif %}
+    
     {% if composition_constraint -%}
     # Contrived way to incorporate x3 into the second objective
     y2 = y2 * (1 - 0.1 * x1 * x2 * x3)
@@ -70,12 +76,12 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" 
     {% set objective_function = objective_function + "3" %}
 {% endif %}
 
-{% if task == "multi" %}
+{% if task == "Multi" %}
     {% set objective_function = objective_function + "_mt" %}
 {% endif %}
 
 {# Set the objective function based on the objective #}
-{% if objective == "multi" -%}
+{% if objective == "Multi" -%}
     {% set objective_function = objective_function + "_moo" %}
 {%- endif %}
 
@@ -88,9 +94,9 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "multi" 
 {% endif %}
 
 {# add MOO to FULLYBAYESIAN if multi-objective #}
-{% if model == "Fully Bayesian" and objective == "multi" -%}
+{% if model == "Fully Bayesian" and objective == "Multi" -%}
     {% set model_name = "FULLYBAYESIANMOO" %}
-{% elif model == "Fully Bayesian" and objective != "multi" -%}
+{% elif model == "Fully Bayesian" and objective != "Multi" -%}
     {% set model_name = "FULLYBAYESIAN" %}
 {% else %}
     {% set model_name = "BOTORCH_MODULAR" %}
@@ -175,13 +181,13 @@ gs = GenerationStrategy(
             min_trials_observed=3,
             max_parallelism=5,
             model_kwargs={"seed": 999},
-            model_gen_kwargs={% if task == "multi" %}{"deduplicate": True, "transforms": Specified_Task_ST_MTGP_trans}{% else %}{}{% endif %},
+            model_gen_kwargs={% if task == "Multi" %}{"deduplicate": True, "transforms": Specified_Task_ST_MTGP_trans}{% else %}{}{% endif %},
         ),
         GenerationStep(
             model=Models.{{ model_name }},
             num_trials=-1,
             max_parallelism=3,
-            model_kwargs={% if task == "multi" %}{% if model == "Fully Bayesian" %}{"num_samples": 512, "warmup_steps": 512, "transforms": Specified_Task_ST_MTGP_trans}{% elif model == "Custom" %}{"botorch_acqf_class": UpperConfidenceBound, "transforms": Specified_Task_ST_MTGP_trans}{% else %}{"transforms": Specified_Task_ST_MTGP_trans}{% endif %}{% elif model == "Fully Bayesian" %}{"num_samples": 256, "warmup_steps": 256}{% elif model == "Custom" %}{"botorch_acqf_class": UpperConfidenceBound}{% else %}{}{% endif %},
+            model_kwargs={% if task == "Multi" %}{% if model == "Fully Bayesian" %}{"num_samples": 512, "warmup_steps": 512, "transforms": Specified_Task_ST_MTGP_trans}{% elif model == "Custom" %}{"botorch_acqf_class": UpperConfidenceBound, "transforms": Specified_Task_ST_MTGP_trans}{% else %}{"transforms": Specified_Task_ST_MTGP_trans}{% endif %}{% elif model == "Fully Bayesian" %}{"num_samples": 512, "warmup_steps": 512}{% elif model == "Custom" %}{"botorch_acqf_class": UpperConfidenceBound}{% else %}{}{% endif %},
         ),
     ]
 )
@@ -194,7 +200,7 @@ ax_client.create_experiment(
     parameters=[
         {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[-5.0, 10.0]{% endif %}},
         {"name": "x2", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[0.0, 10.0]{% endif %}},
-        {% if task == "multi"%}
+        {% if task == "Multi"%}
             {
                 "name": "task",
                 "type": "choice",
@@ -214,7 +220,7 @@ ax_client.create_experiment(
     ],
     objectives={
         obj1_name: ObjectiveProperties(minimize=True{% if custom_threshold %}, threshold=25.0{% endif %}),
-{% if objective == "multi" -%}
+{% if objective == "Multi" -%}
         obj2_name: ObjectiveProperties(minimize=True{% if custom_threshold %}, threshold=15.0{% endif %}),
 {%- endif %}
     },
@@ -251,17 +257,17 @@ for i in range(n_train):
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 {# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
-{% if synchrony == "batch" %}
+{% if synchrony == "Batch" %}
 batch_size = 2
 {% endif %}
-{% set indent = "    " if synchrony == "batch" else "" %}
+{% set indent = "    " if synchrony == "Batch" else "" %}
 
 for i in range({{ num_iter }}):
-    {% if synchrony == "single" and not task == 'multi' %}
+    {% if synchrony == "Single" and not task == 'multi' %}
     parameterization, trial_index = ax_client.get_next_trial()
-    {% elif synchrony == "single" and task == 'multi' %}
+    {% elif synchrony == "Single" and task == 'multi' %}
     parameterization, trial_index = ax_client.get_next_trial(fixed_features={"task": "A" if i % 2 == 0 else "B"})
-    {% elif synchrony == "batch" and task == 'multi' %}
+    {% elif synchrony == "Batch" and task == 'multi' %}
     parameterization, trial_index = ax_client.get_next_trial(batch_size,fixed_features={"task": "A" if i % 2 == 0 else "B"})
     for trial_index, parameterization in list(parameterizations.items()):
     {% else %}
@@ -286,7 +292,7 @@ for i in range({{ num_iter }}):
     {{ indent }}    )
     {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
-{% if objective == "multi" -%}
+{% if objective == "Multi" -%}
 pareto_results = ax_client.get_pareto_optimal_parameters()
 {% else %}
 best_parameters, metrics = ax_client.get_best_parameters()
@@ -297,13 +303,13 @@ import matplotlib.pyplot as plt
 objectives = ax_client.objective_names
 df = ax_client.get_trials_data_frame()[objectives]
 
-{% if objective == "single" %}
-{% if task == "multi" %}
+{% if objective == "Single" %}
+{% if task == "Multi" %}
 # Multi-task, single objective case
 task = "A"  # specify task results to plot
 df = df[df.task == task]
 
-{% if synchrony == "batch" %}
+{% if synchrony == "Batch" %}
 df.index = df.index // batch_size
 best_to_trial = np.minimum.accumulate(df.groupby(df.index).min())
 
@@ -321,7 +327,7 @@ ax.plot(df.index, trace, color="#0033FF", lw=2, label="Best to Trial")
 ax.set_title(f"Task {task}")
 
 {% else %}  # single task
-{% if synchrony == "batch" %}
+{% if synchrony == "Batch" %}
 df.index = df.index // batch_size
 best_to_trial = np.minimum.accumulate(df.groupby(df.index).min())
 
@@ -341,7 +347,7 @@ ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
 
 {% else %}  # multi-objective case
-{% if not task == "multi" %}
+{% if not task == "Multi" %}
 pareto = ax_client.get_pareto_optimal_parameters()
 pareto = pd.DataFrame([p[1][0] for p in pareto.values()]).sort_values(objectives[0])
 

@@ -200,7 +200,7 @@ def model_kwargs_test_override(render_datum):
 option_rows = [
     {
         "name": cst.OBJECTIVE_OPT_KEY,
-        "options": ["single", "multi"],
+        "options": ["Single", "Multi"],
         "hidden": False,
         "disable": False,
         "tooltip": "Choose between <a href='/docs/curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.",  # noqa E501
@@ -286,7 +286,7 @@ option_rows = [
     # },  # noqa E501 # NOTE: AC Microcourses
     {
         "name": cst.TASK_OPT_KEY,
-        "options": ["single", "multi"],
+        "options": ["Single", "Multi"],
         "hidden": False,
         "disable": False,
         "tooltip": "Placeholder",
@@ -294,7 +294,7 @@ option_rows = [
     # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
     {
         "name": cst.SYNCHRONY_OPT_KEY,
-        "options": ["single", "batch"],  # TODO: add "asynchronous"
+        "options": ["Single", "Batch"],  # TODO: add "asynchronous"
         "hidden": False,
         "disable": False,
         "tooltip": "Choose whether to perform <a href='curriculum/concepts/batch/single-vs-batch.md'>single or batch evaluations</a> for your Bayesian optimization campaign. Single evaluations analyze one candidate solution at a time, offering precise control and adaptability after each trial at the expense of more compute time. Batch evaluations, however, process several solutions in parallel, significantly reducing the number of optimization cycles but potentially diluting the specificity of adjustments. Batch evaluation is helpful in scenarios where it is advantageous to test several solutions simultaneously. Consider the nature of your evaluation tool when selecting between the two options.",  # noqa E501
