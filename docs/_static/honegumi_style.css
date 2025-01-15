@@ -2,6 +2,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
+    margin-bottom: 1em;
 }
 
 .title-block .logo {
@@ -11,7 +12,7 @@
 }
 
 .title-block h2 {
-    margin: 0;
+    margin-right: 0.2em;
     /* increase the fontsize */
     font-size: 1.7em;
 }
