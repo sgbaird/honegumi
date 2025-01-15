@@ -200,6 +200,7 @@ def model_kwargs_test_override(render_datum):
 option_rows = [
     {
         "name": cst.OBJECTIVE_OPT_KEY,
+        "display_name": "Objective",
         "options": ["Single", "Multi"],
         "hidden": False,
         "disable": False,
@@ -207,6 +208,7 @@ option_rows = [
     },
     {
         "name": cst.MODEL_OPT_KEY,
+        "display_name": "Model Type",
         "options": [
             "Default",  # e.g., GPEI
             cst.CUSTOM_KEY,
@@ -217,22 +219,33 @@ option_rows = [
         "tooltip": "Choose between <a href='/docs/curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.",  # noqa E501
     },
     {
-        "name": cst.CUSTOM_GEN_KEY,
-        "options": [False, True],
-        "hidden": True,
+        "name": cst.TASK_OPT_KEY,
+        "display_name": "Task",
+        "options": ["Single", "Multi"],
+        "hidden": False,
         "disable": False,
-    },
+        "tooltip": "Placeholder",
+    },  # noqa E501 # NOTE: AC Microcourses
     {
-        "name": cst.EXISTING_DATA_KEY,
+        "name": cst.CATEGORICAL_KEY,
+        "display_name": "Categorical Parameter",
         "options": [False, True],
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose whether to fit the surrogate model to previous data before starting the optimization process. Including historical data may give your model a better starting place and potentially speed up convergence. Conversely, excluding existing data means starting the optimization from scratch, which might be preferred in scenarios where historical data could introduce bias or noise into the optimization process. Consider the relevance and reliability of your existing data when making your selection.",  # noqa E501
+        "tooltip": "Choose whether to include a categorical variable in the optimization process (e.g. dark or milk chocolate chips in a cookie recipe). Including categorical variables allows choice parameters and their interaction with continuous variables to be optimized. Note that adding categorical variables can create discontinuities in the search space that are difficult to optimize over. Consider the value of adding categorical variables to the optimization task when selecting this option.",  # noqa E501
+    },
+    {
+        "name": cst.CUSTOM_GEN_KEY,
+        "display_name": "Custom Generator",
+        "options": [False, True],
+        "hidden": True,
+        "disable": False,
     },
     # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
     # consider collapsing these three constraints into single option # noqa: E501
     {
         "name": cst.SUM_CONSTRAINT_KEY,
+        "display_name": "Sum Constraint",
         "options": [False, True],
         "hidden": False,
         "disable": False,
@@ -240,6 +253,7 @@ option_rows = [
     },
     {
         "name": cst.ORDER_CONSTRAINT_KEY,
+        "display_name": "Order Constraint",
         "options": [False, True],
         "hidden": False,
         "disable": False,
@@ -247,6 +261,7 @@ option_rows = [
     },
     {
         "name": cst.LINEAR_CONSTRAINT_KEY,
+        "display_name": "Linear Constraint",
         "options": [False, True],
         "hidden": False,
         "disable": False,
@@ -254,24 +269,27 @@ option_rows = [
     },
     {
         "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
+        "display_name": "Composition Constraint",
         "options": [False, True],
         "hidden": False,
         "disable": False,
         "tooltip": "Choose whether to include a composition constraint over two or more optimization variables such that their sum does not exceed a specified total (e.g. ensuring the mole fractions of elements in a composition sum to one). This constraint is particularly relevant to fabrication-related tasks where the quantities of components must sum to a total. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
     },
     {
-        "name": cst.CATEGORICAL_KEY,
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to include a categorical variable in the optimization process (e.g. dark or milk chocolate chips in a cookie recipe). Including categorical variables allows choice parameters and their interaction with continuous variables to be optimized. Note that adding categorical variables can create discontinuities in the search space that are difficult to optimize over. Consider the value of adding categorical variables to the optimization task when selecting this option.",  # noqa E501
-    },
-    {
         "name": cst.CUSTOM_THRESHOLD_KEY,
+        "display_name": "Custom Threshold",
         "options": [False, True],
         "hidden": False,
         "disable": False,
         "tooltip": "Choose whether to apply custom thresholds to objectives in a multi-objective optimization problem (e.g. a minimum acceptable strength requirement for a material). Setting a threshold on an objective guides the optimization algorithm to prioritize solutions that meet or exceed these criteria. Excluding thresholds enables greater exploration of the design space, but may produce sub-optimal solutions. Consider whether threshold values reflect the reality or expectations of your optimization task when selection this option.",  # noqa E501
+    },
+    {
+        "name": cst.EXISTING_DATA_KEY,
+        "display_name": "Existing Data",
+        "options": [False, True],
+        "hidden": False,
+        "disable": False,
+        "tooltip": "Choose whether to fit the surrogate model to previous data before starting the optimization process. Including historical data may give your model a better starting place and potentially speed up convergence. Conversely, excluding existing data means starting the optimization from scratch, which might be preferred in scenarios where historical data could introduce bias or noise into the optimization process. Consider the relevance and reliability of your existing data when making your selection.",  # noqa E501
     },
     # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
@@ -284,16 +302,10 @@ option_rows = [
     #     "disable": True,
     #     "tooltip": "Choose whether to perform single or multi-fidelity optimization. Single-fidelity optimization uses a single evaluation method for all optimization trials, while multi-fidelity optimization leverages multiple evaluation methods with varying computational costs. Multi-fidelity optimization can be more efficient than single-fidelity optimization, as it uses cheaper evaluations to guide the optimization process. Consider the availability of different fidelity levels, their computational costs when selecting this option, and compatibility with other algorithms when making this choice.",  # noqa E501
     # },  # noqa E501 # NOTE: AC Microcourses
-    {
-        "name": cst.TASK_OPT_KEY,
-        "options": ["Single", "Multi"],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Placeholder",
-    },  # noqa E501 # NOTE: AC Microcourses
     # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
     {
         "name": cst.SYNCHRONY_OPT_KEY,
+        "display_name": "Synchrony",
         "options": ["Single", "Batch"],  # TODO: add "asynchronous"
         "hidden": False,
         "disable": False,
@@ -301,6 +313,7 @@ option_rows = [
     },
     {
         "name": cst.VISUALIZE_KEY,
+        "display_name": "Visualize Results",
         "options": [False, True],
         "hidden": False,
         "disable": False,

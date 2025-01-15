@@ -100,6 +100,7 @@ def create_options_model(option_rows: List[Dict[str, Any]]):
 
     for row in option_rows:
         name = row["name"]
+        display_name = row["display_name"]
         options = row["options"]
         hidden = row["hidden"]
         disable = row["disable"]
