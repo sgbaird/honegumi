@@ -1,5 +1,5 @@
 .title-block .row {
-    /* display: flex; */
+    display: inline-flex;
     align-items: center;
     gap: 0.4em;
 }
