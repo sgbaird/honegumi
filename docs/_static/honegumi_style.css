@@ -5,13 +5,15 @@
 }
 
 .title-block .logo {
-    height: 1.75em;  /* Adjust this value to match your text height */
+    height: 2.5em;  /* Adjust this value to match your text height */
     /* add some padding to the left */
     padding-left: 0.1em;
 }
 
 .title-block h2 {
     margin: 0;
+    /* increase the fontsize */
+    font-size: 1.75em;
 }
 
 input[type="radio"] {
