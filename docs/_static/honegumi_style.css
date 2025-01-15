@@ -1,18 +1,18 @@
 .title-block .row {
-    display: flex;
     align-items: center;
-    gap: 0.4em;
 }
 
-.title-block .logo {
+.title-block img {
     height: 2.5em;  /* Adjust this value to match your text height */
-    /* add some padding to the left */
-    padding-left: 0.1em;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+    vertical-align: bottom;
 }
 
 .title-block h2 {
-    margin: 0;
-    /* increase the fontsize */
+    margin-right: 0.2em;
+    margin-bottom: 0em;
+    /* vertical-align: middle; */
     font-size: 1.7em;
 }
 
