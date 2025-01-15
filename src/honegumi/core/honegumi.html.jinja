@@ -25,17 +25,11 @@
 
     <form onsubmit="return false;">
         <div class="title-block">
-            <div class="row align-items-center">
-                {# <img src="logo.png" alt="Logo"
-                    style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
-                <img src="_static/logo.png" alt="Logo"
-                    style="height: 2em; margin-right: 1em; vertical-align: middle;">
-                {# <img src="https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/main/docs/logo.png"
-                    alt="Logo" style="height: 2em; margin-right: 1em; vertical-align: middle;"> #}
-                <h2 style="margin-bottom: 0;">Honegumi</h2>
+            <div class="row">
+                <img src="_static/logo.png" alt="Logo" class="logo">
+                <h2>Honegumi</h2>
             </div>
         </div>
-
         {% for row in jinja_option_rows %}
         <div class="row">
             <label class="row-label">{{ row.display_name }}:</label>
