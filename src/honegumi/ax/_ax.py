@@ -156,7 +156,12 @@ def add_model_specific_keys(option_names, opt):
     # cst.FULLYBAYESIAN_KEY) NOTE: setdefault was conflicting with
     # create_model_options, which already was setting defaults Now it's simply
     # overriding whatever was there
-    opt[cst.CUSTOM_GEN_KEY] = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+    # opt[cst.CUSTOM_GEN_KEY] = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
+    opt[cst.CUSTOM_GEN_KEY] = (
+        (opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
+        or (opt[cst.MODEL_OPT_KEY] == cst.CUSTOM_KEY)
+        or (opt[cst.TASK_OPT_KEY] == "multi")
+    )
 
     # log_fn(f"opt: {opt}")
 
