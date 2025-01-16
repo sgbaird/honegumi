@@ -2,7 +2,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
-    margin-bottom: 1em;
+    margin-bottom: 0.5em;
 }
 
 .title-block .logo {
@@ -13,6 +13,7 @@
 .title-block h2 {
     margin-right: 0.2em;
     font-size: 1.7em;
+    align-items: center;
 }
 
 input[type="radio"] {
