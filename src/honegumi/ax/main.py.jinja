@@ -8,7 +8,8 @@ from botorch.acquisition import UpperConfidenceBound
 {%- endif %}
 
 {% if task == "Multi" -%}
-from ax.modelbridge.registry import Specified_Task_ST_MTGP_tran
+from ax.modelbridge.registry import Specified_Task_ST_MTGP_trans
+from ax.core.observation import ObservationFeatures
 {%- endif %}
 
 {% if existing_data -%}
@@ -263,12 +264,12 @@ batch_size = 2
 {% set indent = "    " if synchrony == "Batch" else "" %}
 
 for i in range({{ num_iter }}):
-    {% if synchrony == "Single" and not task == 'multi' %}
+    {% if synchrony == "Single" and not task == "Multi" %}
     parameterization, trial_index = ax_client.get_next_trial()
-    {% elif synchrony == "Single" and task == 'multi' %}
-    parameterization, trial_index = ax_client.get_next_trial(fixed_features={"task": "A" if i % 2 == 0 else "B"})
-    {% elif synchrony == "Batch" and task == 'multi' %}
-    parameterization, trial_index = ax_client.get_next_trial(batch_size,fixed_features={"task": "A" if i % 2 == 0 else "B"})
+    {% elif synchrony == "Single" and task == "Multi" %}
+    parameterization, trial_index = ax_client.get_next_trial(fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
+    {% elif synchrony == "Batch" and task == "Multi" %}
+    parameterization, trial_index = ax_client.get_next_trial(batch_size, fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     for trial_index, parameterization in list(parameterizations.items()):
     {% else %}
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size)
@@ -280,7 +281,7 @@ for i in range({{ num_iter }}):
     {% if composition_constraint -%}
     {{ indent }}x3 = total - (x1 + x2) # composition constraint: x1 + x2 + x3 == total
     {%- endif %}
-    {% if task == 'multi' %}
+    {% if task == "Multi" %}
     {{ indent }}task = parameterization["task"]
     {%- endif %}
     {% if categorical -%}
@@ -288,7 +289,7 @@ for i in range({{ num_iter }}):
     {%- endif %}
 
     {{ indent }}results = {{ objective_function }}(
-    {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == 'multi' %}, task{% endif %}
+    {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}
     {{ indent }}    )
     {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 
@@ -300,6 +301,7 @@ best_parameters, metrics = ax_client.get_best_parameters()
 
 {% if visualize %}
 import matplotlib.pyplot as plt
+import pandas as pd
 objectives = ax_client.objective_names
 df = ax_client.get_trials_data_frame()[objectives]
 
@@ -348,7 +350,7 @@ ax.set_ylabel(objectives[0])
 
 {% else %}  # multi-objective case
 {% if not task == "Multi" %}
-pareto = ax_client.get_pareto_optimal_parameters()
+pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=False)
 pareto = pd.DataFrame([p[1][0] for p in pareto.values()]).sort_values(objectives[0])
 
 fig, ax = plt.subplots(figsize=(6, 4), dpi=200)
