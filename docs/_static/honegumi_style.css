@@ -6,14 +6,12 @@
 }
 
 .title-block .logo {
-    height: 2.5em;  /* Adjust this value to match your text height */
-    /* add some padding to the left */
+    height: 2.5em;
     padding-left: 0.1em;
 }
 
 .title-block h2 {
     margin-right: 0.2em;
-    /* increase the fontsize */
     font-size: 1.7em;
 }
 
