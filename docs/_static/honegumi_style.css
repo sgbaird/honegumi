@@ -81,8 +81,6 @@ input[type="radio"]:checked+label {
     flex-basis: 3.0%;
     margin: 0px 5px;
     text-align: center;
-    /* bold */
-    font-weight: bold;
 }
 
 .tooltip-text {
@@ -95,6 +93,7 @@ input[type="radio"]:checked+label {
     text-align: left;
     color: #FFF;
     background: #2C2C2C;
+    font-weight: normal;
   }
 
 .tooltip-text.active {

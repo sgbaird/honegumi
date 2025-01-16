@@ -38,7 +38,7 @@
                 option==row.options[0] %} checked{% endif %} py-click="update_text">
             <label class="row-option" for="{{ row.name }}-{{ option }}">{{ option }}</label>
             {% endfor %}
-            <div class="tooltip-icon">&#9432;
+            <div class="tooltip-icon" style="font-weight: bold;">&#9432;
                 <span class="tooltip-text arrow">{{ row.tooltip }}</span>
             </div>
         </div>
