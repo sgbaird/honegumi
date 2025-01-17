@@ -219,7 +219,7 @@ option_rows = [
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between <a href='/docs/curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.",  # noqa E501
+        "tooltip": "Choose between three surrogate model implementations: Default uses a standard Gaussian process (GP), Custom enables user-defined acquisition functions and hyperparameters, and <a href='/docs/curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>Fully Bayesian</a> implements MCMC estimation of GP parameters. The Default option provides a robust baseline performance, Custom allows advanced users to tailor the optimization process, while Fully Bayesian offers deeper uncertainty exploration at higher computational cost. Consider your optimization needs and computational resources when selecting this option.",  # noqa E501
     },
     {
         "name": cst.TASK_OPT_KEY,
@@ -227,7 +227,7 @@ option_rows = [
         "options": ["Single", "Multi"],
         "hidden": False,
         "disable": False,
-        "tooltip": "Placeholder",
+        "tooltip": "Choose between <a href='/docs/curriculum/concepts/single-vs-multi-task/single-vs-multi-task.html'>single and multi-task optimization</a> based on your experimental setup. Single-task optimization focuses on one specific task, while multi-task optimization leverages data from multiple related tasks simultaneously (e.g. optimizing similar manufacturing processes across different production sites). Multi-task optimization can improve efficiency by sharing information between tasks but requires related task structures. Consider whether your tasks share underlying similarities when making this selection.",
     },  # noqa E501 # NOTE: AC Microcourses
     {
         "name": cst.CATEGORICAL_KEY,
@@ -320,7 +320,7 @@ option_rows = [
         "options": [False, True],
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose whether to visualize the optimization process and results. Visualization tools can help you understand the optimization process, identify trends, and make informed decisions about the optimization task. Including visualization can provide insights into the optimization process and help you make informed decisions about the optimization task. Consider the value of visualizing the optimization process when selecting this option.",  # noqa E501
+        "tooltip": "Choose whether to include visualization tools for tracking optimization progress. The default visualizations display key performance metrics like optimization traces and model uncertainty (e.g. objective value convergence over time). Including visualizations helps monitor optimization progress and identify potential issues, but may add minor computational overhead. Consider whether real-time performance tracking would benefit your optimization workflow when selecting this option.",  # noqa E501
     },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
     # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
