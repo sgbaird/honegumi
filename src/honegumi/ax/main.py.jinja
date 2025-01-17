@@ -80,14 +80,14 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "Multi" 
     {% set objective_function = objective_function + "3" %}
 {% endif %}
 
-{% if task == "Multi" %}
-    {% set objective_function = objective_function + "_mt" %}
-{% endif %}
-
 {# Set the objective function based on the objective #}
 {% if objective == "Multi" -%}
     {% set objective_function = objective_function + "_moo" %}
 {%- endif %}
+
+{% if task == "Multi" %}
+    {% set objective_function = objective_function + "_mt" %}
+{% endif %}
 
 {# List of expected models #}
 {% set expected_models = ["Default", "Custom", "Fully Bayesian"] %}
@@ -120,7 +120,7 @@ total = 10.0
 # note that for this training data, the order constraint is satisfied
 {% endif %} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
 {# Set some shorthand variables to make X_train more readable #}
-{% set mt = task%}
+{% set mt = task == "Multi"%}
 {% set comp = composition_constraint %}
 {% set cat = categorical %}
 {% set ord = order_constraint %}
@@ -164,7 +164,7 @@ X_train = pd.DataFrame([
 ])
 
 # Define y_train (normally the values would be supplied directly instead of calculating here)
-y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if composition_constraint %}, row["x3"]{% endif %}{% if categorical %}, row["c1"]{% endif %}) for _, row in X_train.iterrows()]
+y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if composition_constraint %}, row["x3"]{% endif %}{% if categorical %}, row["c1"]{% endif %}{% if task == "Multi" %}, row["task"]{% endif %}) for _, row in X_train.iterrows()]
 
 # Define the number of training examples
 n_train = len(X_train)
