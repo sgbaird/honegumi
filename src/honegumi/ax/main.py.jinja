@@ -1,5 +1,12 @@
+{% if existing_data or visualize %}
+import numpy as np
+import pandas as pd
+from ax.service.ax_client import AxClient, ObjectiveProperties
+{% if visualize %}import matplotlib.pyplot as plt{% endif %}
+{% else %}
 import numpy as np
 from ax.service.ax_client import AxClient, ObjectiveProperties
+{% endif %}
 
 {% if custom_gen -%}
 from ax.modelbridge.factory import Models
@@ -10,10 +17,6 @@ from botorch.acquisition import UpperConfidenceBound
 {% if task == "Multi" -%}
 from ax.modelbridge.registry import Specified_Task_ST_MTGP_trans
 from ax.core.observation import ObservationFeatures
-{%- endif %}
-
-{% if existing_data -%}
-import pandas as pd
 {%- endif %}
 
 obj1_name = "branin"
@@ -181,8 +184,12 @@ gs = GenerationStrategy(
             num_trials={{ num_init }}, # how many sobol trials to perform
             min_trials_observed=3,
             max_parallelism=5,
+            {% if task == "Multi" %}
+            model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans},
+            model_gen_kwargs={"deduplicate": True},
+            {% else %}
             model_kwargs={"seed": 999},
-            model_gen_kwargs={% if task == "Multi" %}{"deduplicate": True, "transforms": Specified_Task_ST_MTGP_trans}{% else %}{}{% endif %},
+            {% endif %}
         ),
         GenerationStep(
             model=Models.{{ model_name }},
@@ -292,7 +299,6 @@ for i in range({{ num_iter }}):
     {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}
     {{ indent }}    )
     {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
-
 {% if objective == "Multi" -%}
 pareto_results = ax_client.get_pareto_optimal_parameters()
 {% else %}
@@ -300,67 +306,44 @@ best_parameters, metrics = ax_client.get_best_parameters()
 {%- endif %}
 
 {% if visualize %}
-import matplotlib.pyplot as plt
-import pandas as pd
+# Plot results
 objectives = ax_client.objective_names
-df = ax_client.get_trials_data_frame()[objectives]
+df = ax_client.get_trials_data_frame()
 
-{% if objective == "Single" %}
-{% if task == "Multi" %}
-# Multi-task, single objective case
+{%- if task == "Multi" and objective == "Single" %}
 task = "A"  # specify task results to plot
 df = df[df.task == task]
-
-{% if synchrony == "Batch" %}
+{%- endif %}
+{%- if synchrony == "Batch" %}
 df.index = df.index // batch_size
 best_to_trial = np.minimum.accumulate(df.groupby(df.index).min())
+trials = df.index.unique()
+{%- else %}
+best_to_trial = np.minimum.accumulate(df)
+trials = df.index
+{%- endif %}
 
 fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
-ax.plot(df.index.unique(), best_to_trial, color="#0033FF", lw=2, label="Best to Trial")
-{% else %}  # single synchrony
-trace = np.minimum.accumulate(df)
 
-fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
-ax.plot(df.index, trace, color="#0033FF", lw=2, label="Best to Trial")
-{% endif %}
-
+{%- if objective == "Single" %}
+ax.scatter(df.index, df[objectives], ec="k", fc="none", label="Observed")
+ax.plot(trials, best_to_trial[objectives], color="#0033FF", lw=2, label="Best to Trial")
+{%- if task == "Multi" %}
 ax.set_title(f"Task {task}")
-
-{% else %}  # single task
-{% if synchrony == "Batch" %}
-df.index = df.index // batch_size
-best_to_trial = np.minimum.accumulate(df.groupby(df.index).min())
-
-fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
-ax.plot(df.index.unique(), best_to_trial, color="#0033FF", lw=2, label="Best to Trial")
-{% else %}  # single synchrony
-trace = np.minimum.accumulate(df)
-
-fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-ax.scatter(df.index, df, ec="k", fc="none", label="Observed")
-ax.plot(df.index, trace, color="#0033FF", lw=2, label="Best to Trial")
-{% endif %}
-{% endif %}
-
+{%- endif %}
 ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
-
-{% else %}  # multi-objective case
-{% if not task == "Multi" %}
+{%- elif task != "Multi" %}
 pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=False)
-pareto = pd.DataFrame([p[1][0] for p in pareto.values()]).sort_values(objectives[0])
+pareto_data = [p[1][0] for p in pareto.values()]
+pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
 
-fig, ax = plt.subplots(figsize=(6, 4), dpi=200)
 ax.scatter(df[objectives[0]], df[objectives[1]], fc="None", ec="k", label="Observed")
 ax.plot(pareto[objectives[0]], pareto[objectives[1]], color="#0033FF", lw=2, label="Pareto Front")
 
 ax.set_xlabel(objectives[0])
 ax.set_ylabel(objectives[1])
-{% endif %}
-{% endif %}
+{%- endif %}
 
 ax.legend()
 plt.show()
