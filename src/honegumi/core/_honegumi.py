@@ -12,7 +12,6 @@ import os
 import sys
 import warnings
 from itertools import product
-from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
 from black import FileMode, format_file_contents
@@ -41,7 +40,9 @@ try:
 
     log_fn = window.console.log
 except Exception:
-    log_fn = lambda x: x
+
+    def log_fn(x):
+        return x
 
 
 # ---- Python API ----
@@ -100,7 +101,7 @@ def create_options_model(option_rows: List[Dict[str, Any]]):
 
     for row in option_rows:
         name = row["name"]
-        display_name = row["display_name"]
+        display_name = row["display_name"]  # noqa: F841
         options = row["options"]
         hidden = row["hidden"]
         disable = row["disable"]
@@ -289,10 +290,6 @@ class Honegumi:
         Get the options that deviate by zero or one elements from the current
         configuration based on the invalid configurations.
         """
-        # if len(current_config) != len(option_rows):
-        #     raise ValueError(
-        #         "The length of the current configuration does not match the number of option rows."
-        #     )
 
         current_config = self.process_selections(self.OptionsModel(**current_config))
         current_is_valid = current_config[core_cst.IS_COMPATIBLE_KEY]
@@ -320,7 +317,8 @@ class Honegumi:
         seen_configs = set()
         unique_configs = []
         for config in possible_deviating_configs:
-            # Convert the dictionary to a tuple of key-value pairs, converting nested dictionaries to strings
+            # Convert the dictionary to a tuple of key-value pairs, converting nested
+            # dictionaries to strings
             config_tuple = tuple(
                 (k, str(v) if isinstance(v, dict) else v) for k, v in config.items()
             )
@@ -468,7 +466,8 @@ if __name__ == "__main__":
 
 # def get_rendered_template_stem(datum, option_names):
 #     """
-#     Returns a string that represents the rendered template stem based on the given data
+#     Returns a string that represents the rendered template stem based on the given
+#     data
 #     and option names.
 
 #     Filenames still have strict character limits even if longpaths enabled on Windows
@@ -574,3 +573,9 @@ if __name__ == "__main__":
 # see https://github.com/facebook/Ax/issues/1781
 
 # also, this would make ax an explicit dependency, so perhaps better not to do so.
+
+# if len(current_config) != len(option_rows):
+#     raise ValueError(
+#         "The length of the current configuration does not match the number of option
+#         rows."
+#     )

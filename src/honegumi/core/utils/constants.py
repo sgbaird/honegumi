@@ -1,5 +1,3 @@
-from os import path
-
 DOC_DIR = "docs"
 
 RENDERED_KEY = "rendered_template"

@@ -227,8 +227,8 @@ option_rows = [
         "options": ["Single", "Multi"],
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between <a href='/docs/curriculum/concepts/single-vs-multi-task/single-vs-multi-task.html'>single and multi-task optimization</a> based on your experimental setup. Single-task optimization focuses on one specific task, while multi-task optimization leverages data from multiple related tasks simultaneously (e.g. optimizing similar manufacturing processes across different production sites). Multi-task optimization can improve efficiency by sharing information between tasks but requires related task structures. Consider whether your tasks share underlying similarities when making this selection.",
-    },  # noqa E501 # NOTE: AC Microcourses
+        "tooltip": "Choose between <a href='/docs/curriculum/concepts/single-vs-multi-task/single-vs-multi-task.html'>single and multi-task optimization</a> based on your experimental setup. Single-task optimization focuses on one specific task, while multi-task optimization leverages data from multiple related tasks simultaneously (e.g. optimizing similar manufacturing processes across different production sites). Multi-task optimization can improve efficiency by sharing information between tasks but requires related task structures. Consider whether your tasks share underlying similarities when making this selection.",  # noqa E501
+    },
     {
         "name": cst.CATEGORICAL_KEY,
         "display_name": "Categorical Parameter",
