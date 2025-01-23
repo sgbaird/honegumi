@@ -1,13 +1,9 @@
+from honegumi.ax._ax import is_incompatible, option_rows
 from honegumi.ax.utils import constants as cst
-from honegumi.core._honegumi import (
+from honegumi.core._honegumi import (  # get_rendered_template_stem,; unpack_rendered_template_stem,; get_deviating_options,
     Honegumi,
-    # get_rendered_template_stem,
     main,
-    # unpack_rendered_template_stem,
-    # get_deviating_options,
 )
-
-from honegumi.ax._ax import option_rows, is_incompatible
 
 __author__ = "sgbaird"
 __copyright__ = "sgbaird"

@@ -6,7 +6,6 @@ from js import invalidConfigs, optionRows
 
 from honegumi.core._honegumi import Honegumi
 
-
 # Create an instance of Honegumi with the appropriate context and options
 
 invalid_configs = invalidConfigs

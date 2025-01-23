@@ -1,5 +1,5 @@
-import ltk
 import constants
+import ltk
 
 (
     ltk.VBox(

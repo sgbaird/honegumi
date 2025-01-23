@@ -1,19 +1,17 @@
-from pyscript import window  # noqa: F401
+import os
+
 import js
+from pyscript import window  # noqa: F401
 
 # from js import invalidConfigs
 
 # from js import optionRows
 
-import os
 
 try:
     from honegumi.core._honegumi import Honegumi
 except Exception as e:
     print(f"Failed to load Honegumi: {e}")
-
-# from honegumi.core._honegumi import Honegumi, get_deviating_options
-from honegumi.ax.utils import constants as cst
 
 from honegumi.ax._ax import (
     add_model_specific_keys,
@@ -21,6 +19,9 @@ from honegumi.ax._ax import (
     model_kwargs_test_override,
     option_rows,
 )
+
+# from honegumi.core._honegumi import Honegumi, get_deviating_options
+from honegumi.ax.utils import constants as cst
 
 # invalid_configs = invalidConfigs
 

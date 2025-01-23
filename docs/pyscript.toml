@@ -9,7 +9,7 @@ packages = [ "jinja2", "pydantic", "black"]
 # NOTE: Should I be using absolute instead of relative paths?
 # E.g., "/src/honegumi/__init__.py"
 
-# Honegumi - switch comments 
+# Honegumi - switch comments
 "/src/honegumi/__init__.py" = "./honegumi/__init__.py"
 # "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/src/honegumi/__init__.py" = "./honegumi/__init__.py"
 
