@@ -166,7 +166,16 @@ X_train = pd.DataFrame([
 ])
 
 # Define y_train (normally the values would be supplied directly instead of calculating here)
-y_train = [{{ objective_function }}(row["x1"], row["x2"]{% if composition_constraint %}, row["x3"]{% endif %}{% if categorical %}, row["c1"]{% endif %}{% if task == "Multi" %}, row["task"]{% endif %}) for _, row in X_train.iterrows()]
+y_train = [
+    {{ objective_function }}(
+        row["x1"], 
+        row["x2"]
+        {% if composition_constraint %}, row["x3"]{% endif %}
+        {% if categorical %}, row["c1"]{% endif %}
+        {% if task == "Multi" %}, row["task"]{% endif %}
+    ) 
+    for _, row in X_train.iterrows()
+]
 
 # Define the number of training examples
 n_train = len(X_train)
@@ -183,7 +192,7 @@ gs = GenerationStrategy(
     steps=[
         GenerationStep(
             model=Models.SOBOL,
-            num_trials={{ num_init }}, # how many sobol trials to perform
+            num_trials={{ num_init }}, # how many sobol trials to perform (rule of thumb: 2 * number of params)
             min_trials_observed=3,
             max_parallelism=5,
             {% if task == "Multi" %}
