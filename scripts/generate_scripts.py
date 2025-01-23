@@ -3,14 +3,13 @@ import os
 
 import honegumi.ax.utils.constants as cst
 
-# import honegumi.core.utils.constants as core_cst
 from honegumi.ax._ax import (
     add_model_specific_keys,
     is_incompatible,
     model_kwargs_test_override,
     option_rows,
 )
-from honegumi.core._honegumi import Honegumi  # , gen_combs_with_keys
+from honegumi.core._honegumi import Honegumi
 
 hg = Honegumi(
     cst,
@@ -25,6 +24,29 @@ hg = Honegumi(
     output_dir="docs",
     output_name="honegumi.html",
 )
+
+# convert boolean values within option_rows to strings
+for row in hg.jinja_option_rows:
+    row["options"] = [str(opt) for opt in row["options"]]
+
+# Render the template with your variables
+html = hg.core_template.render(jinja_option_rows=hg.jinja_option_rows)
+
+# Write the rendered HTML to a file
+with open(os.path.join(hg.output_dir, hg.output_name), "w") as f:
+    f.write(html)
+
+# TODO: run make html command from here
+
+# Run the make html command
+# subprocess.run(["make", "html"], check=True, cwd="../docs", timeout=90)
+
+1 + 1
+
+# %% Code Graveyard
+
+# import honegumi.core.utils.constants as core_cst
+# from honegumi.core._honegumi import Honegumi, gen_combs_with_keys
 
 # all_opts = gen_combs_with_keys(hg.visible_option_names, hg.visible_option_rows)
 
@@ -56,24 +78,3 @@ hg = Honegumi(
 #     [str(opt[option_name]) for option_name in hg.visible_option_names]
 #     for opt in invalid_configs
 # ]
-
-# convert boolean values within option_rows to strings
-for row in hg.jinja_option_rows:
-    row["options"] = [str(opt) for opt in row["options"]]
-
-# Render the template with your variables
-html = hg.core_template.render(
-    jinja_option_rows=hg.jinja_option_rows,
-    # invalid_configs=invalid_configs,
-)
-
-# Write the rendered HTML to a file
-with open(os.path.join(hg.output_dir, hg.output_name), "w") as f:
-    f.write(html)
-
-# TODO: run make html command from here
-
-# Run the make html command
-# subprocess.run(["make", "html"], check=True, cwd="../docs", timeout=90)
-
-1 + 1
