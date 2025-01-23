@@ -20,11 +20,13 @@ References:
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
 
+import argparse
 import logging
+import sys
 
 import honegumi.ax.utils.constants as cst
 import honegumi.core.utils.constants  # noqa: F401
-from honegumi import __version__  # noqa: F401
+from honegumi.core import __version__  # noqa: F401
 
 # from jinja2 import Environment, FileSystemLoader
 
@@ -73,7 +75,6 @@ def is_incompatible(opt):
     """
     use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
     model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
-    # use_custom_threshold = opt.get(cst.CUSTOM_THRESHOLD_KEY, False)
     use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
     objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
 
@@ -152,21 +153,7 @@ def add_model_specific_keys(option_names, opt):
         "model_kwargs": {},
     }
     """
-    # opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] ==
-    # cst.FULLYBAYESIAN_KEY) NOTE: setdefault was conflicting with
-    # create_model_options, which already was setting defaults Now it's simply
-    # overriding whatever was there
-    # opt[cst.CUSTOM_GEN_KEY] = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
-    if opt[cst.TASK_OPT_KEY] == "Multi":
-        opt[cst.MODEL_OPT_KEY] == cst.CUSTOM_KEY
-
-    opt[cst.CUSTOM_GEN_KEY] = (
-        (opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
-        or (opt[cst.MODEL_OPT_KEY] == cst.CUSTOM_KEY)
-        or (opt[cst.TASK_OPT_KEY] == "Multi")
-    )
-
-    # log_fn(f"opt: {opt}")
+    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
 
     # increased from the default in Ax tutorials for quality/robustness
     opt["model_kwargs"] = (
@@ -203,124 +190,97 @@ def model_kwargs_test_override(render_datum):
 option_rows = [
     {
         "name": cst.OBJECTIVE_OPT_KEY,
-        "display_name": "Objective",
-        "options": ["Single", "Multi"],
+        "options": ["single", "multi"],
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between <a href='/docs/curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.",  # noqa E501
+        "tooltip": "Choose between <a href='curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo.html'>single and multi-objective optimization</a> based on your project needs. Single objective optimization targets one primary goal (e.g. maximize the strength of a material), while multi-objective optimization considers several objectives simultaneously (e.g. maximize the strength of a material while minimizing synthesis cost). Select the option that best aligns with your optimization goals and problem complexity.",  # noqa E501
     },
     {
         "name": cst.MODEL_OPT_KEY,
-        "display_name": "Model Type",
         "options": [
             "Default",  # e.g., GPEI
-            cst.CUSTOM_KEY,
             cst.FULLYBAYESIAN_KEY,  # e.g., FULLYBAYESIAN
         ],  # Change to "Default" and "Fully Bayesian" # noqa E501
         "hidden": False,
         "disable": False,
-        "tooltip": "Choose between three surrogate model implementations: Default uses a standard Gaussian process (GP), Custom enables user-defined acquisition functions and hyperparameters, and <a href='/docs/curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>Fully Bayesian</a> implements MCMC estimation of GP parameters. The Default option provides a robust baseline performance, Custom allows advanced users to tailor the optimization process, while Fully Bayesian offers deeper uncertainty exploration at higher computational cost. Consider your optimization needs and computational resources when selecting this option.",  # noqa E501
-    },
-    {
-        "name": cst.TASK_OPT_KEY,
-        "display_name": "Task",
-        "options": ["Single", "Multi"],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose between <a href='/docs/curriculum/concepts/single-vs-multi-task/single-vs-multi-task.html'>single and multi-task optimization</a> based on your experimental setup. Single-task optimization focuses on one specific task, while multi-task optimization leverages data from multiple related tasks simultaneously (e.g. optimizing similar manufacturing processes across different production sites). Multi-task optimization can improve efficiency by sharing information between tasks but requires related task structures. Consider whether your tasks share underlying similarities when making this selection.",  # noqa E501
-    },
-    {
-        "name": cst.CATEGORICAL_KEY,
-        "display_name": "Categorical Parameter",
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to include a categorical variable in the optimization process (e.g. dark or milk chocolate chips in a cookie recipe). Including categorical variables allows choice parameters and their interaction with continuous variables to be optimized. Note that adding categorical variables can create discontinuities in the search space that are difficult to optimize over. Consider the value of adding categorical variables to the optimization task when selecting this option.",  # noqa E501
+        "tooltip": "Choose between <a href='curriculum/concepts/freq-vs-bayes/freq-vs-bayes.html'>frequentist and fully bayesian</a> implementations of the gaussian process (GP) surrogate model. The frequentist GP model, which is often the default in BO packages, offers efficiency and speed. The fully Bayesian GP models GP parameters as random variables through MCMC estimation, providing a deeper exploration of uncertainty. The fully bayesian treatment has historically provided better closed loop Bayesian optimization performance, but comes at the cost of higher computational demand. Consider your computational resources and the complexity of your optimization task when making your selection. This option asks you to choose between 'Default' and 'FullyBayesian', where, depending on the other options, 'Default' may be Noisy Gaussian Process Expected Improvement (NGPEI), Noisy Expected Hypervolume Improvement (NEHVI), etc.",  # noqa E501
     },
     {
         "name": cst.CUSTOM_GEN_KEY,
-        "display_name": "Custom Generator",
         "options": [False, True],
         "hidden": True,
         "disable": False,
     },
-    # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
-    # consider collapsing these three constraints into single option # noqa: E501
-    {
-        "name": cst.SUM_CONSTRAINT_KEY,
-        "display_name": "Sum Constraint",
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to apply a sum constraint over two or more optimization variables (e.g. ensuring total allocation remains within available budget). This constraint focusses generated optimization trials on feasible candidates at the cost of flexibility. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
-    },
-    {
-        "name": cst.ORDER_CONSTRAINT_KEY,
-        "display_name": "Order Constraint",
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to implement an order constraint over two or more optimization variables (e.g. ensuring certain tasks precede others). This constraint focusses generated optimization trials on variable combinations that follow a specific order. Excluding the constraint offers flexibility in variable arrangements but may neglect important task sequencing or value inequality considerations. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
-    },
-    {
-        "name": cst.LINEAR_CONSTRAINT_KEY,
-        "display_name": "Linear Constraint",
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to implement a linear constraint over two or more optimization variables such that the linear combination of parameter values adheres to an inequality (e.g. 0.2*x_1 + x_2 < 0.1). This constraint focusses generated optimization trials on variable combinations that follow an enforced rule at the cost of flexibility. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
-    },
-    {
-        "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
-        "display_name": "Composition Constraint",
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to include a composition constraint over two or more optimization variables such that their sum does not exceed a specified total (e.g. ensuring the mole fractions of elements in a composition sum to one). This constraint is particularly relevant to fabrication-related tasks where the quantities of components must sum to a total. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
-    },
-    {
-        "name": cst.CUSTOM_THRESHOLD_KEY,
-        "display_name": "Custom Threshold",
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to apply custom thresholds to objectives in a multi-objective optimization problem (e.g. a minimum acceptable strength requirement for a material). Setting a threshold on an objective guides the optimization algorithm to prioritize solutions that meet or exceed these criteria. Excluding thresholds enables greater exploration of the design space, but may produce sub-optimal solutions. Consider whether threshold values reflect the reality or expectations of your optimization task when selection this option.",  # noqa E501
-    },
     {
         "name": cst.EXISTING_DATA_KEY,
-        "display_name": "Existing Data",
         "options": [False, True],
         "hidden": False,
         "disable": False,
         "tooltip": "Choose whether to fit the surrogate model to previous data before starting the optimization process. Including historical data may give your model a better starting place and potentially speed up convergence. Conversely, excluding existing data means starting the optimization from scratch, which might be preferred in scenarios where historical data could introduce bias or noise into the optimization process. Consider the relevance and reliability of your existing data when making your selection.",  # noqa E501
     },
+    # {"name": USE_CONSTRAINTS_NAME, "options": [False, True], "hidden": False},
+    # consider collapsing these three constraints into single option # noqa: E501
+    {
+        "name": cst.SUM_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+        "tooltip": "Choose whether to apply a sum constraint over two or more optimization variables (e.g. ensuring total allocation remains within available budget). This constraint focusses generated optimization trials on feasible candidates at the cost of flexibility. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
+    },
+    {
+        "name": cst.ORDER_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+        "tooltip": "Choose whether to implement an order constraint over two or more optimization variables (e.g. ensuring certain tasks precede others). This constraint focusses generated optimization trials on variable combinations that follow a specific order. Excluding the constraint offers flexibility in variable arrangements but may neglect important task sequencing or value inequality considerations. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
+    },
+    {
+        "name": cst.LINEAR_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+        "tooltip": "Choose whether to implement a linear constraint over two or more optimization variables such that the linear combination of parameter values adheres to an inequality (e.g. 0.2*x_1 + x_2 < 0.1). This constraint focusses generated optimization trials on variable combinations that follow an enforced rule at the cost of flexibility. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
+    },
+    {
+        "name": cst.COMPOSITIONAL_CONSTRAINT_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+        "tooltip": "Choose whether to include a composition constraint over two or more optimization variables such that their sum does not exceed a specified total (e.g. ensuring the mole fractions of elements in a composition sum to one). This constraint is particularly relevant to fabrication-related tasks where the quantities of components must sum to a total. Consider whether such a constraint reflects the reality of variable interactions when selecting this option.",  # noqa E501
+    },
+    {
+        "name": cst.CATEGORICAL_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": True,
+        "tooltip": "Choose whether to include a categorical variable in the optimization process (e.g. dark or milk chocolate chips in a cookie recipe). Including categorical variables allows choice parameters and their interaction with continuous variables to be optimized. Note that adding categorical variables can create discontinuities in the search space that are difficult to optimize over. Consider the value of adding categorical variables to the optimization task when selecting this option.",  # noqa E501
+    },
+    {
+        "name": cst.CUSTOM_THRESHOLD_KEY,
+        "options": [False, True],
+        "hidden": False,
+        "disable": False,
+        "tooltip": "Choose whether to apply custom thresholds to objectives in a multi-objective optimization problem (e.g. a minimum acceptable strength requirement for a material). Setting a threshold on an objective guides the optimization algorithm to prioritize solutions that meet or exceed these criteria. Excluding thresholds enables greater exploration of the design space, but may produce sub-optimal solutions. Consider whether threshold values reflect the reality or expectations of your optimization task when selection this option.",  # noqa E501
+    },
     # {"name": NOISE_OPT_NAME, "options": ["zero", "fixed", "variable", "inferred"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐ {"name": USE_PREDEFINED_CANDIDATES_NAME, "options": [False, True], "hidden": False}, # e.g., black-box constraints # noqa E501  # NOTE: AC Microcourses
     # {"name": USE_FEATURIZATION_NAME, "options": [False, True], "hidden": False}, # predefined candidates must be True # noqa E501 # NOTE: AC Microcourses (probably leave out, and just include as a tutorial with predefined candidates)
     # ⭐ {"name": USE_CONTEXTUAL_NAME, "options": [False, True], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
-    # {
-    #     "name": cst.FIDELITY_OPT_KEY,
-    #     "options": ["single", "multi"],
-    #     "hidden": False,
-    #     "disable": True,
-    #     "tooltip": "Choose whether to perform single or multi-fidelity optimization. Single-fidelity optimization uses a single evaluation method for all optimization trials, while multi-fidelity optimization leverages multiple evaluation methods with varying computational costs. Multi-fidelity optimization can be more efficient than single-fidelity optimization, as it uses cheaper evaluations to guide the optimization process. Consider the availability of different fidelity levels, their computational costs when selecting this option, and compatibility with other algorithms when making this choice.",  # noqa E501
-    # },  # noqa E501 # NOTE: AC Microcourses
+    {
+        "name": cst.FIDELITY_OPT_KEY,
+        "options": ["single", "multi"],
+        "hidden": False,
+        "disable": True,
+        "tooltip": "Choose whether to perform single or multi-fidelity optimization. Single-fidelity optimization uses a single evaluation method for all optimization trials, while multi-fidelity optimization leverages multiple evaluation methods with varying computational costs. Multi-fidelity optimization can be more efficient than single-fidelity optimization, as it uses cheaper evaluations to guide the optimization process. Consider the availability of different fidelity levels, their computational costs when selecting this option, and compatibility with other algorithms when making this choice.",  # noqa E501
+    },  # noqa E501 # NOTE: AC Microcourses
+    # {"name": TASK_OPT_NAME, "options": ["single", "multi"], "hidden": False}, # noqa E501 # NOTE: AC Microcourses
     # ⭐⭐ {"name": SHOW_METRICS, "options": [False, True], "hidden": False}, # i.e., visualizations and metrics, e.g., optimization trace, Pareto front, HVI vs. cost # noqa E501 # NOTE: AC Microcourses
     {
         "name": cst.SYNCHRONY_OPT_KEY,
-        "display_name": "Synchrony",
-        "options": ["Single", "Batch"],  # TODO: add "asynchronous"
+        "options": ["single", "batch"],  # TODO: add "asynchronous"
         "hidden": False,
-        "disable": False,
+        "disable": True,
         "tooltip": "Choose whether to perform <a href='curriculum/concepts/batch/single-vs-batch.md'>single or batch evaluations</a> for your Bayesian optimization campaign. Single evaluations analyze one candidate solution at a time, offering precise control and adaptability after each trial at the expense of more compute time. Batch evaluations, however, process several solutions in parallel, significantly reducing the number of optimization cycles but potentially diluting the specificity of adjustments. Batch evaluation is helpful in scenarios where it is advantageous to test several solutions simultaneously. Consider the nature of your evaluation tool when selecting between the two options.",  # noqa E501
-    },
-    {
-        "name": cst.VISUALIZE_KEY,
-        "display_name": "Visualize Results",
-        "options": [False, True],
-        "hidden": False,
-        "disable": False,
-        "tooltip": "Choose whether to include visualization tools for tracking optimization progress. The default visualizations display key performance metrics like optimization traces and model uncertainty (e.g. objective value convergence over time). Including visualizations helps monitor optimization progress and identify potential issues, but may add minor computational overhead. Consider whether real-time performance tracking would benefit your optimization workflow when selecting this option.",  # noqa E501
     },
     # TODO: Single vs. Batch vs. Asynchronous Optimization, e.g., get_next_trial() vs. get_next_trials() # NOTE: AC Microcourses # noqa E501
     # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses

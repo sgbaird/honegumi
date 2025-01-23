@@ -10,8 +10,9 @@ import argparse
 import logging
 import os
 import sys
-import warnings
+import time
 from itertools import product
+from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
 from black import FileMode, format_file_contents
@@ -19,14 +20,15 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pydantic import BaseModel, Field, create_model
 
 import honegumi.core.utils.constants as core_cst
-from honegumi import __version__
 from honegumi.ax._ax import (
     add_model_specific_keys,
     extra_jinja_var_names,
     is_incompatible,
     model_kwargs_test_override,
     option_rows,
+    tooltips,
 )
+from honegumi.core import __version__
 
 __author__ = "sgbaird"
 __copyright__ = "sgbaird"
@@ -46,6 +48,97 @@ except Exception:
 
 
 # ---- Python API ----
+
+
+def get_rendered_template_stem(datum, option_names):
+    """
+    Returns a string that represents the rendered template stem based on the given data
+    and option names.
+
+    Filenames still have strict character limits even if longpaths enabled on Windows
+    (https://stackoverflow.com/a/61628356/13697228), so use folder structure instead
+
+    Parameters
+    ----------
+    data : dict
+        A dictionary containing the data to be used in the rendered template stem.
+    option_names : list
+        A list of strings representing the names of the options to be included in the
+        rendered template stem.
+
+    Returns
+    -------
+    str
+        A string representing the rendered template stem.
+
+    Examples
+    --------
+    >>> data = {'option1': 'value1', 'option2': 'value2'}
+    >>> option_names = ['option1', 'option2']
+    >>> get_rendered_template_stem(data, option_names)
+    'option1-value1+option2-value2'
+    """
+    rendered_template_stem = "+".join(
+        [f"{option_name}-{str(datum[option_name])}" for option_name in option_names]
+    )  # `str()` was intended for boolean values, but no longer using booleans
+    return rendered_template_stem
+
+
+def unpack_rendered_template_stem(rendered_template_stem):
+    """
+    This function takes a rendered template stem as input and returns a dictionary of
+    options and their values.
+
+    Parameters
+    ----------
+    rendered_template_stem : str
+        The rendered template stem to be unpacked.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the options and their values.
+
+    Examples
+    --------
+    >>> unpack_rendered_template_stem("option1-value1+option2-value2+option3-value3")
+    {'option1': 'value1', 'option2': 'value2', 'option3': 'value3'}
+    """
+    options = {}
+
+    # split the string into a list of option-value pairs
+    option_value_pairs = rendered_template_stem.split("+")
+
+    # extract the option names and values from the pairs and add them to a dictionary
+    for pair in option_value_pairs:
+        option_name, option_value = pair.split("-")
+
+        if option_value.lower() == "true":
+            option_value = True
+        elif option_value.lower() == "false":
+            option_value = False
+        elif option_value.isdigit():
+            option_value = int(option_value)
+        elif option_value.replace(".", "", 1).isdigit():
+            option_value = float(option_value)
+
+        options[option_name] = option_value
+
+    return options
+
+
+def create_and_clear_dir(directory):
+    # create the directory if it doesn't exist
+    Path(directory).mkdir(parents=True, exist_ok=True)
+
+    # clear out the directory (to avoid confusion/running old scripts)
+    for file in os.listdir(directory):
+        file_path = os.path.join(directory, file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(e)
 
 
 def gen_combs_with_keys(
@@ -96,12 +189,45 @@ def gen_combs_with_keys(
     return all_opts
 
 
+# NOTE: `custom_gen_opt_name` gets converted to a string from a boolean to
+# simply things on a Python/Jinja/Javascript side (i.e., strings are strings,
+# but boolean syntax can vary).
+
+
+def generate_lookup_dict(data, option_names, key):
+    """
+    Generate a lookup dictionary from a list of dictionaries.
+
+    Examples
+    --------
+    >>> data = [
+    >>>     {"option1": "a", "option2": 1, "key": "foo"},
+    >>>     {"option1": "b", "option2": 2, "key": "bar"},
+    >>>     {"option1": "c", "option2": 3, "key": "baz"},
+    >>> ]
+    >>> generate_lookup_dict(data, ['option1', 'option2'], 'key')
+    {'a,1': 'foo', 'b,2': 'bar', 'c,3': 'baz'}
+    """
+    if not all(key in item for item in data):
+        raise ValueError(f"key {key} not in all items")
+    return {
+        ",".join([str(item[option_name]) for option_name in option_names]): item[key]
+        for item in data
+    }
+
+
+# NOTE: `from ax.modelbridge.factory import Models` causes an issue with pytest!
+# i.e., hard-code the model names instead of accessing them programatically
+# see https://github.com/facebook/Ax/issues/1781
+
+# also, this would make ax an explicit dependency, so perhaps better not to do so.
+
+
 def create_options_model(option_rows: List[Dict[str, Any]]):
     fields = {}
 
     for row in option_rows:
         name = row["name"]
-        display_name = row["display_name"]  # noqa: F841
         options = row["options"]
         hidden = row["hidden"]
         disable = row["disable"]
@@ -125,11 +251,6 @@ def create_options_model(option_rows: List[Dict[str, Any]]):
             ),
         )
 
-        # NOTE: This may be conflicting and causing confusion relative to
-        # add_model_specific_keys, since originally I was using e.g.,
-        # `opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] ==
-        # cst.FULLYBAYESIAN_KEY)`
-
         # TODO: auto-create the docstring __doc__ since this dynamically
         # generates the pydantic model (i.e., useful hover typehints are lost)
         # https://chatgpt.com/share/d3cce48d-effe-4496-82be-476c1889e7fd
@@ -144,12 +265,8 @@ class Honegumi:
         self,
         cst,
         option_rows: List[Dict[str, Any]] = option_rows,
-        script_template_dir=os.path.join("src", "honegumi", "ax"),
+        tooltips=tooltips,
         script_template_name="main.py.jinja",
-        core_template_dir=os.path.join("src", "honegumi", "core"),
-        core_template_name="honegumi.html.jinja",
-        output_dir="docs",
-        output_name="honegumi.html",
         is_incompatible_fn=is_incompatible,
         add_model_specific_keys_fn=add_model_specific_keys,
         model_kwargs_test_override_fn=model_kwargs_test_override,
@@ -158,14 +275,9 @@ class Honegumi:
     ):
         self.cst = cst
 
-        self.output_dir = output_dir
-        self.output_name = output_name
-
         self.is_incompatible_fn = is_incompatible_fn
         self.add_model_specific_keys_fn = add_model_specific_keys_fn
         self.model_kwargs_test_override_fn = model_kwargs_test_override_fn
-
-        self.option_rows = option_rows
 
         # Generate the Pydantic options model dynamically
         self.OptionsModel = create_options_model(option_rows)
@@ -186,7 +298,7 @@ class Honegumi:
             print("SKIPPING TESTS")
 
         self.env = Environment(
-            loader=FileSystemLoader(script_template_dir),
+            loader=FileSystemLoader(cst.TEMPLATE_DIR),
             undefined=StrictUndefined,
             keep_trailing_newline=True,
         )
@@ -194,12 +306,10 @@ class Honegumi:
         self.template = self.env.get_template(script_template_name)
 
         self.core_env = Environment(
-            loader=FileSystemLoader(core_template_dir),
+            loader=FileSystemLoader(core_cst.CORE_TEMPLATE_DIR),
             undefined=StrictUndefined,
             keep_trailing_newline=True,
         )
-
-        self.core_template = self.core_env.get_template(core_template_name)
 
         # remove the options where disable is True, and print disabled options (keep
         # track of disabled option names and default values)
@@ -208,9 +318,7 @@ class Honegumi:
         ]
         disabled_option_names = [row["name"] for row in option_rows if row["disable"]]
 
-        active_option_rows = [row for row in option_rows if not row["disable"]]
-
-        self.active_option_rows = active_option_rows
+        option_rows = [row for row in option_rows if not row["disable"]]
 
         # E.g.,
         # {
@@ -224,22 +332,26 @@ class Honegumi:
             for default in self.disabled_option_defaults:
                 print(f"Disabled option and default: {default}")
 
-        self.active_option_names = [row["name"] for row in active_option_rows]
+        for row in option_rows:
+            if row["name"] in tooltips:
+                row["tooltip"] = tooltips[row["name"]]
+
+        self.option_names = [row["name"] for row in option_rows]
 
         self.visible_option_names = [
-            row["name"] for row in active_option_rows if not row["hidden"]
+            row["name"] for row in option_rows if not row["hidden"]
         ]
-        self.visible_option_rows = [
-            row for row in active_option_rows if not row["hidden"]
-        ]
+        self.visible_option_rows = [row for row in option_rows if not row["hidden"]]
 
         self.jinja_var_names = (
-            self.active_option_names + extra_jinja_var_names + disabled_option_names
+            self.option_names + extra_jinja_var_names + disabled_option_names
         )
 
         self.jinja_option_rows = [row for row in self.visible_option_rows]
 
-    def process_selections(self, options_model: BaseModel):
+    def generate(
+        self, options_model: BaseModel, return_selections=False
+    ) -> Union[str, Tuple[str, Dict[str, Any]]]:
         # You can check if selections is an instance of the expected type
         if not isinstance(options_model, self.OptionsModel):
             warnings.warn(f"Expected {self.OptionsModel}, got {type(options_model)}")
@@ -252,7 +364,7 @@ class Honegumi:
             selections.update(default)
 
         # in-place operation
-        self.add_model_specific_keys_fn(self.active_option_names, selections)
+        self.add_model_specific_keys_fn(self.option_names, selections)
 
         # NOTE: Decided to always keep dummy key false for scripts (as opposed to tests)
         selections[core_cst.DUMMY_KEY] = False
@@ -262,14 +374,6 @@ class Honegumi:
         }
 
         selections[core_cst.IS_COMPATIBLE_KEY] = not self.is_incompatible_fn(selections)
-
-        return selections
-
-    def generate(
-        self, options_model: BaseModel, return_selections=False
-    ) -> Union[str, Tuple[str, Dict[str, Any]]]:
-
-        selections = self.process_selections(options_model)
 
         if self.is_incompatible_fn(selections):
             # override
@@ -460,6 +564,157 @@ if __name__ == "__main__":
     #     python -m honegumi.core.skeleton 42
     #
     run()
+
+
+def add_model_specific_keys(option_names, opt):
+    """Add model-specific keys to the options dictionary (in-place).
+
+    This function adds model-specific keys to the options dictionary `opt`. For
+    example, if use_custom_gen is a hidden variable, and the model is
+    FULLYBAYESIAN, then use_custom_gen should be True.
+
+    It also sets the value of the key `model_kwargs` based on the value of
+    `MODEL_OPT_KEY` in `opt`.
+
+    Parameters
+    ----------
+    option_names : list
+        A list of option names.
+    opt : dict
+        The options dictionary.
+
+    Examples
+    --------
+    The following example is demonstrative, the range of cases may be expanded
+    later.
+
+    >>> option_names = [
+    ...     "objective",
+    ...     "model",
+    ...     "custom_gen",
+    ...     "existing_data",
+    ...     "sum_constraint",
+    ...     "order_constraint",
+    ...     "linear_constraint",
+    ...     "composition_constraint",
+    ...     "categorical",
+    ...     "custom_threshold",
+    ...     "fidelity",
+    ...     "synchrony",
+    ... ]
+    >>> opt = {
+    ...     "objective": "single",
+    ...     "model": "Default",
+    ...     "existing_data": False,
+    ...     "sum_constraint": False,
+    ...     "order_constraint": False,
+    ...     "linear_constraint": False,
+    ...     "composition_constraint": False,
+    ...     "categorical": False,
+    ...     "custom_threshold": False,
+    ...     "fidelity": "single",
+    ...     "synchrony": "single",
+    ... }
+
+    >>> add_model_specific_keys(option_names, opt)
+    {
+        "objective": "single",
+        "model": "Default",
+        "existing_data": False,
+        "sum_constraint": False,
+        "order_constraint": False,
+        "linear_constraint": False,
+        "composition_constraint": False,
+        "categorical": False,
+        "custom_threshold": False,
+        "fidelity": "single",
+        "synchrony": "single",
+        "custom_gen": False,
+        "model_kwargs": {},
+    }
+    """
+    opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY)
+
+    # increased from the default in Ax tutorials for quality/robustness
+    opt["model_kwargs"] = (
+        {"num_samples": 1024, "warmup_steps": 1024}
+        if opt[cst.MODEL_OPT_KEY] == "FULLYBAYESIAN"
+        else {}
+    )  # override later to 16 and 32 later on, but only for test script
+
+    # verify that all variables (hidden and visible) are represented
+    assert all(
+        [opt.get(option_name, None) is not None for option_name in option_names]
+    ), f"option_names {option_names} not in opt {opt}"
+
+
+def is_incompatible(opt):
+    """
+    Check if the given option dictionary contains incompatible options.
+
+    An option is considered incompatible if it cannot be used together with
+    another option. For example, if the model is fully Bayesian, it cannot use
+    the custom generator (`use_custom_gen`). Similarly, if the objective is
+    single, it cannot use the custom threshold (`use_custom_threshold`).
+
+    Parameters
+    ----------
+    opt : dict
+        The option dictionary to check for incompatibility.
+
+    Returns
+    -------
+    bool
+        True if any incompatibility is found among the options, False otherwise.
+    """
+    use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
+    model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == "FULLYBAYESIAN"
+    use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
+    objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
+
+    checks = [
+        model_is_fully_bayesian and not use_custom_gen,
+        objective_is_single and use_custom_threshold,
+        # add new incompatibility checks here
+    ]
+    return any(checks)
+
+
+def prep_datum_for_render(option_names, datum):
+    """
+    Checks the compatibility of the given options and updates the datum
+    dictionary with the rendered template stem and compatibility status.
+
+    Parameters
+    ----------
+    option_names : list
+        The full list of option names in order to generate the filename stem.
+    datum : dict
+        The dictionary of option key-value pairs.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> check_compatibility_and_update(['option1', 'option2'], {'option1': 'value1', 'option2': 'value2'}) # noqa: E501
+    OUTPUT
+
+    Notes
+    -----
+    This function will always set the 'dummy' key in the 'datum' dictionary to
+    False.
+    """
+    rendered_template_stem = get_rendered_template_stem(datum, option_names)
+
+    datum["stem"] = rendered_template_stem
+
+    datum[cst.IS_COMPATIBLE_KEY] = not is_incompatible(datum)
+
+    # NOTE: Decided to always keep dummy key false for scripts, let dummy only
+    # affect tests
+    datum[cst.DUMMY_KEY] = False
 
 
 # %% Code Graveyard

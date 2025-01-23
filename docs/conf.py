@@ -190,6 +190,15 @@ todo_emit_warnings = True
 # a list of builtin themes.
 html_theme = "sphinx_rtd_theme"
 
+html_context = {
+    "display_github": True,  # Add 'Edit on Github' link instead of 'View page source'
+    "github_user": "sgbaird",
+    "github_repo": "honegumi",  # assuming an exact match
+    "github_version": "main",
+    "conf_py_path": "/docs/",  # needs leading and trailing slashes!
+    # "source_suffix": source_suffix,
+}
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -222,12 +231,16 @@ html_static_path = ["_static"]
 html_extra_path = ["honegumi.html", "main.py", "pyscript.toml", "../src"]
 
 nbsphinx_thumbnails = {
-    "curriculum/tutorials/sobo/sobo-tutorial": "_static/thumbnails/sobo-tutorial-thumbnail.jpg",
-    "curriculum/tutorials/mobo/mobo-tutorial": "_static/thumbnails/mobo-tutorial-thumbnail.jpg",
-    "curriculum/tutorials/batch/Batch_BO_tutorial": "_static/thumbnails/batch_tutorial_thumbnail.png",
-    "curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo": "_static/thumbnails/SOBOMOBO_concept_thumbnail.png",
-    "curriculum/concepts/freq-vs-bayes/freq-vs-bayes": "_static/thumbnails/FullyBayesian_concept_thumbnail.png",
-    "curriculum/concepts/batch/single-vs-batch": "_static/thumbnails/BatchBO_concept_thumbnail.png",
+    "curriculum/tutorials/sobo/sobo": "_static/thumbnails/tutorials/sobo.jpg",
+    "curriculum/tutorials/mobo/mobo": "_static/thumbnails/tutorials/mobo.jpg",
+    "curriculum/tutorials/batch/batch-fullybayesian": "_static/thumbnails/tutorials/batch.png",
+    "curriculum/tutorials/featurization/featurization": "_static/thumbnails/tutorials/featurization.png",
+    "curriculum/tutorials/multitask/multitask": "_static/thumbnails/tutorials/multitask.png",
+    "curriculum/tutorials/benchmarking/benchmarking": "_static/thumbnails/tutorials/benchmarking.png",
+    "curriculum/concepts/sobo-vs-mobo/sobo-vs-mobo": "_static/thumbnails/concepts/sobo-mobo.png",
+    "curriculum/concepts/freq-vs-bayes/freq-vs-bayes": "_static/thumbnails/concepts/fully-bayesian.png",
+    "curriculum/concepts/batch/single-vs-batch": "_static/thumbnails/concepts/batch.png",
+    "curriculum/concepts/multitask/multitask": "_static/thumbnails/concepts/multitask.png",
 }
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,

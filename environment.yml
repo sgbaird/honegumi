@@ -7,14 +7,12 @@ dependencies:
   - python >=3.6,<3.12
   - pip
   - ipython
+  - ipykernel
   - ipywidgets
   - numpy
   - pandas
-  - pandoc
   - pip:
-     - -e .[dev]  # install git checkout of honegumi in editable mode
-     - ax-platform # since not explicitly required within src
-     - pyscript
+     - -e .[ax,dev]  # install git checkout of honegumi in editable mode
      # add here only pip-packages that are not available in conda/conda-forge! E.g.:
      # - icecream
 
