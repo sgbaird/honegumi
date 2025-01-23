@@ -1,4 +1,4 @@
-# import os
+from os import path
 
 import constants as cst
 import js
@@ -22,9 +22,9 @@ option_rows = list(row.to_py() for row in option_rows_temp)
 hg = Honegumi(
     cst,
     option_rows=option_rows,
-    is_incompatible_fn=is_incompatible,
-    add_model_specific_keys_fn=add_model_specific_keys,
-    model_kwargs_test_override_fn=model_kwargs_test_override,
+    # is_incompatible_fn=is_incompatible,
+    # add_model_specific_keys_fn=add_model_specific_keys,
+    # model_kwargs_test_override_fn=model_kwargs_test_override,
     script_template_dir=path.join("honegumi", "ax"),
     script_template_name="main.py.jinja",
     core_template_dir=path.join("honegumi", "core"),
