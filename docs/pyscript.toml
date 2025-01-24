@@ -9,27 +9,27 @@ packages = [ "jinja2", "pydantic", "black"]
 # NOTE: Should I be using absolute instead of relative paths?
 
 # Honegumi - switch comments
-"/src/honegumi/__init__.py" = "./honegumi/__init__.py"
+"/honegumi/__init__.py" = "./honegumi/__init__.py"
 # "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/honegumi/__init__.py" = "./honegumi/__init__.py"
 
 # Honegumi Ax - src for local, remove for online.
-"/src/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
-"/src/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
-"/src/honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
+"/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
+"/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
+"/honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
 
 # Honegumi Ax Utils
-"/src/honegumi/ax/utils/__init__.py" = "./honegumi/ax/utils/__init__.py"
-"/src/honegumi/ax/utils/constants.py" = "./honegumi/ax/utils/constants.py"
+"/honegumi/ax/utils/__init__.py" = "./honegumi/ax/utils/__init__.py"
+"/honegumi/ax/utils/constants.py" = "./honegumi/ax/utils/constants.py"
 
 # Honegumi Core
-"/src/honegumi/core/__init__.py" = "./honegumi/core/__init__.py"
-"/src/honegumi/core/_honegumi.py" = "./honegumi/core/_honegumi.py"
-"/src/honegumi/core/honegumi.html.jinja" = "./honegumi/core/honegumi.html.jinja"
+"/honegumi/core/__init__.py" = "./honegumi/core/__init__.py"
+"/honegumi/core/_honegumi.py" = "./honegumi/core/_honegumi.py"
+"/honegumi/core/honegumi.html.jinja" = "./honegumi/core/honegumi.html.jinja"
 
 # Honegumi Core Utils
-"/src/honegumi/core/utils/constants.py" = "./honegumi/core/utils/constants.py"
-"/src/honegumi/core/utils/notebooks.py" = "./honegumi/core/utils/notebooks.py"
-"/src/honegumi/core/utils/testing.py" = "./honegumi/core/utils/testing.py"
+"/honegumi/core/utils/constants.py" = "./honegumi/core/utils/constants.py"
+"/honegumi/core/utils/notebooks.py" = "./honegumi/core/utils/notebooks.py"
+"/honegumi/core/utils/testing.py" = "./honegumi/core/utils/testing.py"
 
 # Honegumi CSS and JS
 "/docs/_static/honegumi_style.css" = "./_static/honegumi_style.css"
@@ -46,7 +46,7 @@ packages = [ "jinja2", "pydantic", "black"]
 # # Honegumi Ax
 # "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
 # # "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
-# "/src/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
+# "/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
 # "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
 
 # # Honegumi Ax Utils
