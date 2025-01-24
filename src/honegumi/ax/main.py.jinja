@@ -208,7 +208,27 @@ gs = GenerationStrategy(
             model=Models.{{ model_name }},
             num_trials=-1,
             max_parallelism=3,
-            model_kwargs={% if task == "Multi" %}{% if model == "Fully Bayesian" %}{"num_samples": 512, "warmup_steps": 512, "transforms": Specified_Task_ST_MTGP_trans}{% elif model == "Custom" %}{"botorch_acqf_class": UpperConfidenceBound, "transforms": Specified_Task_ST_MTGP_trans}{% else %}{"transforms": Specified_Task_ST_MTGP_trans}{% endif %}{% elif model == "Fully Bayesian" %}{"num_samples": 512, "warmup_steps": 512}{% elif model == "Custom" %}{"botorch_acqf_class": UpperConfidenceBound}{% else %}{}{% endif %},
+            model_kwargs={
+                {% if task == "Multi" %}
+                    {% if model == "Fully Bayesian" %}
+                        "num_samples": 512,
+                        "warmup_steps": 512,
+                        "transforms": Specified_Task_ST_MTGP_trans
+                    {% elif model == "Custom" %}
+                        "botorch_acqf_class": UpperConfidenceBound,
+                        "transforms": Specified_Task_ST_MTGP_trans
+                    {% else %}
+                        "transforms": Specified_Task_ST_MTGP_trans
+                    {% endif %}
+                {% elif model == "Fully Bayesian" %}
+                    "num_samples": 512,
+                    "warmup_steps": 512
+                {% elif model == "Custom" %}
+                    "botorch_acqf_class": UpperConfidenceBound
+                {% else %}
+                    {}
+                {% endif %}
+            },
         ),
     ]
 )
