@@ -3,10 +3,17 @@ import os
 import js
 from pyscript import window  # noqa: F401
 
-# from js import invalidConfigs
+try:
+    import honegumi  # noqa: F401
 
-# from js import optionRows
+    prefix_dir = ""
+except ImportError as e:
+    import sys
 
+    print(f"Failed to import honegumi: {e}.\nTrying to import from src instead.")
+    prefix_dir = "src"
+    sys.path.append(prefix_dir)
+    import honegumi  # noqa: F401
 
 try:
     from honegumi.core._honegumi import Honegumi
@@ -20,46 +27,8 @@ from honegumi.ax._ax import (
     option_rows,
 )
 
-# from honegumi.core._honegumi import Honegumi, get_deviating_options
 from honegumi.ax.utils import constants as cst
 
-# invalid_configs = invalidConfigs
-
-# option_rows_temp = optionRows
-
-# use to_py()
-
-# invalid_configs = [config.to_py() for config in invalid_configs]
-
-# # Ensure invalid_configs is a list of lists
-# if isinstance(invalid_configs, str):
-#     import ast
-
-#     invalid_configs = ast.literal_eval(invalid_configs)
-
-# option_rows = list(row.to_py() for row in option_rows_temp)
-
-# REVIEW: Not sure if below was working properly
-# # Convert JavaScript variables to Python data structures
-# option_rows = list(row.to_py() for row in optionRows)
-# invalid_configs = invalidConfigs.to_py()
-
-# SMOKE_TEST = True
-
-# if SMOKE_TEST:
-#     option_names_shortlist = [
-#         cst.OBJECTIVE_OPT_KEY,
-#         cst.CUSTOM_GEN_KEY,
-#         cst.MODEL_OPT_KEY,
-#         cst.EXISTING_DATA_KEY,
-#         cst.CUSTOM_THRESHOLD_KEY,
-#     ]
-
-#     option_rows = [
-#         option_row
-#         for option_row in option_rows
-#         if option_row["name"] in option_names_shortlist
-#     ]
 
 hg = Honegumi(
     cst,
@@ -67,9 +36,9 @@ hg = Honegumi(
     is_incompatible_fn=is_incompatible,
     add_model_specific_keys_fn=add_model_specific_keys,
     model_kwargs_test_override_fn=model_kwargs_test_override,
-    script_template_dir=os.path.join("honegumi", "ax"),
+    script_template_dir=os.path.join(prefix_dir, "honegumi", "ax"),
     script_template_name="main.py.jinja",
-    core_template_dir=os.path.join("honegumi", "core"),
+    core_template_dir=os.path.join(prefix_dir, "honegumi", "core"),
     core_template_name="honegumi.html.jinja",
     output_dir="docs/_static",
     output_name="honegumi.html",
@@ -238,3 +207,48 @@ update_text(None)
 
 
 # if label.htmlFor != rows[0].id: # NOTE: Not sure why this was here
+
+
+# invalid_configs = invalidConfigs
+
+# option_rows_temp = optionRows
+
+# use to_py()
+
+# invalid_configs = [config.to_py() for config in invalid_configs]
+
+# # Ensure invalid_configs is a list of lists
+# if isinstance(invalid_configs, str):
+#     import ast
+
+#     invalid_configs = ast.literal_eval(invalid_configs)
+
+# option_rows = list(row.to_py() for row in option_rows_temp)
+
+# REVIEW: Not sure if below was working properly
+# # Convert JavaScript variables to Python data structures
+# option_rows = list(row.to_py() for row in optionRows)
+# invalid_configs = invalidConfigs.to_py()
+
+# SMOKE_TEST = True
+
+# if SMOKE_TEST:
+#     option_names_shortlist = [
+#         cst.OBJECTIVE_OPT_KEY,
+#         cst.CUSTOM_GEN_KEY,
+#         cst.MODEL_OPT_KEY,
+#         cst.EXISTING_DATA_KEY,
+#         cst.CUSTOM_THRESHOLD_KEY,
+#     ]
+
+#     option_rows = [
+#         option_row
+#         for option_row in option_rows
+#         if option_row["name"] in option_names_shortlist
+#     ]
+
+# from js import invalidConfigs
+
+# from js import optionRows
+
+# from honegumi.core._honegumi import Honegumi, get_deviating_options
