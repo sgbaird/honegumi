@@ -9,27 +9,27 @@ packages = [ "jinja2", "pydantic", "black"]
 # NOTE: Should I be using absolute instead of relative paths?
 
 # Honegumi - switch comments
-"/honegumi/__init__.py" = "./honegumi/__init__.py"
+"./honegumi/__init__.py" = "./honegumi/__init__.py"
 # "https://raw.githubusercontent.com/sgbaird/honegumi/refs/heads/dev/honegumi/__init__.py" = "./honegumi/__init__.py"
 
 # Honegumi Ax - src for local, remove for online.
-"/honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
-"/honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
-"/honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
+"./honegumi/ax/__init__.py" = "./honegumi/ax/__init__.py"
+"./honegumi/ax/main.py.jinja" = "./honegumi/ax/main.py.jinja"
+"./honegumi/ax/_ax.py" = "./honegumi/ax/_ax.py"
 
 # Honegumi Ax Utils
-"/honegumi/ax/utils/__init__.py" = "./honegumi/ax/utils/__init__.py"
-"/honegumi/ax/utils/constants.py" = "./honegumi/ax/utils/constants.py"
+"./honegumi/ax/utils/__init__.py" = "./honegumi/ax/utils/__init__.py"
+"./honegumi/ax/utils/constants.py" = "./honegumi/ax/utils/constants.py"
 
 # Honegumi Core
-"/honegumi/core/__init__.py" = "./honegumi/core/__init__.py"
-"/honegumi/core/_honegumi.py" = "./honegumi/core/_honegumi.py"
-"/honegumi/core/honegumi.html.jinja" = "./honegumi/core/honegumi.html.jinja"
+"./honegumi/core/__init__.py" = "./honegumi/core/__init__.py"
+"./honegumi/core/_honegumi.py" = "./honegumi/core/_honegumi.py"
+"./honegumi/core/honegumi.html.jinja" = "./honegumi/core/honegumi.html.jinja"
 
 # Honegumi Core Utils
-"/honegumi/core/utils/constants.py" = "./honegumi/core/utils/constants.py"
-"/honegumi/core/utils/notebooks.py" = "./honegumi/core/utils/notebooks.py"
-"/honegumi/core/utils/testing.py" = "./honegumi/core/utils/testing.py"
+"./honegumi/core/utils/constants.py" = "./honegumi/core/utils/constants.py"
+"./honegumi/core/utils/notebooks.py" = "./honegumi/core/utils/notebooks.py"
+"./honegumi/core/utils/testing.py" = "./honegumi/core/utils/testing.py"
 
 # Honegumi CSS and JS
 "/docs/_static/honegumi_style.css" = "./_static/honegumi_style.css"
