@@ -32,6 +32,7 @@ def test_get_deviating_options():
         "custom_gen",
         "existing_data",
         "custom_threshold",
+        "task",
     ]
 
     current_config = {
@@ -40,6 +41,7 @@ def test_get_deviating_options():
         "custom_gen": False,
         "existing_data": False,
         "custom_threshold": False,
+        "task": "single",
     }
 
     option_rows_short = [
@@ -52,7 +54,7 @@ def test_get_deviating_options():
     print(deviating_options)
 
     # Add assertions to verify the expected deviating options
-    expected_deviating_options = {"custom_threshold": True}
+    expected_deviating_options = [{"custom_threshold": True}]
     if deviating_options != expected_deviating_options:
         raise AssertionError(
             f"Expected deviating options: {expected_deviating_options}, but got: {deviating_options}"  # noqa: E501
