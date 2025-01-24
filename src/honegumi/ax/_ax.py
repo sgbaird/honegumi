@@ -75,7 +75,7 @@ def is_incompatible(opt):
     model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
     # use_custom_threshold = opt.get(cst.CUSTOM_THRESHOLD_KEY, False)
     use_custom_threshold = opt[cst.CUSTOM_THRESHOLD_KEY]
-    objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "single"
+    objective_is_single = opt[cst.OBJECTIVE_OPT_KEY] == "Single"
 
     checks = [
         model_is_fully_bayesian and not use_custom_gen,
