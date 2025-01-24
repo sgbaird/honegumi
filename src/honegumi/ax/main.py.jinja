@@ -168,12 +168,12 @@ X_train = pd.DataFrame([
 # Define y_train (normally the values would be supplied directly instead of calculating here)
 y_train = [
     {{ objective_function }}(
-        row["x1"], 
+        row["x1"],
         row["x2"]
         {% if composition_constraint %}, row["x3"]{% endif %}
         {% if categorical %}, row["c1"]{% endif %}
         {% if task == "Multi" %}, row["task"]{% endif %}
-    ) 
+    )
     for _, row in X_train.iterrows()
 ]
 
