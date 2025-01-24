@@ -203,20 +203,6 @@
         </div>
 
 
-        <div class="row">
-            <label class="row-label">synchrony:</label>
-
-            <input type="radio" id="synchrony-single" name="synchrony" value="single" checked onclick="updateText()">
-            <label class="row-option" for="synchrony-single">single</label>
-
-            <input type="radio" id="synchrony-batch" name="synchrony" value="batch" onclick="updateText()">
-            <label class="row-option" for="synchrony-batch">batch</label>
-
-            <div class="tooltip-icon">&#9432;
-                <span class="tooltip-text arrow">Choose whether to perform <a href='curriculum/concepts/batch/single-vs-batch.md'>single or batch evaluations</a> for your Bayesian optimization campaign. Single evaluations analyze one candidate solution at a time, offering precise control and adaptability after each trial at the expense of more compute time. Batch evaluations, however, process several solutions in parallel, significantly reducing the number of optimization cycles but potentially diluting the specificity of adjustments. Batch evaluation is helpful in scenarios where it is advantageous to test several solutions simultaneously. Consider the nature of your evaluation tool when selecting between the two options.</span>
-            </div>
-        </div>
-
         <div class="row align-items-end">
             <p id="preamble"></p>
         </div>
@@ -229,6 +215,7 @@
             </div>
         </div>
     </form>
+
     <script src="_static/prism/prism.js"></script>
 </body>
 
