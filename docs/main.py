@@ -26,9 +26,7 @@ from honegumi.ax._ax import (
     model_kwargs_test_override,
     option_rows,
 )
-
 from honegumi.ax.utils import constants as cst
-
 
 hg = Honegumi(
     cst,
