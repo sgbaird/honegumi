@@ -9,6 +9,9 @@ dependencies:
   - ipython
   - ipykernel
   - ipywidgets
+  - numpy
+  - pandas
+  - pandoc
   - matplotlib
   - pip:
      - -e .[ax,dev]  # install git checkout of honegumi in editable mode

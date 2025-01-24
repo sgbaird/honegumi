@@ -1,99 +1,85 @@
-import pytest
-
-from honegumi.core._honegumi import (
-    fib,
-    get_rendered_template_stem,
-    main,
-    unpack_rendered_template_stem,
-)
+from honegumi.ax._ax import is_incompatible, option_rows
+from honegumi.ax.utils import constants as cst
+from honegumi.core._honegumi import Honegumi, main
 
 __author__ = "sgbaird"
 __copyright__ = "sgbaird"
 __license__ = "MIT"
 
 
-def test_fib():
-    """API Tests"""
-    assert fib(1) == 1
-    assert fib(2) == 1
-    assert fib(7) == 13
-    with pytest.raises(AssertionError):
-        fib(-10)
+def test_honegumi():
+
+    hg = Honegumi(cst, option_rows)
+    options_model = hg.OptionsModel(
+        objective="multi", model="Default", custom_gen=False, existing_data=True
+    )
+    result = hg.generate(options_model)
+    print(result)
+
+    print(options_model.model_fields["objective"].json_schema_extra["hidden"])
+    print(options_model.model_fields["objective"].json_schema_extra["disable"])
+
+    # print(list(selections.model_fields.values())[0].json_schema_extra["hidden"])
+
+    1 + 1
 
 
-def test_get_rendered_template_stem():
-    # Test case 1: Single option
-    data = {"option1": "value1"}
-    option_names = ["option1"]
-    expected_output = "option1-value1"
-    assert get_rendered_template_stem(data, option_names) == expected_output
+def test_get_deviating_options():
 
-    # Test case 2: Multiple options
-    data = {"option1": "value1", "option2": "value2", "option3": "value3"}
-    option_names = ["option1", "option2", "option3"]
-    expected_output = "option1-value1+option2-value2+option3-value3"
-    assert get_rendered_template_stem(data, option_names) == expected_output
+    option_names_shortlist = [
+        "objective",
+        "model",
+        "custom_gen",
+        "existing_data",
+        "custom_threshold",
+        "task",
+    ]
 
-    # Test case 3: Boolean option (True)
-    data = {"option1": True}
-    option_names = ["option1"]
-    expected_output = "option1-True"
-    assert get_rendered_template_stem(data, option_names) == expected_output
-
-    # Test case 4: Boolean option (False)
-    data = {"option1": False}
-    option_names = ["option1"]
-    expected_output = "option1-False"
-    assert get_rendered_template_stem(data, option_names) == expected_output
-
-    # Test case 5: Integer option
-    data = {"option1": 123}
-    option_names = ["option1"]
-    expected_output = "option1-123"
-    assert get_rendered_template_stem(data, option_names) == expected_output
-
-    # Test case 6: Empty option list
-    data = {"option1": "value1"}
-    option_names = []
-    expected_output = ""
-    assert get_rendered_template_stem(data, option_names) == expected_output
-
-
-def test_unpack_rendered_template_stem():
-    # Test case 1: Single option
-    rendered_template_stem = "option1-value1"
-    expected_output = {"option1": "value1"}
-    assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
-
-    # Test case 2: Multiple options
-    rendered_template_stem = "option1-value1+option2-value2+option3-value3"
-    expected_output = {
-        "option1": "value1",
-        "option2": "value2",
-        "option3": "value3",
+    current_config = {
+        "objective": "single",
+        "model": "Default",
+        "custom_gen": False,
+        "existing_data": False,
+        "custom_threshold": False,
+        "task": "single",
     }
-    assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
 
-    # # Test case 3: Multiple values for the same option
-    # rendered_template_stem = "option1-value1__option1-value2"
-    # expected_output = {"option1": ["value1", "value2"]}
-    # assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+    option_rows_short = [
+        option for option in option_rows if option["name"] in option_names_shortlist
+    ]
 
-    # # Test case 4: Empty input
-    # rendered_template_stem = ""
-    # expected_output = {}
-    # assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+    hg = Honegumi(cst, option_rows_short, is_incompatible_fn=is_incompatible)
 
-    # Test case 1: Boolean string "True"
-    rendered_template_stem = "option1-True"
-    expected_output = {"option1": True}
-    assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+    deviating_options = hg.get_deviating_options(current_config)
+    print(deviating_options)
 
-    # Test case 2: Boolean string "False"
-    rendered_template_stem = "option1-False"
-    expected_output = {"option1": False}
-    assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+    # Add assertions to verify the expected deviating options
+    expected_deviating_options = [{"custom_threshold": True}]
+    if deviating_options != expected_deviating_options:
+        raise AssertionError(
+            f"Expected deviating options: {expected_deviating_options}, but got: {deviating_options}"  # noqa: E501
+        )
 
+    1 + 1
+
+
+def test_main(capsys):
+    """CLI Tests"""
+    # capsys is a pytest fixture that allows asserts against stdout/stderr
+    # https://docs.pytest.org/en/stable/capture.html
+    main(["7"])
+    captured = capsys.readouterr()
+    assert "The 7-th Fibonacci number is 13" in captured.out
+
+
+if __name__ == "__main__":
+    """Execute the test suite"""
+    test_get_deviating_options()
+    test_honegumi()
+    # test_unpack_rendered_template_stem()
+
+
+# %% Code Graveyard
 
 # def test_results_collector():
 #     collector = ResultsCollector()
@@ -141,16 +127,139 @@ def test_unpack_rendered_template_stem():
 #     assert collector.skipped == 0
 #     assert collector.total_duration > 0
 
+# invalid_configs = [
+#     {
+#         "objective": "single",
+#         "model": "Default",
+#         "custom_gen": False,
+#         "existing_data": True,
+#     },
+#     {
+#         "objective": "single",
+#         "model": "Default",
+#         "custom_gen": True,
+#         "existing_data": True,
+#     },
+#     {
+#         "objective": "single",
+#         "model": "Fully Bayesian",
+#         "custom_gen": False,
+#         "existing_data": False,
+#     },
+#     {
+#         "objective": "single",
+#         "model": "Fully Bayesian",
+#         "custom_gen": False,
+#         "existing_data": True,
+#     },
+#     {
+#         "objective": "single",
+#         "model": "Fully Bayesian",
+#         "custom_gen": True,
+#         "existing_data": False,
+#     },
+#     {
+#         "objective": "single",
+#         "model": "Fully Bayesian",
+#         "custom_gen": True,
+#         "existing_data": True,
+#     },
+#     {
+#         "objective": "multi",
+#         "model": "Fully Bayesian",
+#         "custom_gen": False,
+#         "existing_data": False,
+#     },
+#     {
+#         "objective": "multi",
+#         "model": "Fully Bayesian",
+#         "custom_gen": False,
+#         "existing_data": True,
+#     },
+#     {
+#         "objective": "multi",
+#         "model": "Fully Bayesian",
+#         "custom_gen": True,
+#         "existing_data": False,
+#     },
+#     {
+#         "objective": "multi",
+#         "model": "Fully Bayesian",
+#         "custom_gen": True,
+#         "existing_data": True,
+#     },
+# ]
 
-def test_main(capsys):
-    """CLI Tests"""
-    # capsys is a pytest fixture that allows asserts against stdout/stderr
-    # https://docs.pytest.org/en/stable/capture.html
-    main(["7"])
-    captured = capsys.readouterr()
-    assert "The 7-th Fibonacci number is 13" in captured.out
+
+# def test_get_rendered_template_stem():
+#     # Test case 1: Single option
+#     data = {"option1": "value1"}
+#     option_names = ["option1"]
+#     expected_output = "option1-value1"
+#     assert get_rendered_template_stem(data, option_names) == expected_output
+
+#     # Test case 2: Multiple options
+#     data = {"option1": "value1", "option2": "value2", "option3": "value3"}
+#     option_names = ["option1", "option2", "option3"]
+#     expected_output = "option1-value1+option2-value2+option3-value3"
+#     assert get_rendered_template_stem(data, option_names) == expected_output
+
+#     # Test case 3: Boolean option (True)
+#     data = {"option1": True}
+#     option_names = ["option1"]
+#     expected_output = "option1-True"
+#     assert get_rendered_template_stem(data, option_names) == expected_output
+
+#     # Test case 4: Boolean option (False)
+#     data = {"option1": False}
+#     option_names = ["option1"]
+#     expected_output = "option1-False"
+#     assert get_rendered_template_stem(data, option_names) == expected_output
+
+#     # Test case 5: Integer option
+#     data = {"option1": 123}
+#     option_names = ["option1"]
+#     expected_output = "option1-123"
+#     assert get_rendered_template_stem(data, option_names) == expected_output
+
+#     # Test case 6: Empty option list
+#     data = {"option1": "value1"}
+#     option_names = []
+#     expected_output = ""
+#     assert get_rendered_template_stem(data, option_names) == expected_output
 
 
-if __name__ == "__main__":
-    """Execute the test suite"""
-    test_unpack_rendered_template_stem()
+# def test_unpack_rendered_template_stem():
+#     # Test case 1: Single option
+#     rendered_template_stem = "option1-value1"
+#     expected_output = {"option1": "value1"}
+#     assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+
+#     # Test case 2: Multiple options
+#     rendered_template_stem = "option1-value1+option2-value2+option3-value3"
+#     expected_output = {
+#         "option1": "value1",
+#         "option2": "value2",
+#         "option3": "value3",
+#     }
+#     assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+
+#     # # Test case 3: Multiple values for the same option
+#     # rendered_template_stem = "option1-value1__option1-value2"
+#     # expected_output = {"option1": ["value1", "value2"]}
+#     # assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+
+#     # # Test case 4: Empty input
+#     # rendered_template_stem = ""
+#     # expected_output = {}
+#     # assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+
+#     # Test case 1: Boolean string "True"
+#     rendered_template_stem = "option1-True"
+#     expected_output = {"option1": True}
+#     assert unpack_rendered_template_stem(rendered_template_stem) == expected_output
+
+#     # Test case 2: Boolean string "False"
+#     rendered_template_stem = "option1-False"
+#     expected_output = {"option1": False}
+#     assert unpack_rendered_template_stem(rendered_template_stem) == expected_output

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LTK on MicroPython</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+</head>
+<body>
+    <p>
+        This is a minimal template for
+        using <a target=_blank href="https://github.com/laffra/ltk">LTK</a>,
+        the PyScript Little Toolkit.
+    </p>
+    <p>
+        This example runs on MicroPython, which has no easy
+        module downloads,
+        so we include LTK in this example by cloning it from
+        <a href=https://github.com/laffra/ltk>GitHub</a>.
+        See <code>pyscript.toml</code> for more information.
+    </p>
+    <p>
+        More LTK examples can be found in the
+        <a target=_blank href=https://laffra.github.io/ltk/>LTK kitchensink</a>.
+    </p>
+
+    <script type="mpy" src="main.py" config="pyscript.toml">
+    </script>
+
+</body>
+</html>

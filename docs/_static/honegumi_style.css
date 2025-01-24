@@ -1,3 +1,22 @@
+.title-block .row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-bottom: 0.5em;
+}
+
+.title-block .logo {
+    height: 2.5em;
+    padding-left: 0.1em;
+}
+
+.title-block h2 {
+    margin-right: 0.2em;
+    font-size: 1.7em;
+    align-items: center;
+    margin-bottom: 0;
+}
+
 input[type="radio"] {
     opacity: 0;
     position: absolute;
@@ -12,10 +31,27 @@ form {
 
 .row {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch; /* Changed from center */
+    justify-content: flex-start; /* Changed from center */
     background-color: #f2f2f2;
     border: 0px solid #ccc;
+}
+
+.row-option {
+    display: inline-flex; /* Changed from inline-block */
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    padding: 5px;
+    cursor: pointer;
+    background-color: #f2f2f2;
+    text-align: center;
+    flex: 1; /* Changed from flex-basis */
+}
+
+/* Add this new class for three-option rows */
+.row-option-triple {
+    flex: 0.66; /* This will make each option take up 1/3 of the remaining space */
 }
 
 .row-label {
@@ -30,16 +66,6 @@ form {
     border-left: 3px solid #868686;
     flex-basis: 25.0%;
 
-}
-
-.row-option {
-    display: inline-block;
-    border: 1px solid #ccc;
-    padding: 5px;
-    cursor: pointer;
-    background-color: #f2f2f2;
-    text-align: center;
-    flex-basis: 35.0%;
 }
 
 input[type="radio"]:checked+label {
@@ -67,6 +93,7 @@ input[type="radio"]:checked+label {
     text-align: left;
     color: #FFF;
     background: #2C2C2C;
+    font-weight: normal;
   }
 
 .tooltip-text.active {

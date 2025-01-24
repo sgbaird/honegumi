@@ -153,6 +153,8 @@ exclude_patterns = [
     ".DS_Store",
     ".venv",
     "generated_notebooks/ax",
+    "honegumi.egg-info",
+    "**/__pycache__",
 ]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
@@ -214,7 +216,7 @@ html_context = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "logo.png"
+html_logo = "_static/logo.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -225,6 +227,8 @@ html_favicon = "_static/logo.ico"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+html_extra_path = ["honegumi.html", "main.py", "pyscript.toml", "../src"]
 
 nbsphinx_thumbnails = {
     "curriculum/tutorials/sobo/sobo": "_static/thumbnails/tutorials/sobo.jpg",
