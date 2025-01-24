@@ -1,10 +1,32 @@
+import numpy as np
 from ax.core.observation import ObservationFeatures
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
 from ax.modelbridge.registry import Models
 from ax.modelbridge.transforms.task_encode import TaskEncode
 from ax.modelbridge.transforms.unit_x import UnitX
 from ax.service.ax_client import AxClient, ObjectiveProperties
-from utils import measure_uniformity_A, measure_uniformity_B, set_seeds
+
+
+# Function to set seeds for reproducibility
+def set_seeds(seed=42):
+    np.random.seed(seed)
+
+
+# Branin function
+def branin(x1, x2):
+    a = 1.0
+    b = 5.1 / (4.0 * np.pi**2)
+    c = 5.0 / np.pi
+    r = 6.0
+    s = 10.0
+    t = 1.0 / (8.0 * np.pi)
+    return a * (x2 - b * x1**2 + c * x1 - r) ** 2 + s * (1 - t) * np.cos(x1) + s
+
+
+# Shifted and inverted Branin function
+def shifted_inverted_branin(x1, x2):
+    return -branin(x1 + 2.5, x2 + 2.5) + 300
+
 
 set_seeds()  # setting the random seed for reproducibility
 
@@ -32,22 +54,16 @@ ax_client.create_experiment(
     name="MultiTaskOp",
     parameters=[
         {
-            "name": "Temperature",
+            "name": "x1",
             "type": "range",
             "value_type": "float",
-            "bounds": [600.0, 1100.0],
+            "bounds": [-5.0, 10.0],
         },
         {
-            "name": "Pressure",
+            "name": "x2",
             "type": "range",
             "value_type": "float",
-            "bounds": [5.0, 300.0],
-        },
-        {
-            "name": "Gas_Flow",
-            "type": "range",
-            "value_type": "float",
-            "bounds": [10.0, 700.0],
+            "bounds": [0.0, 15.0],
         },
         {
             "name": "Task",
@@ -57,7 +73,7 @@ ax_client.create_experiment(
             "target_value": "B",
         },
     ],
-    objectives={"Uniformity": ObjectiveProperties(minimize=False)},
+    objectives={"Objective": ObjectiveProperties(minimize=False)},
 )
 
 for i in range(40):
@@ -66,24 +82,24 @@ for i in range(40):
     )
 
     if p["Task"] == "A":
-        u = measure_uniformity_A(p["Temperature"], p["Pressure"], F=p["Gas_Flow"])
+        u = branin(p["x1"], p["x2"])
     else:
-        u = measure_uniformity_B(p["Temperature"], p["Pressure"], F=p["Gas_Flow"])
+        u = shifted_inverted_branin(p["x1"], p["x2"])
 
-    ax_client.complete_trial(trial_index=trial_index, raw_data={"Uniformity": u})
+    ax_client.complete_trial(trial_index=trial_index, raw_data={"Objective": u})
 
 df = ax_client.get_trials_data_frame()
 df_A = df[df["Task"] == "A"]
 df_B = df[df["Task"] == "B"]
 
-# return the parameters as a dict for the row with the hihest uniformity
-optimal_parameters_A = df_A.loc[df_A["Uniformity"].idxmax()].to_dict()
-optimal_parameters_B = df_B.loc[df_B["Uniformity"].idxmax()].to_dict()
+# return the parameters as a dict for the row with the highest objective value
+optimal_parameters_A = df_A.loc[df_A["Objective"].idxmax()].to_dict()
+optimal_parameters_B = df_B.loc[df_B["Objective"].idxmax()].to_dict()
 
-uniformity_A = optimal_parameters_A["Uniformity"]
-uniformity_B = optimal_parameters_B["Uniformity"]
+objective_A = optimal_parameters_A["Objective"]
+objective_B = optimal_parameters_B["Objective"]
 
-print(f"Optimal parameters for reactor A: {optimal_parameters_A}")
-print(f"Optimal parameters for reactor B: {optimal_parameters_B}")
-print(f"Uniformity for reactor A: {uniformity_A}")
-print(f"Uniformity for reactor B: {uniformity_B}")
+print(f"Optimal parameters for task A: {optimal_parameters_A}")
+print(f"Optimal parameters for task B: {optimal_parameters_B}")
+print(f"Objective for task A: {objective_A}")
+print(f"Objective for task B: {objective_B}")

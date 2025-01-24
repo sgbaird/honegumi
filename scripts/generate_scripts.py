@@ -5,6 +5,9 @@ import honegumi.ax.utils.constants as cst
 
 from honegumi.ax._ax import (
     add_model_specific_keys,
+    create_and_clear_dir,
+    gen_combs_with_keys,
+    generate_lookup_dict,
     is_incompatible,
     model_kwargs_test_override,
     option_rows,
@@ -26,7 +29,8 @@ hg = Honegumi(
 )
 
 # convert boolean values within option_rows to strings
-for row in hg.jinja_option_rows:
+jinja_option_rows = [row for row in visible_option_rows]
+for row in jinja_option_rows:
     row["options"] = [str(opt) for opt in row["options"]]
 
 # Render the template with your variables

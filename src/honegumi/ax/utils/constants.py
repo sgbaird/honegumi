@@ -15,6 +15,7 @@ CONTEXTUAL_VAR_KEY = "context"
 FIDELITY_OPT_KEY = "fidelity"
 TASK_OPT_KEY = "task"
 SYNCHRONY_OPT_KEY = "synchrony"  # single, batch, asynchronous
+DUMMY_KEY = "dummy"
 MODEL_KWARGS_KEY = "model_kwargs"
 CUSTOM_KEY = "Custom"
 VISUALIZE_KEY = "visualize"

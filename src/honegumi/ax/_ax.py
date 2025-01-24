@@ -20,7 +20,9 @@ References:
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
 
+import argparse
 import logging
+import sys
 
 import honegumi.ax.utils.constants as cst
 import honegumi.core.utils.constants  # noqa: F401
@@ -52,24 +54,55 @@ except Exception:
 # when using this Python module as a library.
 
 
-def is_incompatible(opt):
+def fib(n):
+    """Fibonacci example function
+
+    Args:
+      n (int): integer
+
+    Returns:
+      int: n-th Fibonacci number
     """
-    Check if the given option dictionary contains incompatible options.
+    assert n > 0
+    a, b = 1, 1
+    for _i in range(n - 1):
+        a, b = b, a + b
+    return a
 
-    An option is considered incompatible if it cannot be used together with
-    another option. For example, if the model is fully Bayesian, it cannot use
-    the custom generator (`use_custom_gen`). Similarly, if the objective is
-    single, it cannot use the custom threshold (`use_custom_threshold`).
 
-    Parameters
-    ----------
-    opt : dict
-        The option dictionary to check for incompatibility.
+# # Create an environment with the template directory
+# template_dir = "."
+# env = Environment(loader=FileSystemLoader(template_dir))
 
-    Returns
-    -------
-    bool
-        True if any incompatibility is found among the options, False otherwise.
+# # Load the template file
+# template_name = "randint.py.jinja"
+# template = env.get_template(template_name)
+
+# # Define the data to be rendered
+# data = {
+#     "min_value": 1,
+#     "max_value": 10,
+# }
+
+# # print the rendered template
+# print(template.render(data))
+
+
+# ---- CLI ----
+# The functions defined in this section are wrappers around the main Python
+# API allowing them to be called directly from the terminal as a CLI
+# executable/script.
+
+
+def parse_args(args):
+    """Parse command line parameters
+
+    Args:
+      args (List[str]): command line parameters as list of strings
+          (for example  ``["--help"]``).
+
+    Returns:
+      :obj:`argparse.Namespace`: command line parameters namespace
     """
     use_custom_gen = opt[cst.CUSTOM_GEN_KEY]
     model_is_fully_bayesian = opt[cst.MODEL_OPT_KEY] == cst.FULLYBAYESIAN_KEY
@@ -85,72 +118,11 @@ def is_incompatible(opt):
     return any(checks)
 
 
-def add_model_specific_keys(option_names, opt):
-    """Add model-specific keys to the options dictionary (in-place).
+def setup_logging(loglevel):
+    """Setup basic logging
 
-    This function adds model-specific keys to the options dictionary `opt`. For
-    example, if use_custom_gen is a hidden variable, and the model is
-    FULLYBAYESIAN, then use_custom_gen should be True.
-
-    It also sets the value of the key `model_kwargs` based on the value of
-    `MODEL_OPT_KEY` in `opt`.
-
-    Parameters
-    ----------
-    option_names : list
-        A list of option names.
-    opt : dict
-        The options dictionary.
-
-    Examples
-    --------
-    The following example is demonstrative, the range of cases may be expanded
-    later.
-
-    >>> option_names = [
-    ...     "objective",
-    ...     "model",
-    ...     "custom_gen",
-    ...     "existing_data",
-    ...     "sum_constraint",
-    ...     "order_constraint",
-    ...     "linear_constraint",
-    ...     "composition_constraint",
-    ...     "categorical",
-    ...     "custom_threshold",
-    ...     "fidelity",
-    ...     "synchrony",
-    ... ]
-    >>> opt = {
-    ...     "objective": "single",
-    ...     "model": "Default",
-    ...     "existing_data": False,
-    ...     "sum_constraint": False,
-    ...     "order_constraint": False,
-    ...     "linear_constraint": False,
-    ...     "composition_constraint": False,
-    ...     "categorical": False,
-    ...     "custom_threshold": False,
-    ...     "fidelity": "single",
-    ...     "synchrony": "single",
-    ... }
-
-    >>> add_model_specific_keys(option_names, opt)
-    {
-        "objective": "single",
-        "model": "Default",
-        "existing_data": False,
-        "sum_constraint": False,
-        "order_constraint": False,
-        "linear_constraint": False,
-        "composition_constraint": False,
-        "categorical": False,
-        "custom_threshold": False,
-        "fidelity": "single",
-        "synchrony": "single",
-        "custom_gen": False,
-        "model_kwargs": {},
-    }
+    Args:
+      loglevel (int): minimum loglevel for emitting messages
     """
     # opt.setdefault(cst.CUSTOM_GEN_KEY, opt[cst.MODEL_OPT_KEY] ==
     # cst.FULLYBAYESIAN_KEY) NOTE: setdefault was conflicting with
@@ -181,19 +153,29 @@ def add_model_specific_keys(option_names, opt):
     ), f"option_names {option_names} not in opt {opt}"
 
 
-def model_kwargs_test_override(render_datum):
-    """make sure tests run faster for SAASBO"""
-    model_kwargs = render_datum[cst.MODEL_KWARGS_KEY]
-    if "num_samples" in model_kwargs and "warmup_steps" in model_kwargs:
-        model_kwargs["num_samples"] = 16
-        model_kwargs["warmup_steps"] = 32
-    return render_datum
+def main(args):
+    """Wrapper allowing :func:`fib` to be called with string arguments in a CLI fashion
+
+    Instead of returning the value from :func:`fib`, it prints the result to the
+    ``stdout`` in a nicely formatted message.
+
+    Args:
+      args (List[str]): command line parameters as list of strings
+          (for example  ``["--verbose", "42"]``).
+    """
+    args = parse_args(args)
+    setup_logging(args.loglevel)
+    _logger.debug("Starting crazy calculations...")
+    print(f"The {args.n}-th Fibonacci number is {fib(args.n)}")
+    _logger.info("Script ends here")
 
 
-# NOTE: Moved to
-# # NOTE: 'model' tooltip can use some clarification once
-# # https://github.com/facebook/Ax/issues/2411 is resolved
-# tooltips = json.load(open("scripts/resources/tooltips.json"))
+def run():
+    """Calls :func:`main` passing the CLI arguments extracted from :obj:`sys.argv`
+
+    This function can be used as entry point to create console scripts with setuptools.
+    """
+    main(sys.argv[1:])
 
 
 # opts stands for options
@@ -326,4 +308,9 @@ option_rows = [
     # TODO: Consider adding "human-in-the-loop" toggle, or something else related to start/stop or blocking to wait for human input # noqa E501 # NOTE: AC Microcourses
 ]
 
-extra_jinja_var_names = [cst.MODEL_KWARGS_KEY, honegumi.core.utils.constants.DUMMY_KEY]
+    # After installing your project with pip, users can also run your Python
+    # modules as scripts via the ``-m`` flag, as defined in PEP 338::
+    #
+    #     python -m honegumi.ax.skeleton 42
+    #
+    run()
