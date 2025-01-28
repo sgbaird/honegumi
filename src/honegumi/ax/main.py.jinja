@@ -309,9 +309,9 @@ for i in range({{ num_iter }}):
     {% elif synchrony == "Single" and task == "Multi" %}
     parameterization, trial_index = ax_client.get_next_trial(fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     {% elif synchrony == "Batch" and task == "Multi" %}
-    parameterization, trial_index = ax_client.get_next_trial(batch_size, fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
+    parameterizations, optimization_complete = ax_client.get_next_trials(batch_size, fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     for trial_index, parameterization in list(parameterizations.items()):
-    {% else %}
+    {% else %} {# if batch and task = singlee #}
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size)
     for trial_index, parameterization in list(parameterizations.items()):
     {%- endif %}
