@@ -342,6 +342,9 @@ best_parameters, metrics = ax_client.get_best_parameters()
 # Plot results
 objectives = ax_client.objective_names
 df = ax_client.get_trials_data_frame()
+{%- if synchrony == "Batch" and objective == "Single"%}
+df.index = df.index // batch_size
+{%- endif %}
 
 fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
 
@@ -374,6 +377,8 @@ pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
 ax.scatter(df[objectives[0]], df[objectives[1]], fc="None", ec="k", label="Observed")
 ax.plot(pareto[objectives[0]], pareto[objectives[1]], color="#0033FF", lw=2, label="Pareto Front")
 ax.set_title(f"Task {task}")
+ax.set_xlabel(objectives[0])
+ax.set_ylabel(objectives[1])
 {%- else %}
 pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=False)
 pareto_data = [p[1][0] for p in pareto.values()]
@@ -381,10 +386,10 @@ pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
 
 ax.scatter(df[objectives[0]], df[objectives[1]], fc="None", ec="k", label="Observed")
 ax.plot(pareto[objectives[0]], pareto[objectives[1]], color="#0033FF", lw=2, label="Pareto Front")
-{%- endif %}
-
 ax.set_xlabel(objectives[0])
 ax.set_ylabel(objectives[1])
+{%- endif %}
+
 ax.legend()
 plt.show()
 {% endif %}
