@@ -332,7 +332,7 @@ for i in range({{ num_iter }}):
     {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}
     {{ indent }}    )
     {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
-{% if objective == "Multi" -%}
+{% if objective == "Multi" and task != "Multi" -%}
 pareto_results = ax_client.get_pareto_optimal_parameters()
 {% else %}
 best_parameters, metrics = ax_client.get_best_parameters()
