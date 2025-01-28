@@ -343,41 +343,48 @@ best_parameters, metrics = ax_client.get_best_parameters()
 objectives = ax_client.objective_names
 df = ax_client.get_trials_data_frame()
 
-{%- if task == "Multi" and objective == "Single" %}
-task = "A"  # specify task results to plot
-df = df[df.task == task]
-{%- endif %}
-{%- if synchrony == "Batch" %}
-df.index = df.index // batch_size
-best_to_trial = np.minimum.accumulate(df.groupby(df.index).min())
-trials = df.index.unique()
-{%- else %}
-best_to_trial = np.minimum.accumulate(df)
-trials = df.index
-{%- endif %}
-
 fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
 
 {%- if objective == "Single" %}
-ax.scatter(df.index, df[objectives], ec="k", fc="none", label="Observed")
-ax.plot(trials, best_to_trial[objectives], color="#0033FF", lw=2, label="Best to Trial")
 {%- if task == "Multi" %}
+task = "A"  # specify task results to plot
+df = df[df.task == task]
+ax.scatter(df.index, df[objectives], ec="k", fc="none", label="Observed")
+ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, label="Best to Trial")
 ax.set_title(f"Task {task}")
+{%- else %}
+ax.scatter(df.index, df[objectives], ec="k", fc="none", label="Observed")
+ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, label="Best to Trial")
 {%- endif %}
 ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
-{%- elif task != "Multi" %}
+{%- elif task == "Multi" and objective == "Multi" %}
+def get_pareto(df, task='A'):
+    t = df[df['task'] == task]
+    m = t.iloc[:,4:6].values  # objectives are always cols 4,5
+    p = ~np.any(np.all(m[:,None] > m, axis=2), axis=1)
+    return [(dict(r[df.columns[6:-1]]), dict(r[df.columns[4:6]])) for i,r in t[p].iterrows()]
+
+task = "A"
+df = df[df.task == task]
+pareto = get_pareto(df, task)
+pareto_data = [p[1] for p in pareto]
+pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
+
+ax.scatter(df[objectives[0]], df[objectives[1]], fc="None", ec="k", label="Observed")
+ax.plot(pareto[objectives[0]], pareto[objectives[1]], color="#0033FF", lw=2, label="Pareto Front")
+ax.set_title(f"Task {task}")
+{%- else %}
 pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=False)
 pareto_data = [p[1][0] for p in pareto.values()]
 pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
 
 ax.scatter(df[objectives[0]], df[objectives[1]], fc="None", ec="k", label="Observed")
 ax.plot(pareto[objectives[0]], pareto[objectives[1]], color="#0033FF", lw=2, label="Pareto Front")
+{%- endif %}
 
 ax.set_xlabel(objectives[0])
 ax.set_ylabel(objectives[1])
-{%- endif %}
-
 ax.legend()
 plt.show()
 {% endif %}
