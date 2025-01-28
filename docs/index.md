@@ -20,7 +20,7 @@ aria-label="Issue sgbaird/honegumi on GitHub">Issue</a>
 > Honegumi ('ho-nay-goo-mee'), which means "skeletal framework" in Japanese, is a package for interactively creating minimal working examples for advanced Bayesian optimization topics.
 
 ```{tip}
-New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c)and explore our concept guides on key optimization principles, from single-objective to multi-task approaches.
+New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our concept guides and coding tutorials on key optimization principles.
 ```
 
 Real-world chemistry and materials science optimization tasks are complex! Noise, objectives, tasks, parameters, parameter types, and constraints riddle our optimization campaigns. However, applications of state-of-the-art algorithms to these materials science tasks have been limited, even for veteran materials informatics practitioners. Other logistical issues arise, such as using existing data, embedding physical descriptors, and ad-hoc modification of search spaces. To address these challenges, we present Honegumi, an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).
