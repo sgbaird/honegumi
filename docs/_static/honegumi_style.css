@@ -44,7 +44,7 @@ form {
     border: 1px solid #ccc;
     padding: 5px;
     cursor: pointer;
-    background-color: #f2f2f2;
+    /* background-color: #f2f2f2; */
     text-align: center;
     flex: 1; /* Changed from flex-basis */
 }

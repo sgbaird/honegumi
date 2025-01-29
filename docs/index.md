@@ -22,6 +22,7 @@
 <div style="text-align: center;">
     <em>Honegumi ('ho-nay-goo-mee'), which means "skeletal framework" in Japanese, is a package for interactively creating minimal working examples for advanced Bayesian optimization topics.</em>
 </div>
+<br>
 
 ```{tip}
 New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) and [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) on key optimization principles.
