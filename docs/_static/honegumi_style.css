@@ -11,7 +11,7 @@
 }
 
 .title-block h2 {
-    margin-right: 0.2em;
+    margin-right: 0.1em;
     font-size: 1.7em;
     align-items: center;
     margin-bottom: 0;
@@ -33,7 +33,7 @@ form {
     display: inline-flex;
     align-items: stretch; /* Changed from center */
     justify-content: flex-start; /* Changed from center */
-    background-color: #f2f2f2;
+    /* background-color: #f2f2f2; */
     border: 0px solid #ccc;
 }
 
@@ -64,7 +64,7 @@ form {
     text-align: left;
     border: none;
     border-left: 3px solid #868686;
-    flex-basis: 25.0%;
+    flex-basis: 26.0%;
 
 }
 
