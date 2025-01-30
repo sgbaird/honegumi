@@ -1,4 +1,4 @@
-{% if existing_data or visualize %}
+{%- if existing_data or visualize %}
 import numpy as np
 import pandas as pd
 from ax.service.ax_client import AxClient, ObjectiveProperties
@@ -392,4 +392,4 @@ ax.set_ylabel(objectives[1])
 
 ax.legend()
 plt.show()
-{% endif %}
+{%- endif %}
