@@ -30,7 +30,7 @@ New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Opti
 
 Real-world chemistry and materials science optimization tasks are complex! Noise, objectives, tasks, parameters, parameter types, and constraints riddle our optimization campaigns. However, applying state-of-the-art algorithms to these tasks isn't trivial, even for veteran materials informatics practitioners. Additionally, python libraries can be cumbersome to learn and use serving as a barrier to entry for interested users. To address these challenges, we present Honegumi, an interactive script generator for materials-relevant Bayesian optimization using the [Ax Platform](https://ax.dev/).
 
-**Create your optimization script using the grid below!** 
+**Create your optimization script using the grid below!**
  Select options from each row to generate a code template. Hover over the **&#9432;** icons to get more information and see whether it’s a good choice.
 
 ```{raw} html
