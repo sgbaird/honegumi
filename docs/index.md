@@ -105,6 +105,7 @@ Zenodo snapshots of the GitHub releases (beginning with `v0.3.2`) are available 
 
 🔰 Tutorials <tutorials>
 📖 Concepts <concepts>
+🦾 API Usage <api-usage>
 🧑‍💻 Development <development>
 🌐 GitHub Source <https://github.com/sgbaird/honegumi>
 ```
