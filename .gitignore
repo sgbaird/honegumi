@@ -54,3 +54,4 @@ venv/*
 .conda*/
 .python-version
 reports/~$honegumi-logo.pptx
+docs/curriculum/api-usage/multi_objective_existing_data.py
