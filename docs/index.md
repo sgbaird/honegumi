@@ -24,7 +24,7 @@
 </div>
 <br>
 
-# Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
+# Honegumi — Accelerating the adoption of Bayesian optimization for science [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
 
 ```{tip}
 New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) and [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) on key optimization principles.
@@ -49,7 +49,7 @@ If you like this tool, please consider [starring it on GitHub](https://github.co
 
 ## Concept Docs and Tutorials
 
-Understanding Bayesian optimization requires both theoretical knowledge and practical experience. Our documentation is structured to support this dual approach. The [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) provide in-depth explanations of fundamental principles, from the basics of single-objective optimization to advanced topics like multitask optimization and fully Bayesian Gaussian process models. These theoretical foundations are complemented by hands-on [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) that demonstrate real-world applications across various materials science domains.
+Understanding Bayesian optimization requires both theoretical knowledge and practical experience. Our documentation is structured to support this dual approach. The [concept guides](./concepts.md) provide in-depth explanations of fundamental principles, from the basics of single-objective optimization to advanced topics like multitask optimization and fully Bayesian Gaussian process models. These theoretical foundations are complemented by hands-on [coding tutorials](./tutorials.md) that demonstrate real-world applications across various materials science domains.
 
 The tutorials walk you through practical scenarios such as optimizing 3D printed materials, developing biodegradable polymers with specific strength requirements, and efficiently screening anti-corrosion coatings. Each tutorial bridges theory and practice, showing how to apply advanced optimization concepts to solve tangible engineering challenges. Whether you're new to Bayesian optimization or looking to implement sophisticated multi-objective strategies, our documentation provides the guidance needed to successfully apply these techniques to your specific materials science challenges.
 
@@ -72,6 +72,10 @@ While Large Language Models excel at pattern recognition, they often struggle to
 ### Tutorial #2 walkthrough
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/T5DWycXu1SY?si=dLl83jYQSntXOPqx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+### API Usage
+
+Have a look at our
 
 ## Citing
 
