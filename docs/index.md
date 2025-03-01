@@ -24,7 +24,7 @@
 </div>
 <br>
 
-# Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences
+# Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
 
 ```{tip}
 New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) and [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) on key optimization principles.
@@ -72,6 +72,31 @@ While Large Language Models excel at pattern recognition, they often struggle to
 ### Tutorial #2 walkthrough
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/T5DWycXu1SY?si=dLl83jYQSntXOPqx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## Citing
+
+If you find Honegumi useful, please consider citing:
+
+> Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *arXiv*, February 4, 2025. https://doi.org/10.48550/arXiv.2502.06815.
+
+```bibtex
+@misc{baird_honegumi_2025,
+  title = {Honegumi: {{An Interface}} for {{Accelerating}} the {{Adoption}} of {{Bayesian Optimization}} in the {{Experimental Sciences}}},
+  shorttitle = {Honegumi},
+  author = {Baird, Sterling G. and Falkowski, Andrew R. and Sparks, Taylor D.},
+  year = {2025},
+  month = feb,
+  number = {arXiv:2502.06815},
+  eprint = {2502.06815},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2502.06815},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Condensed Matter - Materials Science},
+}
+```
+
+Zenodo snapshots of the GitHub releases (beginning with `v0.3.2`) are available at [![DOI](https://zenodo.org/badge/658136354.svg)](https://doi.org/10.5281/zenodo.14949415)
 
 ## Contents
 
