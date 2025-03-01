@@ -24,6 +24,8 @@
 </div>
 <br>
 
+#
+
 ```{tip}
 New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) and [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) on key optimization principles.
 ```
@@ -54,12 +56,22 @@ The tutorials walk you through practical scenarios such as optimizing 3D printed
 ## A Perfect Pairing with LLMs
 
 ```{tip}
-Use Honegumi with ChatGPT to create non-halucinatory, custom Bayesian optimization scripts. See an [example ChatGPT transcript](https://chat.openai.com/share/f1169938-f891-4060-8034-b137e82cd5af) and the two-minute video below.
+Use Honegumi with ChatGPT to create non-halucinatory, custom Bayesian optimization scripts. See an [example ChatGPT transcript](https://chat.openai.com/share/f1169938-f891-4060-8034-b137e82cd5af) and the videos below.
 ```
 
 While Large Language Models excel at pattern recognition, they often struggle to create reliable Bayesian optimization scripts from scratch. Honegumi complements LLMs by providing validated templates that can then be customized through LLM assistance. Watch below as we demonstrate this workflow by optimizing a cookie recipe using Honegumi and ChatGPT:
 
+### Basic demo: Cookie Optimization (no audio)
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/rnI2BvGgP9o?si=HGODRbP19MlkC662" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+### Overview
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1d1rlCyk85g?si=QF_Yn0I3RCddgMP9" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+### Tutorial #2 walkthrough
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/T5DWycXu1SY?si=dLl83jYQSntXOPqx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Contents
 
