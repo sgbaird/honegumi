@@ -26,9 +26,9 @@
 
 <!-- TODO: refactor this paragraph to emphasize general API tutorial creation, and then focus in on materials science as one example that I'll be focusing on here -->
 
-# Honegumi
+# Honegumi [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
 
-Real-world materials science optimization tasks are complex! To cite a few examples:
+Honegumi is an interface for accelerating the adoption of Bayesian optimization in the experimental sciences, such as materials science. Real-world tasks can get quite complex:
 
 | Topic           | Description |
 | --------------- | ----------- |
@@ -36,7 +36,6 @@ Real-world materials science optimization tasks are complex! To cite a few examp
 | Multi-fidelity  | Some measurements are higher quality but much more costly |
 | Multi-objective | Almost always, tasks have multiple properties that are important |
 | High-dimensional| Like finding the proverbial "needle-in-a-haystack", the search spaces are enormous |
-| Constraints     | Not all combinations of parameters are valid (i.e., constraints) |
 | Mixed-variable  | Often there is a mixture of numerical and categorical variables |
 
 However, applications of state-of-the-art algorithms to these materials science tasks have been limited. Meta's Adaptive Experimentation (Ax) platform is one of the few optimization platforms capable of handling these challenges without oversimplification. While Ax and its backbone, BoTorch, have gained traction in chemistry and materials science, advanced implementations are still challenging, even for veteran materials informatics practitioners. In addition to combining multiple algorithms, there are other logistical issues, such as using existing data, embedding physical descriptors, and modifying search spaces. To address these challenges, we present Honegumi (骨組み or "ho-neh-goo-mee"): An interactive "skeleton code" generator for materials-relevant optimization. Similar to [PyTorch's installation docs](https://pytorch.org/get-started/locally/), users interactively select advanced topics to generate robust templates that are unit-tested with invalid configurations crossed out. Honegumi is the first Bayesian optimization template generator of its kind, and we envision that this tool will reduce the barrier to entry for applying advanced Bayesian optimization to real-world materials science tasks.
@@ -47,6 +46,31 @@ You don't need to install anything. Just navigate to https://honegumi.readthedoc
 
 If you're interested in collaborating, see [the contribution
 guidelines](https://github.com/sgbaird/honegumi/blob/main/CONTRIBUTING.md) and [the high-level roadmap of Honegumi's development](https://github.com/sgbaird/honegumi/discussions/2).
+
+## Citing
+
+If you find Honegumi useful, please consider citing:
+
+> Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *arXiv*, February 4, 2025. https://doi.org/10.48550/arXiv.2502.06815.
+
+```bibtex
+@misc{baird_honegumi_2025,
+  title = {Honegumi: {{An Interface}} for {{Accelerating}} the {{Adoption}} of {{Bayesian Optimization}} in the {{Experimental Sciences}}},
+  shorttitle = {Honegumi},
+  author = {Baird, Sterling G. and Falkowski, Andrew R. and Sparks, Taylor D.},
+  year = {2025},
+  month = feb,
+  number = {arXiv:2502.06815},
+  eprint = {2502.06815},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2502.06815},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Condensed Matter - Materials Science},
+}
+```
+
+Zenodo snapshots of the GitHub releases (beginning with `v0.3.2`) are available at [![DOI](https://zenodo.org/badge/658136354.svg)](https://doi.org/10.5281/zenodo.14949415)
 
 ## License
 
