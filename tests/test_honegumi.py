@@ -25,7 +25,6 @@ def test_honegumi():
 
 
 def test_get_deviating_options():
-
     option_names_shortlist = [
         "objective",
         "model",
@@ -51,16 +50,14 @@ def test_get_deviating_options():
     hg = Honegumi(cst, option_rows_short, is_incompatible_fn=is_incompatible)
 
     deviating_options = hg.get_deviating_options(current_config)
-    print(deviating_options)
+    print("Deviating options:", deviating_options)  # Debug print
 
     # Add assertions to verify the expected deviating options
     expected_deviating_options = [{"custom_threshold": True}]
     if deviating_options != expected_deviating_options:
         raise AssertionError(
-            f"Expected deviating options: {expected_deviating_options}, but got: {deviating_options}"  # noqa: E501
+            f"Expected deviating options: {expected_deviating_options}, but got: {deviating_options}"  # noqa
         )
-
-    1 + 1
 
 
 def test_main(capsys):
