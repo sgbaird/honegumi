@@ -24,7 +24,7 @@
 </div>
 <br>
 
-#
+# Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences
 
 ```{tip}
 New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) and [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) on key optimization principles.
