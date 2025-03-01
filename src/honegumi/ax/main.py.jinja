@@ -103,9 +103,9 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "Multi" 
 
 {# add MOO to FULLYBAYESIAN if multi-objective #}
 {% if model == "Fully Bayesian" and objective == "Multi" -%}
-    {% set model_name = "FULLYBAYESIANMOO" %}
+    {% set model_name = "SAASBO" %}
 {% elif model == "Fully Bayesian" and objective != "Multi" -%}
-    {% set model_name = "FULLYBAYESIAN" %}
+    {% set model_name = "SAASBO" %} {# apparently this handles both soo and moo, https://ax.dev/docs/tutorials/saasbo_nehvi/ #}
 {% else %}
     {% set model_name = "BOTORCH_MODULAR" %}
 {%- endif %}
@@ -213,8 +213,8 @@ gs = GenerationStrategy(
             model_kwargs={
                 {% if task == "Multi" %}
                     {% if model == "Fully Bayesian" %}
-                        "num_samples": 512,
-                        "warmup_steps": 512,
+                        {# "num_samples": 512, #} {# https://github.com/sgbaird/honegumi/issues/87 #}
+                        {# "warmup_steps": 512, #}
                         "transforms": Specified_Task_ST_MTGP_trans
                     {% elif model == "Custom" %}
                         "botorch_acqf_class": UpperConfidenceBound,
@@ -223,8 +223,8 @@ gs = GenerationStrategy(
                         "transforms": Specified_Task_ST_MTGP_trans
                     {% endif %}
                 {% elif model == "Fully Bayesian" %}
-                    "num_samples": 512,
-                    "warmup_steps": 512
+                    {# "num_samples": 512, #} {# https://github.com/sgbaird/honegumi/issues/87 #}
+                    {# "warmup_steps": 512 #}
                 {% elif model == "Custom" %}
                     "botorch_acqf_class": UpperConfidenceBound
                 {% else %}
