@@ -241,7 +241,7 @@ nbsphinx_thumbnails = {
     "curriculum/concepts/freq-vs-bayes/freq-vs-bayes": "_static/thumbnails/concepts/fully-bayesian.png",
     "curriculum/concepts/batch/single-vs-batch": "_static/thumbnails/concepts/batch.png",
     "curriculum/concepts/multitask/multitask": "_static/thumbnails/concepts/multitask.png",
-    "curriculum/api_usage/honegumi-api-getting-started": "_static/thumbnails/api-usage/api-thumbnail.png",
+    "curriculum/api-usage/honegumi-api-getting-started": "_static/thumbnails/api-usage/api-thumbnail.png",
 }
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
