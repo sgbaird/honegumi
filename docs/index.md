@@ -75,7 +75,7 @@ While Large Language Models excel at pattern recognition, they often struggle to
 
 ### API Usage
 
-Have a look at our
+Have a look at our [API usage tutorials](./api-usage.md)
 
 ## Citing
 
