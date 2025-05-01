@@ -1,9 +1,9 @@
 from pprint import pprint
-from honegumi.core._honegumi import Honegumi
-from honegumi.ax.utils import constants as cst
-from honegumi.ax._ax import option_rows
+
 import honegumi
-import os
+from honegumi.ax._ax import option_rows
+from honegumi.ax.utils import constants as cst
+from honegumi.core._honegumi import Honegumi
 
 # Set up template paths
 script_template_dir = honegumi.ax.__path__[0]
@@ -23,18 +23,18 @@ hg = Honegumi(
 
 # Configure for OER catalyst optimization
 options_model = hg.OptionsModel(
-    objective="multi",               # For multiple KPIs (efficiency, durability, cost)
-    model="Default",                 # Standard GP is suitable for this problem
-    task="Single",                   # Single task optimization
-    categorical=True,                # For electrolyte type parameter
-    sum_constraint=True,             # For metal fractions summing to 1
-    order_constraint=False,          # No order constraints specified
-    linear_constraint=False,         # No linear constraints beyond composition
-    composition_constraint=True,     # Metal fractions must sum to 1
-    custom_threshold=True,           # For minimum performance criteria
-    existing_data=False,             # No historical data available
-    synchrony="Single",              # Process one catalyst composition at a time
-    visualize=True                   # Helpful for tracking optimization progress
+    objective="multi",  # For multiple KPIs (efficiency, durability, cost)
+    model="Default",  # Standard GP is suitable for this problem
+    task="Single",  # Single task optimization
+    categorical=True,  # For electrolyte type parameter
+    sum_constraint=True,  # For metal fractions summing to 1
+    order_constraint=False,  # No order constraints specified
+    linear_constraint=False,  # No linear constraints beyond composition
+    composition_constraint=True,  # Metal fractions must sum to 1
+    custom_threshold=True,  # For minimum performance criteria
+    existing_data=False,  # No historical data available
+    synchrony="Single",  # Process one catalyst composition at a time
+    visualize=True,  # Helpful for tracking optimization progress
 )
 
 # Print the configured options for review

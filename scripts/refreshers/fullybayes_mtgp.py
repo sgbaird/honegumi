@@ -1,10 +1,10 @@
 import numpy as np
-from ax.service.ax_client import AxClient, ObjectiveProperties
 from ax.modelbridge.factory import Models
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
+from ax.models.torch.botorch_modular.surrogate import SurrogateSpec
+from ax.service.ax_client import AxClient, ObjectiveProperties
 from ax.service.utils.instantiation import FixedFeatures
 from botorch.models.fully_bayesian_multitask import SaasFullyBayesianMultiTaskGP
-from ax.models.torch.botorch_modular.surrogate import SurrogateSpec
 
 # Minimal multi-task, fully Bayesian MWE
 
