@@ -1,4 +1,3 @@
-import numpy as np
 from ax.modelbridge.factory import Models
 from ax.modelbridge.generation_strategy import GenerationStep, GenerationStrategy
 from ax.models.torch.botorch_modular.surrogate import ModelConfig, SurrogateSpec
