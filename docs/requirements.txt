@@ -1,4 +1,5 @@
 black
+ipykernel
 Jinja2
 jupytext
 myst-parser[linkify]
