@@ -1,3 +1,4 @@
+ax-platform==0.5.0
 black
 ipykernel
 Jinja2
