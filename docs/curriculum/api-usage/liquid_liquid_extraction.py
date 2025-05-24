@@ -155,7 +155,7 @@ print(f"Stirring Speed: {stirring_speed}")
 print(f"Stirring Time: {stirring_time}")
 print(f"Temperature: {temperature}")
 
-# # Run evaluation
+# # Run evaluation (assumes optimization of a Python function)
 # results = evaluate_extraction(
 #     aqueous_composition,
 #     organic_composition,
