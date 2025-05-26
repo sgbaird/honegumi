@@ -59,7 +59,7 @@ for i in range(23):
     # extract parameters
     x1 = parameterization["x1"]
     x2 = parameterization["x2"]
-    x3 = total - (x1 + x2)  # composition constraint: x1 + x2 + x3 == total
+    x3 = total - (x1 + x2)  # composition constraint: x1 + x2 + x3 == total # noqa: E501
 
     c1 = parameterization["c1"]
 
