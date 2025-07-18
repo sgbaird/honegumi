@@ -13,6 +13,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
@@ -187,3 +188,15 @@ print(f"  TPSA: {best_result['tpsa']:.1f}")
 print("\nImprovement over iterations:")
 print(f"  Initial best: {results_df['qed_score'][:5].max():.3f}")
 print(f"  Final best: {results_df['qed_score'].max():.3f}")
+
+# Create best so far trace plot
+best_so_far = results_df['qed_score'].cummax()
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, len(best_so_far) + 1), best_so_far, 'b-', linewidth=2, marker='o', markersize=4)
+plt.xlabel('Iteration')
+plt.ylabel('Best QED Score So Far')
+plt.title('Bayesian Optimization Progress')
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig('best_so_far_trace.png', dpi=150, bbox_inches='tight')
+print(f"\nBest so far trace plot saved to: best_so_far_trace.png")
