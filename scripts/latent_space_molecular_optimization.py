@@ -150,7 +150,7 @@ ax_client.create_experiment(
 )
 
 print("Running optimization...")
-n_iterations = 20
+n_iterations = 30
 results = []
 
 for iteration in range(n_iterations):
