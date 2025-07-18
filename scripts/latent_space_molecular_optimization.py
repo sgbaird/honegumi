@@ -31,7 +31,7 @@ from rdkit.Chem import QED, Descriptors
 
 def generate_molecular_dataset(n_molecules=100, seed=42):
     """Generate simplified molecular dataset"""
-    np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     base_smiles = [
         "CCO",
@@ -43,7 +43,7 @@ def generate_molecular_dataset(n_molecules=100, seed=42):
 
     molecules = []
     for i in range(n_molecules):
-        base_smi = np.random.choice(base_smiles)
+        base_smi = rng.choice(base_smiles)
         mol = Chem.MolFromSmiles(base_smi)
         if mol is not None:
             molecules.append(
@@ -93,15 +93,15 @@ class SimplifiedMolecularVAE:
 
         return decoded
 
-    def get_latent_bounds(self, molecular_data, percentile=95):
+    def get_latent_bounds(self, molecular_data):
         """Get bounds for latent space optimization"""
         latent_repr = self.encoder.transform(
             self.scaler.transform(molecular_data[self.feature_columns].values)
         )
         bounds = []
         for i in range(self.latent_dim):
-            lower = np.percentile(latent_repr[:, i], 100 - percentile)
-            upper = np.percentile(latent_repr[:, i], percentile)
+            lower = np.min(latent_repr[:, i])
+            upper = np.max(latent_repr[:, i])
             bounds.append((lower, upper))
         return bounds
 
@@ -121,18 +121,35 @@ def molecular_objective_function(latent_coords):
     """Objective function: predict QED score from latent coordinates"""
     decoded_mol = vae.decode(np.array(latent_coords).reshape(1, -1)).iloc[0]
 
-    # Simplified QED-like scoring
+    # More complex QED-like scoring with noise and nonlinearities
     mw = decoded_mol["molecular_weight"]
     logp = decoded_mol["logp"]
     tpsa = decoded_mol["tpsa"]
 
-    # Lipinski's rule-inspired scoring
-    mw_score = 1.0 if 150 <= mw <= 500 else max(0, 1 - abs(mw - 325) / 325)
-    logp_score = 1.0 if -0.4 <= logp <= 5.6 else max(0, 1 - abs(logp - 2.6) / 3.0)
-    tpsa_score = 1.0 if tpsa <= 140 else max(0, 1 - (tpsa - 140) / 140)
-
-    qed_estimate = (mw_score * logp_score * tpsa_score) ** (1 / 3)
-    return qed_estimate
+    # Complex multi-modal scoring function
+    # MW component: bimodal preference around 200 and 400
+    mw_score1 = np.exp(-((mw - 200) / 100) ** 2)
+    mw_score2 = np.exp(-((mw - 400) / 120) ** 2)
+    mw_score = 0.6 * mw_score1 + 0.4 * mw_score2
+    
+    # LogP component: optimal around 2.5 with penalties for extremes
+    logp_score = np.exp(-((logp - 2.5) / 2.0) ** 2) * (1 - np.exp(-((logp + 1) / 3.0) ** 2))
+    
+    # TPSA component: sigmoid with optimal around 60-80
+    tpsa_score = 1 / (1 + np.exp((tpsa - 70) / 20))
+    
+    # Add cross-term interactions
+    interaction_term = 0.1 * np.sin(mw / 100) * np.cos(logp * 2) * np.exp(-tpsa / 200)
+    
+    # Combine with weighted geometric mean and add interaction
+    qed_estimate = (mw_score * logp_score * tpsa_score) ** (1 / 3) + interaction_term
+    
+    # Add small amount of noise to prevent exact reproducibility
+    noise = 0.02 * np.sin(mw * logp * tpsa / 10000)
+    qed_estimate += noise
+    
+    # Clip to valid range
+    return max(0, min(1, qed_estimate))
 
 
 print("Setting up Bayesian optimization...")
