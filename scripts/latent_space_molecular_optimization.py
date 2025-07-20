@@ -106,15 +106,10 @@ class SimplifiedMolecularVAE:
         return bounds
 
 
-print("Generating molecular dataset...")
 molecular_data = generate_molecular_dataset(n_molecules=100)
-print(f"Generated {len(molecular_data)} molecules")
-
-print("Training molecular VAE...")
 vae = SimplifiedMolecularVAE(latent_dim=3)
 vae.fit(molecular_data)
 latent_bounds = vae.get_latent_bounds(molecular_data)
-print(f"Latent space bounds: {latent_bounds}")
 
 
 def molecular_objective_function(latent_coords):
@@ -166,7 +161,6 @@ ax_client.create_experiment(
     objectives={"qed_score": ObjectiveProperties(minimize=False)},
 )
 
-print("Running optimization...")
 n_iterations = 30
 results = []
 
@@ -188,23 +182,12 @@ for iteration in range(n_iterations):
         }
     )
 
-    if iteration % 5 == 0:
-        print(f"Iteration {iteration}: QED = {qed_score:.3f}")
-
 # Print results
 results_df = pd.DataFrame(results)
 best_result = results_df.loc[results_df["qed_score"].idxmax()]
 
-print("\nOptimization complete!")
 print(f"Best QED score: {best_result['qed_score']:.3f}")
-print("Best molecule properties:")
-print(f"  Molecular Weight: {best_result['molecular_weight']:.1f}")
-print(f"  LogP: {best_result['logp']:.2f}")
-print(f"  TPSA: {best_result['tpsa']:.1f}")
-
-print("\nImprovement over iterations:")
-print(f"  Initial best: {results_df['qed_score'][:5].max():.3f}")
-print(f"  Final best: {results_df['qed_score'].max():.3f}")
+print(f"Final best: {results_df['qed_score'].max():.3f}")
 
 # Create best so far trace plot
 best_so_far = results_df['qed_score'].cummax()
@@ -216,4 +199,4 @@ plt.title('Bayesian Optimization Progress')
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('best_so_far_trace.png', dpi=150, bbox_inches='tight')
-print(f"\nBest so far trace plot saved to: best_so_far_trace.png")
+print("Best so far trace plot saved to: best_so_far_trace.png")

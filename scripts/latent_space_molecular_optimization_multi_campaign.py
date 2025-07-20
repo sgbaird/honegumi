@@ -141,15 +141,14 @@ def molecular_objective_function(latent_coords, vae):
 # Run multiple campaigns
 n_campaigns = 5
 n_iterations = 50
-campaign_seeds = [42, 123, 456, 789, 999]
 
 all_campaign_results = []
 
 print(f"Running {n_campaigns} campaigns with {n_iterations} iterations each...")
 
 for campaign_idx in range(n_campaigns):
-    seed = campaign_seeds[campaign_idx]
-    print(f"\nCampaign {campaign_idx + 1}/5 (seed={seed})")
+    seed = campaign_idx + 42  # Use deterministic but different seeds
+    print(f"\nCampaign {campaign_idx + 1}/{n_campaigns} (seed={seed})")
     
     # Generate molecular dataset with campaign-specific seed
     molecular_data = generate_molecular_dataset(n_molecules=100, seed=seed)
@@ -188,7 +187,7 @@ for campaign_idx in range(n_campaigns):
             "qed_score": qed_score,
         })
         
-        if iteration % 10 == 0:
+        if iteration % 20 == 0:
             print(f"  Iteration {iteration}: QED = {qed_score:.3f}")
     
     # Calculate best so far for this campaign
@@ -224,7 +223,7 @@ plt.legend()
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('multi_campaign_trace.png', dpi=150, bbox_inches='tight')
-print(f"\nMulti-campaign trace plot saved to: multi_campaign_trace.png")
+print("Multi-campaign trace plot saved to: multi_campaign_trace.png")
 
 # Print summary statistics
 print(f"\nSummary across {n_campaigns} campaigns:")
