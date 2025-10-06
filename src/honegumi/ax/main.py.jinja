@@ -198,7 +198,9 @@ n_train = len(X_train)
 
 {% if custom_gen -%}
 # Define a custom generation strategy with explicit initialization and optimization phases
-# GenerationStep controls how trials are suggested at different stages of optimization
+# Using a custom generation strategy allows you to control how trials are suggested at different stages of optimization.
+# This is beneficial when you want to specify the number of initialization trials, set limits on parallelism, or use different models for different phases.
+# Customization is useful for advanced use cases, such as multi-task optimization, non-standard acquisition functions, or when the default strategy does not fit your experimental needs.
 gs = GenerationStrategy(
     steps=[
         GenerationStep(
