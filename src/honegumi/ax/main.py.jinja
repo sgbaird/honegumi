@@ -381,7 +381,8 @@ ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, 
 ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
 {%- elif task == "Multi" and objective == "Multi" %}
-# Helper function to extract Pareto front for a specific task
+# The Pareto front represents the set of solutions in multi-objective optimization where no objective can be improved without worsening another. 
+# Extracting the Pareto front helps identify the best trade-offs between competing objectives, which is crucial for understanding the optimal solutions in multi-objective problems.
 def get_pareto(df, task='A'):
     t = df[df['task'] == task]
     m = t.iloc[:,4:6].values  # objectives are always cols 4,5
