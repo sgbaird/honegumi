@@ -36,6 +36,9 @@ obj1_name = "branin"
 obj2_name = "branin_swapped"
 {%- endif %}
 
+# Define the objective function(s) to optimize
+# This function evaluates candidate parameter sets and returns the objective value(s)
+# In a real application, replace this with your actual experiment or simulation
 def branin{% if composition_constraint %}3{% endif %}{% if objective == "Multi" %}_moo{% endif %}{% if task == "Multi" %}_mt{% endif %}(x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}):
     y = float(
         (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
@@ -116,7 +119,9 @@ total = 10.0
 {% endif %}
 
 {% if existing_data -%} {# categorical inline/repeated because will be clearer to readers #}
-# Define the training data
+# Define the training data to initialize the optimizer
+# Existing data helps the optimizer learn about the design space before suggesting new trials
+# Each row represents one previously evaluated parameter set
 {% if composition_constraint %}
 # note that for this training data, the compositional constraint is satisfied
 {% endif %}
@@ -192,13 +197,15 @@ n_train = len(X_train)
 {% set num_iter = num_init + num_bayes %}
 
 {% if custom_gen -%}
+# Define a custom generation strategy with explicit initialization and optimization phases
+# GenerationStep controls how trials are suggested at different stages of optimization
 gs = GenerationStrategy(
     steps=[
         GenerationStep(
             model=Models.SOBOL,
             num_trials={{ num_init }}, # how many sobol trials to perform (rule of thumb: 2 * number of params)
-            min_trials_observed=3,
-            max_parallelism=5,
+            min_trials_observed=3, # minimum trials that must complete before moving to next step
+            max_parallelism=5, # maximum number of trials to run simultaneously
             {% if task == "Multi" %}
             model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans},
             model_gen_kwargs={"deduplicate": True},
@@ -207,9 +214,9 @@ gs = GenerationStrategy(
             {% endif %}
         ),
         GenerationStep(
-            model=Models.{{ model_name }},
-            num_trials=-1,
-            max_parallelism=3,
+            model=Models.{{ model_name }}, # Bayesian optimization model for adaptive sampling
+            num_trials=-1, # -1 means use this step for all remaining trials
+            max_parallelism=3, # maximum number of trials to run simultaneously
             model_kwargs={
                 {% if task == "Multi" %}
                     {% if model == "Fully Bayesian" %}
@@ -236,9 +243,13 @@ gs = GenerationStrategy(
 )
 {%- endif %}
 
+# Initialize the Ax client, which manages the optimization experiment
+# AxClient provides a high-level interface for Bayesian optimization
 ax_client = AxClient({% if custom_gen %}generation_strategy=gs{% endif %})
 {% if composition_constraint -%}
 {%- endif %}
+# Create the experiment with parameter space definition and optimization objectives
+# Parameters define the search space; objectives define what to optimize
 ax_client.create_experiment(
     parameters=[
         {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[-5.0, 10.0]{% endif %}},
@@ -288,6 +299,7 @@ ax_client.create_experiment(
 
 {% if existing_data -%}
 # Add existing data to the AxClient
+# This allows the optimizer to learn from previous experiments before suggesting new trials
 for i in range(n_train):
     parameterization = X_train.iloc[i].to_dict()
 
@@ -297,7 +309,7 @@ for i in range(n_train):
     {% endif %}
 
     ax_client.attach_trial(parameterization)
-    ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
+    ax_client.complete_trial(trial_index=i, raw_data=y_train[i]) # raw_data is the observed objective value(s)
 {%- endif %}
 {# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
 {% if synchrony == "Batch" %}
@@ -305,6 +317,8 @@ batch_size = 2
 {% endif %}
 {% set indent = "    " if synchrony == "Batch" else "" %}
 
+# Main optimization loop: request new trials, evaluate them, and report results
+# The optimizer learns from each completed trial to suggest better candidates
 for i in range({{ num_iter }}):
     {% if synchrony == "Single" and not task == "Multi" %}
     parameterization, trial_index = ax_client.get_next_trial()
@@ -333,19 +347,22 @@ for i in range({{ num_iter }}):
     {{ indent }}results = {{ objective_function }}(
     {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}
     {{ indent }}    )
-    {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
+    {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results) # Report results back to optimizer
 {% if objective == "Multi" and task == "Single" -%}
+# Extract Pareto optimal solutions (non-dominated points in multi-objective space)
 pareto_results = ax_client.get_pareto_optimal_parameters()
 {% elif objective == "Single" %}
+# Extract the best parameters found during optimization
 best_parameters, metrics = ax_client.get_best_parameters()
 {%- endif %}
 
 {% if visualize %}
-# Plot results
+# Plot results to visualize optimization progress
+# These plots help assess convergence and identify potential issues
 objectives = ax_client.objective_names
 df = ax_client.get_trials_data_frame()
 {%- if synchrony == "Batch" and objective == "Single"%}
-df.index = df.index // batch_size
+df.index = df.index // batch_size # Adjust index for batch trials
 {%- endif %}
 
 fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
@@ -355,15 +372,16 @@ fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
 task = "A"  # specify task results to plot
 df = df[df.task == task]
 ax.scatter(df.index, df[objectives], ec="k", fc="none", label="Observed")
-ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, label="Best to Trial")
+ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, label="Best to Trial") # Track best objective value found so far
 ax.set_title(f"Task {task}")
 {%- else %}
 ax.scatter(df.index, df[objectives], ec="k", fc="none", label="Observed")
-ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, label="Best to Trial")
+ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, label="Best to Trial") # Track best objective value found so far
 {%- endif %}
 ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
 {%- elif task == "Multi" and objective == "Multi" %}
+# Helper function to extract Pareto front for a specific task
 def get_pareto(df, task='A'):
     t = df[df['task'] == task]
     m = t.iloc[:,4:6].values  # objectives are always cols 4,5
@@ -382,6 +400,7 @@ ax.set_title(f"Task {task}")
 ax.set_xlabel(objectives[0])
 ax.set_ylabel(objectives[1])
 {%- else %}
+# Extract and plot Pareto front for multi-objective optimization
 pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=False)
 pareto_data = [p[1][0] for p in pareto.values()]
 pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
