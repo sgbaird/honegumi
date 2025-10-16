@@ -31,11 +31,13 @@ from ax.modelbridge.registry import Specified_Task_ST_MTGP_trans
 from ax.core.observation import ObservationFeatures
 {%- endif %}
 
+# define these names as variables so we can reuse them easily throughout (e.g., return values in branin function)
 obj1_name = "branin"
 {% if objective == "Multi" -%}
 obj2_name = "branin_swapped"
 {%- endif %}
 
+# dummy objective function (in place of your real-world experiment)
 def branin{% if composition_constraint %}3{% endif %}{% if objective == "Multi" %}_moo{% endif %}{% if task == "Multi" %}_mt{% endif %}(x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}):
     y = float(
         (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
@@ -195,20 +197,20 @@ n_train = len(X_train)
 gs = GenerationStrategy(
     steps=[
         GenerationStep(
-            model=Models.SOBOL,
+            model=Models.SOBOL, # a quasi-random initialization strategy
             num_trials={{ num_init }}, # how many sobol trials to perform (rule of thumb: 2 * number of params)
-            min_trials_observed=3,
-            max_parallelism=5,
+            min_trials_observed=3, # (only relevant for batch or asynchronous optimization)
+            max_parallelism=5, # max number of trials that can be suggested at once (only relevant for batch or asynchronous optimization)
             {% if task == "Multi" %}
-            model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans},
+            model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans}, # transform required for multi-task (for plumbing purposes)
             model_gen_kwargs={"deduplicate": True},
             {% else %}
             model_kwargs={"seed": 999},
             {% endif %}
         ),
         GenerationStep(
-            model=Models.{{ model_name }},
-            num_trials=-1,
+            model=Models.{{ model_name }},{% if model == "Fully Bayesian" %} # https://arxiv.org/abs/2103.00349{% elif model == "Custom" %} # https://archive.ax.dev/tutorials/modular_botax.html{% endif %}
+            num_trials=-1, # no limit on number of trials (i.e., final model step)
             max_parallelism=3,
             model_kwargs={
                 {% if task == "Multi" %}
@@ -296,7 +298,9 @@ for i in range(n_train):
     parameterization.pop('x3')
     {% endif %}
 
+    # signal to Ax that you intend to carry out a particular trial
     ax_client.attach_trial(parameterization)
+    # pass the (historically available) outcome for that trial
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 {# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
@@ -307,8 +311,10 @@ batch_size = 2
 
 for i in range({{ num_iter }}):
     {% if synchrony == "Single" and not task == "Multi" %}
+    # get_next_trial performs model fitting and acquisition function evaluation
     parameterization, trial_index = ax_client.get_next_trial()
     {% elif synchrony == "Single" and task == "Multi" %}
+    # get_next_trial performs model fitting and acquisition function evaluation
     parameterization, trial_index = ax_client.get_next_trial(fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     {% elif synchrony == "Batch" and task == "Multi" %}
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size, fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
@@ -330,13 +336,16 @@ for i in range({{ num_iter }}):
     {{ indent }}c1 = parameterization["c1"]
     {%- endif %}
 
+    # evaluate the dummy objective function
     {{ indent }}results = {{ objective_function }}(
     {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}
     {{ indent }}    )
+    # report the results back to the algorithm
     {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 {% if objective == "Multi" and task == "Single" -%}
 pareto_results = ax_client.get_pareto_optimal_parameters()
 {% elif objective == "Single" %}
+# best in-sample parameterization as predicted by model
 best_parameters, metrics = ax_client.get_best_parameters()
 {%- endif %}
 
