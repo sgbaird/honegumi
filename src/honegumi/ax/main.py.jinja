@@ -209,7 +209,7 @@ gs = GenerationStrategy(
             {% endif %}
         ),
         GenerationStep(
-            model=Models.{{ model_name }},{% if model == "Fully Bayesian" %} # https://arxiv.org/abs/2103.00349{% elif model == "Custom" %} # https://archive.ax.dev/tutorials/modular_botax.html{% endif %}
+            model=Models.{{ model_name }},{% if model == "Fully Bayesian" %} # https://arxiv.org/abs/2103.00349{% elif model == "Custom" %} # https://archive.ax.dev/tutorials/modular_botax.html (link will change when updated to Ax v1){% endif %}
             num_trials=-1, # no limit on number of trials (i.e., final model step)
             max_parallelism=3,
             model_kwargs={
