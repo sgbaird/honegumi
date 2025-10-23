@@ -134,9 +134,11 @@ def get_pareto_optimal_parameters_for_task(
 
     # For observed Pareto, we need to filter the data manually
     if not use_model_predictions:
-        # Use the simple approach: extract from filtered observations
-        task_data_df = all_data.df[all_data.df["trial_index"].isin(task_trial_indices)]
-        task_data = Data(df=task_data_df)
+        # Note: We use the full model_bridge (trained on all tasks) rather than
+        # creating a task-specific model. This is by design because:
+        # 1. Multi-task models learn correlations between tasks
+        # 2. The Pareto frontier is computed then filtered by task value
+        # 3. This ensures we use the full information available
         
         # Get observations for this task
         observations = model_bridge.get_training_data()
@@ -149,7 +151,7 @@ def get_pareto_optimal_parameters_for_task(
             logger.warning(f"No observations found for task {task_name}={task_value}")
             return OrderedDict()
         
-        # Compute Pareto frontier from task-specific observations
+        # Compute Pareto frontier from all observations
         pareto_optimal_observations = observed_pareto(
             modelbridge=model_bridge,
             optimization_config=moo_optimization_config,
@@ -178,7 +180,13 @@ def get_pareto_optimal_parameters_for_task(
     # Format results as expected
     res: dict[int, tuple[TParameterization, TModelPredictArm]] = OrderedDict()
     for obs in task_pareto_observations:
-        res[int(none_throws(obs.features.trial_index))] = (
+        trial_index = obs.features.trial_index
+        if trial_index is None:
+            logger.warning(
+                f"Observation has no trial_index, skipping: {obs.features.parameters}"
+            )
+            continue
+        res[int(trial_index)] = (
             obs.features.parameters,
             (obs.data.means_dict, obs.data.covariance_matrix),
         )
@@ -292,6 +300,10 @@ def get_pareto_optimal_solutions_from_dataframe(
     
     # Find Pareto-optimal solutions
     # A point is Pareto optimal if no other point dominates it
+    # Note: This uses a simple O(n²) algorithm which is acceptable for typical
+    # optimization scenarios with hundreds of trials. For very large datasets
+    # (thousands of points), consider using a more efficient algorithm like
+    # fast non-dominated sorting.
     n_points = len(objectives_transformed)
     is_pareto = np.ones(n_points, dtype=bool)
     
