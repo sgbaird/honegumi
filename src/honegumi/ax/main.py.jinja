@@ -31,7 +31,7 @@ from ax.modelbridge.registry import Specified_Task_ST_MTGP_trans
 from ax.core.observation import ObservationFeatures
 {%- endif %}
 
-# define these names as variables so we can reuse them easily throughout (e.g., return values in branin function)
+# define these names as variables for reuse (e.g., branin function return)
 obj1_name = "branin"
 {% if objective == "Multi" -%}
 obj2_name = "branin_swapped"
@@ -191,9 +191,9 @@ gs = GenerationStrategy(
     steps=[
         GenerationStep(
             model=Models.SOBOL, # a quasi-random initialization strategy
-            num_trials={{ num_init }}, # how many sobol trials to perform (rule of thumb: 2 * number of params)
-            min_trials_observed=3, # (only relevant for batch or asynchronous optimization)
-            max_parallelism=5, # max number of trials that can be suggested at once (only relevant for batch or asynchronous optimization)
+            num_trials={{ num_init }}, # rule of thumb: 2 * number of params
+            min_trials_observed=3, # (only relevant for batch optimization)
+            max_parallelism=5, # max trials suggested at once (batch only)
             {% if task == "Multi" %}
             model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans}, # transform required for multi-task (for plumbing purposes)
             model_gen_kwargs={"deduplicate": True},
@@ -202,8 +202,11 @@ gs = GenerationStrategy(
             {% endif %}
         ),
         GenerationStep(
-            model=Models.{{ model_name }},{% if model == "Fully Bayesian" %} # https://arxiv.org/abs/2103.00349{% elif model == "Custom" %} # https://archive.ax.dev/tutorials/modular_botax.html (link will change when updated to Ax v1){% endif %}
-            num_trials=-1, # no limit on number of trials (i.e., final model step)
+            {% if model == "Custom" %}# https://archive.ax.dev/tutorials/modular_botax.html
+            # (link will change when updated to Ax v1)
+            {% elif model == "Fully Bayesian" %}# https://arxiv.org/abs/2103.00349
+            {% endif %}model=Models.{{ model_name }},
+            num_trials=-1, # no limit on trials (final model step)
             max_parallelism=3,
             model_kwargs={
                 {% if task == "Multi" %}
@@ -234,6 +237,7 @@ gs = GenerationStrategy(
 ax_client = AxClient({% if custom_gen %}generation_strategy=gs{% endif %})
 {% if composition_constraint -%}
 {%- endif %}
+# Define your search space and objectives
 ax_client.create_experiment(
     parameters=[
         {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[-5.0, 10.0]{% endif %}},
@@ -302,6 +306,7 @@ batch_size = 2
 {% endif %}
 {% set indent = "    " if synchrony == "Batch" else "" %}
 
+# optimization loop
 for i in range({{ num_iter }}):
     {% if synchrony == "Single" and not task == "Multi" %}
     # get_next_trial performs model fitting and acquisition function evaluation
@@ -310,9 +315,11 @@ for i in range({{ num_iter }}):
     # get_next_trial performs model fitting and acquisition function evaluation
     parameterization, trial_index = ax_client.get_next_trial(fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     {% elif synchrony == "Batch" and task == "Multi" %}
+    # note the plural "trials" for batch optimization
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size, fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     for trial_index, parameterization in list(parameterizations.items()):
     {% else %} {# if batch and task = singlee #}
+    # note the plural "trials" for batch optimization
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size)
     for trial_index, parameterization in list(parameterizations.items()):
     {%- endif %}
@@ -367,6 +374,7 @@ ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
 {%- elif task == "Multi" and objective == "Multi" %}
 def get_pareto(df, task='A'):
+    """Extract Pareto front from multi-task optimization results."""
     t = df[df['task'] == task]
     m = t.iloc[:,4:6].values  # objectives are always cols 4,5
     p = ~np.any(np.all(m[:,None] > m, axis=2), axis=1)
@@ -384,7 +392,8 @@ ax.set_title(f"Task {task}")
 ax.set_xlabel(objectives[0])
 ax.set_ylabel(objectives[1])
 {%- else %}
-pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=False)
+# use model predictions for Pareto front (better for noisy observations)
+pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=True)
 pareto_data = [p[1][0] for p in pareto.values()]
 pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
 
