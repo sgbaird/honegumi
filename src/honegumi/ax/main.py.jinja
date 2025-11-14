@@ -27,8 +27,12 @@ from botorch.acquisition import UpperConfidenceBound
 {%- endif %}
 
 {% if task == "Multi" -%}
-from ax.modelbridge.registry import Specified_Task_ST_MTGP_trans
+from ax.modelbridge.transforms.task_encode import TaskChoiceToIntTaskChoice
+from ax.modelbridge.transforms.unit_x import UnitX
 from ax.core.observation import ObservationFeatures
+{%- endif %}
+{% if task == "Multi" and objective == "Multi" and visualize -%}
+from ax.modelbridge.modelbridge_utils import observed_pareto_frontier
 {%- endif %}
 
 obj1_name = "branin"
@@ -200,7 +204,7 @@ gs = GenerationStrategy(
             min_trials_observed=3,
             max_parallelism=5,
             {% if task == "Multi" %}
-            model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans},
+            model_kwargs={"seed": 999, "transforms": [TaskChoiceToIntTaskChoice, UnitX]},
             model_gen_kwargs={"deduplicate": True},
             {% else %}
             model_kwargs={"seed": 999},
@@ -215,12 +219,12 @@ gs = GenerationStrategy(
                     {% if model == "Fully Bayesian" %}
                         {# "num_samples": 512, #} {# https://github.com/sgbaird/honegumi/issues/87 #}
                         {# "warmup_steps": 512, #}
-                        "transforms": Specified_Task_ST_MTGP_trans
+                        "transforms": [TaskChoiceToIntTaskChoice, UnitX]
                     {% elif model == "Custom" %}
                         "botorch_acqf_class": UpperConfidenceBound,
-                        "transforms": Specified_Task_ST_MTGP_trans
+                        "transforms": [TaskChoiceToIntTaskChoice, UnitX]
                     {% else %}
-                        "transforms": Specified_Task_ST_MTGP_trans
+                        "transforms": [TaskChoiceToIntTaskChoice, UnitX]
                     {% endif %}
                 {% elif model == "Fully Bayesian" %}
                     {# "num_samples": 512, #} {# https://github.com/sgbaird/honegumi/issues/87 #}
@@ -364,17 +368,27 @@ ax.plot(df.index, np.minimum.accumulate(df[objectives]), color="#0033FF", lw=2, 
 ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
 {%- elif task == "Multi" and objective == "Multi" %}
-def get_pareto(df, task='A'):
-    t = df[df['task'] == task]
-    m = t.iloc[:,4:6].values  # objectives are always cols 4,5
-    p = ~np.any(np.all(m[:,None] > m, axis=2), axis=1)
-    return [(dict(r[df.columns[6:-1]]), dict(r[df.columns[4:6]])) for i,r in t[p].iterrows()]
-
 task = "A"
-df = df[df.task == task]
-pareto = get_pareto(df, task)
-pareto_data = [p[1] for p in pareto]
+
+# Extract Pareto frontier for the specified task using Ax's observed_pareto_frontier
+# Get all observations from the model
+pareto_observations = observed_pareto_frontier(
+    modelbridge=ax_client.generation_strategy.model,
+    optimization_config=ax_client.experiment.optimization_config,
+)
+
+# Filter observations for the specified task
+task_pareto = [
+    obs for obs in pareto_observations
+    if obs.features.parameters.get("task") == task
+]
+
+# Extract objective values from Pareto observations
+pareto_data = [obs.data.means_dict for obs in task_pareto]
 pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
+
+# Filter dataframe for plotting
+df = df[df.task == task]
 
 ax.scatter(df[objectives[0]], df[objectives[1]], fc="None", ec="k", label="Observed")
 ax.plot(pareto[objectives[0]], pareto[objectives[1]], color="#0033FF", lw=2, label="Pareto Front")
