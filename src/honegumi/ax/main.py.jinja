@@ -31,11 +31,13 @@ from ax.modelbridge.registry import Specified_Task_ST_MTGP_trans
 from ax.core.observation import ObservationFeatures
 {%- endif %}
 
+# define these names as variables for reuse (e.g., branin function return)
 obj1_name = "branin"
 {% if objective == "Multi" -%}
 obj2_name = "branin_swapped"
 {%- endif %}
 
+# dummy objective function (in place of your real-world experiment)
 def branin{% if composition_constraint %}3{% endif %}{% if objective == "Multi" %}_moo{% endif %}{% if task == "Multi" %}_mt{% endif %}(x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}):
     y = float(
         (x2 - 5.1 / (4 * np.pi**2) * x1**2 + 5.0 / np.pi * x1 - 6.0) ** 2
@@ -85,49 +87,42 @@ def branin{% if composition_constraint %}3{% endif %}{% if objective == "Multi" 
     {% else %} {# single objective #}
     return y
     {%- endif %}
-
-{% set objective_function = "branin" %}
+{% set objective_function = "branin" -%}
+{%- if composition_constraint -%}
+    {% set objective_function = objective_function + "3" -%}
+{%- endif -%}
+{#- Set the objective function based on the objective -#}
+{%- if objective == "Multi" -%}
+    {% set objective_function = objective_function + "_moo" -%}
+{%- endif -%}
+{%- if task == "Multi" -%}
+    {% set objective_function = objective_function + "_mt" -%}
+{%- endif -%}
+{#- add MOO to FULLYBAYESIAN if multi-objective -#}
+{%- if model == "Fully Bayesian" and objective == "Multi" -%}
+    {% set model_name = "SAASBO" -%}
+{%- elif model == "Fully Bayesian" and objective != "Multi" -%}
+    {% set model_name = "SAASBO" -%} {# apparently this handles both soo and moo, https://ax.dev/docs/tutorials/saasbo_nehvi/ #}
+{%- else -%}
+    {% set model_name = "BOTORCH_MODULAR" -%}
+{%- endif %}
 
 {% if composition_constraint -%}
-    {% set objective_function = objective_function + "3" %}
-{% endif %}
-
-{# Set the objective function based on the objective #}
-{% if objective == "Multi" -%}
-    {% set objective_function = objective_function + "_moo" %}
-{%- endif %}
-
-{% if task == "Multi" %}
-    {% set objective_function = objective_function + "_mt" %}
-{% endif %}
-
-{# add MOO to FULLYBAYESIAN if multi-objective #}
-{% if model == "Fully Bayesian" and objective == "Multi" -%}
-    {% set model_name = "SAASBO" %}
-{% elif model == "Fully Bayesian" and objective != "Multi" -%}
-    {% set model_name = "SAASBO" %} {# apparently this handles both soo and moo, https://ax.dev/docs/tutorials/saasbo_nehvi/ #}
-{% else %}
-    {% set model_name = "BOTORCH_MODULAR" %}
-{%- endif %}
-
-{% if composition_constraint %}
 # Define total for compositional constraint, where x1 + x2 + x3 == total
 total = 10.0
-{% endif %}
-
+{% endif -%}
 {% if existing_data -%} {# categorical inline/repeated because will be clearer to readers #}
 # Define the training data
-{% if composition_constraint %}
+{% if composition_constraint -%}
 # note that for this training data, the compositional constraint is satisfied
-{% endif %}
-{% if order_constraint %}
+{% endif -%}
+{% if order_constraint -%}
 # note that for this training data, the order constraint is satisfied
-{% endif %} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
-{# Set some shorthand variables to make X_train more readable #}
-{% set mt = task == "Multi"%}
-{% set comp = composition_constraint %}
-{% set cat = categorical %}
-{% set ord = order_constraint %}
+{% endif -%} {# TODO: REVIEW: consider how to incorporate out of design with the above scheme. Probably add an additional point that is for sure out of design and warn user if there are points like this? #}
+{%- set mt = task == "Multi" -%}
+{%- set comp = composition_constraint -%}
+{%- set cat = categorical -%}
+{%- set ord = order_constraint -%}
 {# Note the lack of comma after x2, and the presence of a comma before the x3 #}
 X_train = pd.DataFrame([
     {
@@ -195,20 +190,23 @@ n_train = len(X_train)
 gs = GenerationStrategy(
     steps=[
         GenerationStep(
-            model=Models.SOBOL,
-            num_trials={{ num_init }}, # how many sobol trials to perform (rule of thumb: 2 * number of params)
-            min_trials_observed=3,
-            max_parallelism=5,
+            model=Models.SOBOL, # a quasi-random initialization strategy
+            num_trials={{ num_init }}, # rule of thumb: 2 * number of params
+            min_trials_observed=3, # (only relevant for batch optimization)
+            max_parallelism=5, # max trials suggested at once (batch only)
             {% if task == "Multi" %}
-            model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans},
+            model_kwargs={"seed": 999, "transforms": Specified_Task_ST_MTGP_trans}, # transform required for multi-task (for plumbing purposes)
             model_gen_kwargs={"deduplicate": True},
             {% else %}
             model_kwargs={"seed": 999},
             {% endif %}
         ),
         GenerationStep(
-            model=Models.{{ model_name }},
-            num_trials=-1,
+            {% if model == "Custom" %}# https://archive.ax.dev/tutorials/modular_botax.html
+            # (link will change when updated to Ax v1)
+            {% elif model == "Fully Bayesian" %}# https://arxiv.org/abs/2103.00349
+            {% endif %}model=Models.{{ model_name }},
+            num_trials=-1, # no limit on trials (final model step)
             max_parallelism=3,
             model_kwargs={
                 {% if task == "Multi" %}
@@ -239,6 +237,7 @@ gs = GenerationStrategy(
 ax_client = AxClient({% if custom_gen %}generation_strategy=gs{% endif %})
 {% if composition_constraint -%}
 {%- endif %}
+# Define your search space and objectives
 ax_client.create_experiment(
     parameters=[
         {"name": "x1", "type": "range", "bounds": {% if composition_constraint %}[0.0, total]{% else %}[-5.0, 10.0]{% endif %}},
@@ -296,7 +295,9 @@ for i in range(n_train):
     parameterization.pop('x3')
     {% endif %}
 
+    # signal to Ax that you intend to carry out a particular trial
     ax_client.attach_trial(parameterization)
+    # pass the (historically available) outcome for that trial
     ax_client.complete_trial(trial_index=i, raw_data=y_train[i])
 {%- endif %}
 {# One BO step if dummy, TODO: change to 2+ if batch or asynchronous is selected #}
@@ -305,15 +306,20 @@ batch_size = 2
 {% endif %}
 {% set indent = "    " if synchrony == "Batch" else "" %}
 
+# optimization loop
 for i in range({{ num_iter }}):
     {% if synchrony == "Single" and not task == "Multi" %}
+    # get_next_trial performs model fitting and acquisition function evaluation
     parameterization, trial_index = ax_client.get_next_trial()
     {% elif synchrony == "Single" and task == "Multi" %}
+    # get_next_trial performs model fitting and acquisition function evaluation
     parameterization, trial_index = ax_client.get_next_trial(fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     {% elif synchrony == "Batch" and task == "Multi" %}
+    # note the plural "trials" for batch optimization
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size, fixed_features=ObservationFeatures({"task": "A" if i % 2 == 0 else "B"}))
     for trial_index, parameterization in list(parameterizations.items()):
     {% else %} {# if batch and task = singlee #}
+    # note the plural "trials" for batch optimization
     parameterizations, optimization_complete = ax_client.get_next_trials(batch_size)
     for trial_index, parameterization in list(parameterizations.items()):
     {%- endif %}
@@ -330,13 +336,16 @@ for i in range({{ num_iter }}):
     {{ indent }}c1 = parameterization["c1"]
     {%- endif %}
 
+    # evaluate the dummy objective function
     {{ indent }}results = {{ objective_function }}(
     {{ indent }}    x1, x2{% if composition_constraint %}, x3{% endif %}{% if categorical %}, c1{% endif %}{% if task == "Multi" %}, task{% endif %}
     {{ indent }}    )
+    # report the results back to the algorithm
     {{ indent }}ax_client.complete_trial(trial_index=trial_index, raw_data=results)
 {% if objective == "Multi" and task == "Single" -%}
 pareto_results = ax_client.get_pareto_optimal_parameters()
 {% elif objective == "Single" %}
+# best in-sample parameterization as predicted by model
 best_parameters, metrics = ax_client.get_best_parameters()
 {%- endif %}
 
@@ -365,6 +374,7 @@ ax.set_xlabel("Trial Number")
 ax.set_ylabel(objectives[0])
 {%- elif task == "Multi" and objective == "Multi" %}
 def get_pareto(df, task='A'):
+    """Extract Pareto front from multi-task optimization results."""
     t = df[df['task'] == task]
     m = t.iloc[:,4:6].values  # objectives are always cols 4,5
     p = ~np.any(np.all(m[:,None] > m, axis=2), axis=1)
@@ -382,7 +392,8 @@ ax.set_title(f"Task {task}")
 ax.set_xlabel(objectives[0])
 ax.set_ylabel(objectives[1])
 {%- else %}
-pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=False)
+# use model predictions for Pareto front (better for noisy observations)
+pareto = ax_client.get_pareto_optimal_parameters(use_model_predictions=True)
 pareto_data = [p[1][0] for p in pareto.values()]
 pareto = pd.DataFrame(pareto_data).sort_values(objectives[0])
 
