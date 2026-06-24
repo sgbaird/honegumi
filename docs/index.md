@@ -79,7 +79,7 @@ Have a look at our [API usage tutorials](./api-usage.md)
 
 ## Citing
 
-If you find Honegumi useful, please consider citing the journal version (preferred):
+If you find Honegumi useful, please cite the article:
 
 > Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *npj Computational Materials*, June 3, 2026. https://doi.org/10.1038/s41524-026-02156-0.
 
@@ -97,7 +97,7 @@ If you find Honegumi useful, please consider citing the journal version (preferr
 }
 ```
 
-Or the preprint:
+For those who may not have access, the preprint is available:
 
 > Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *arXiv*, February 4, 2025. https://doi.org/10.48550/arXiv.2502.06815.
 
