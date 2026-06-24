@@ -26,7 +26,7 @@
 
 <!-- TODO: refactor this paragraph to emphasize general API tutorial creation, and then focus in on materials science as one example that I'll be focusing on here -->
 
-# Honegumi [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
+# Honegumi [![npj Computational Materials](https://img.shields.io/badge/npj%20Computational%20Materials-journal-blue.svg)](https://www.nature.com/npjcompumats/) [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
 
 Honegumi is an interface for accelerating the adoption of Bayesian optimization in the experimental sciences, such as materials science. Real-world tasks can get quite complex:
 
@@ -51,6 +51,8 @@ guidelines](https://github.com/sgbaird/honegumi/blob/main/CONTRIBUTING.md) and [
 
 If you find Honegumi useful, please consider citing:
 
+> Journal version: *npj Computational Materials*. https://www.nature.com/npjcompumats/
+>
 > Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *arXiv*, February 4, 2025. https://doi.org/10.48550/arXiv.2502.06815.
 
 ```bibtex
