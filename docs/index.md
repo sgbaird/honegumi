@@ -24,7 +24,7 @@
 </div>
 <br>
 
-# Honegumi — Accelerating the adoption of Bayesian optimization for science [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
+# Honegumi — Accelerating the adoption of Bayesian optimization for science [![npj Computational Materials](https://img.shields.io/badge/npj%20Computational%20Materials-journal-blue.svg)](https://doi.org/10.1038/s41524-026-02156-0) [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
 
 ```{tip}
 New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) and [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) on key optimization principles.
@@ -79,7 +79,24 @@ Have a look at our [API usage tutorials](./api-usage.md)
 
 ## Citing
 
-If you find Honegumi useful, please consider citing:
+If you find Honegumi useful, please consider citing the journal version (preferred):
+
+> Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *npj Computational Materials* 12 (2026). https://doi.org/10.1038/s41524-026-02156-0.
+
+```bibtex
+@article{baird_honegumi_2026,
+  title = {Honegumi: {{An Interface}} for {{Accelerating}} the {{Adoption}} of {{Bayesian Optimization}} in the {{Experimental Sciences}}},
+  shorttitle = {Honegumi},
+  author = {Baird, Sterling G. and Falkowski, Andrew R. and Sparks, Taylor D.},
+  year = {2026},
+  journal = {npj Computational Materials},
+  volume = {12},
+  doi = {10.1038/s41524-026-02156-0},
+  publisher = {Nature Publishing Group},
+}
+```
+
+Or the preprint:
 
 > Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *arXiv*, February 4, 2025. https://doi.org/10.48550/arXiv.2502.06815.
 
