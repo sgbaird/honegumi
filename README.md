@@ -51,7 +51,7 @@ guidelines](https://github.com/sgbaird/honegumi/blob/main/CONTRIBUTING.md) and [
 
 If you find Honegumi useful, please consider citing the journal version (preferred):
 
-> Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *npj Computational Materials* 12 (2026). https://doi.org/10.1038/s41524-026-02156-0.
+> Baird, Sterling G., Andrew R. Falkowski, and Taylor D. Sparks. "Honegumi: An Interface for Accelerating the Adoption of Bayesian Optimization in the Experimental Sciences." *npj Computational Materials*, June 3, 2026. https://doi.org/10.1038/s41524-026-02156-0.
 
 ```bibtex
 @article{baird_honegumi_2026,
@@ -59,8 +59,9 @@ If you find Honegumi useful, please consider citing the journal version (preferr
   shorttitle = {Honegumi},
   author = {Baird, Sterling G. and Falkowski, Andrew R. and Sparks, Taylor D.},
   year = {2026},
+  month = jun,
   journal = {npj Computational Materials},
-  volume = {12},
+  issn = {2057-3960},
   doi = {10.1038/s41524-026-02156-0},
   publisher = {Nature Publishing Group},
 }
