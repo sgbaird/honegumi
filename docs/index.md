@@ -24,7 +24,7 @@
 </div>
 <br>
 
-# Honegumi — Accelerating the adoption of Bayesian optimization for science [![npj Computational Materials](https://img.shields.io/badge/npj%20Computational%20Materials-journal-blue.svg)](https://doi.org/10.1038/s41524-026-02156-0) [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
+# Honegumi — Accelerating the adoption of Bayesian optimization for science [![npj Comput Mater](https://img.shields.io/badge/npj%20Comput%20Mater-journal-blue.svg)](https://doi.org/10.1038/s41524-026-02156-0) [![arXiv](https://img.shields.io/badge/arXiv-2502.06815-red.svg)](https://arxiv.org/abs/2502.06815)
 
 ```{tip}
 New to Bayesian optimization? Start with [A Gentle Introduction to Bayesian Optimization](https://youtu.be/IVaWl2tL06c) and explore our [concept guides](https://honegumi.readthedocs.io/en/latest/concepts.html) and [coding tutorials](https://honegumi.readthedocs.io/en/latest/tutorials.html) on key optimization principles.
